@@ -1,0 +1,16 @@
+services:
+    db:
+        image: postgres:16
+        container_name: ibuy-postgres-db
+        environment:
+            POSTGRES_USER: user
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: myapp
+        ports:
+            - '5432:5432'
+        volumes:
+            - ibuy_data:/var/lib/postgresql/data
+            - ./tables.sql:/docker-entrypoint-initdb.d/tables.sql:ro
+
+volumes:
+    ibuy_data:
