@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"ibuy-server/db"
+	"ibuy-server/middleware"
+	"ibuy-server/router"
 	"log"
 	"net/http"
 	"os"
@@ -27,7 +29,9 @@ func main() {
 
     db.InitDB(dsn)
 
+	mux := router.NewMiddlewareMux(middleware.Logging())
+
 
     log.Println("Server listening on :8080")
-    log.Fatal(http.ListenAndServe(":8080", nil))
+    log.Fatal(http.ListenAndServe(":8080", mux))
 }
