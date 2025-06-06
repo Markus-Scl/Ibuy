@@ -15,7 +15,6 @@ type RegisterUser struct {
 	LastName string `json:"lastName"`
 	Email string `json:"email"`
 	Password string `json:"password"`
-	Birthday time.Time `json:"birthday"`
 }
 
 type UserResponse struct {
@@ -23,7 +22,6 @@ type UserResponse struct {
     Name string `json:"name"`
     LastName string `json:"lastName"`
     Email string `json:"email"`
-    Birthday time.Time `json:"birthday"`
     Created time.Time `json:"created"` 
 	AccessToken   string    `json:"access_token"`
 }
@@ -32,7 +30,6 @@ type DbUserResponse struct {
     Name string `json:"name"`
     LastName string `json:"lastName"`
     Email string `json:"email"`
-    Birthday time.Time `json:"birthday"`
     Created time.Time `json:"created"` 
 	Password string `json:"password"` 
 }
@@ -63,8 +60,8 @@ func AddUser(w http.ResponseWriter, r *http.Request){
 	var userId string
 	
 	err = db.DB.QueryRow(
-		"INSERT INTO web_user (name, last_name, email, password, birthday) VALUES ($1, $2, $3, $4, $5) RETURNING u_id",
-		newUser.Name, newUser.LastName, newUser.Email, hashedPassword, newUser.Birthday,
+		"INSERT INTO web_user (name, last_name, email, password) VALUES ($1, $2, $3, $4, $5) RETURNING u_id",
+		newUser.Name, newUser.LastName, newUser.Email, hashedPassword,
 	).Scan(&userId)
 
 
@@ -92,8 +89,8 @@ func LoginUser(w http.ResponseWriter, r *http.Request){
 	}
 
 	err := db.DB.QueryRow(
-		"SELECT u_id, name, last_name, email, birthday, created, password FROM web_user WHERE email = $1", credentials.Email,
-		).Scan(&dbu.U_Id, &dbu.Name, &dbu.LastName, &dbu.Email, &dbu.Birthday, &dbu.Created, &dbu.Password)
+		"SELECT u_id, name, last_name, email, created, password FROM web_user WHERE email = $1", credentials.Email,
+		).Scan(&dbu.U_Id, &dbu.Name, &dbu.LastName, &dbu.Email, &dbu.Created, &dbu.Password)
 
 	if err != nil{
 		http.Error(w, "Failed to Login User", http.StatusUnauthorized)
@@ -124,7 +121,6 @@ func LoginUser(w http.ResponseWriter, r *http.Request){
 		Name:     dbu.Name,
 		LastName: dbu.LastName,
 		Email:    dbu.Email,
-		Birthday: dbu.Birthday,
 		Created:  dbu.Created,
 		AccessToken: accessToken,
 	}

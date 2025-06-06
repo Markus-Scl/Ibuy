@@ -101,24 +101,6 @@ export const RegisterPage: React.FC = () => {
 								</div>
 							</div>
 
-							{/* Birthday Input */}
-							<div className="form-control">
-								<label className="label">
-									<span className="label-text font-medium text-gray-700">Date of Birth</span>
-								</label>
-								<input
-									type="date"
-									name="birthday"
-									value={formData.birthday}
-									onChange={handleInputChange}
-									className="input input-bordered w-full focus:input-primary transition-all duration-200"
-									required
-								/>
-								<label className="label">
-									<span className="label-text-alt text-gray-500">You must be 18 or older to register</span>
-								</label>
-							</div>
-
 							{/* Email Input */}
 							<div className="form-control">
 								<label className="label">

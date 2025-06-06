@@ -10,7 +10,6 @@ CREATE TABLE "web_user" (
     password VARCHAR(255) NOT NULL,
     created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     logged_in BOOLEAN NOT NULL DEFAULT FALSE,
-    birthday DATE,
     refresh_token TEXT,
     refresh_token_expiry TIMESTAMP
 );

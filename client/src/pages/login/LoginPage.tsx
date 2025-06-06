@@ -132,9 +132,6 @@ export const LoginPage: React.FC = () => {
 							</button>
 						</div>
 
-						{/* Divider */}
-						<div className="divider my-6 text-gray-400">or</div>
-
 						{/* Sign Up Link */}
 						<div className="text-center mt-6 pt-4 border-t border-gray-100">
 							<p className="text-gray-600">
