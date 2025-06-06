@@ -1,5 +1,159 @@
 import React, {useState} from 'react';
 
 export const LoginPage: React.FC = () => {
-	return <h1>Login Page</h1>;
+	const [formData, setFormData] = useState({
+		email: '',
+		password: '',
+		rememberMe: false,
+	});
+	const [showPassword, setShowPassword] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const {name, value, type, checked} = e.target;
+		setFormData((prev) => ({
+			...prev,
+			[name]: type === 'checkbox' ? checked : value,
+		}));
+	};
+
+	const handleSubmit = async () => {
+		setIsLoading(true);
+
+		// Simulate API call
+		await new Promise((resolve) => setTimeout(resolve, 1500));
+
+		console.log('Login attempt:', formData);
+		setIsLoading(false);
+	};
+
+	return (
+		<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+			<div className="w-full max-w-md">
+				{/* Logo Section */}
+				<div className="text-center mb-8">
+					<div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl mb-4 shadow-lg">
+						<span className="text-2xl font-bold text-white">IBuy</span>
+					</div>
+					<h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
+					<p className="text-gray-600">Sign in to your IBuy account</p>
+				</div>
+
+				{/* Login Card */}
+				<div className="card bg-white shadow-2xl border-0">
+					<div className="card-body p-8">
+						<div className="space-y-6">
+							{/* Email Input */}
+							<div className="form-control">
+								<label className="label">
+									<span className="label-text font-medium text-gray-700">Email Address</span>
+								</label>
+								<input
+									type="email"
+									name="email"
+									value={formData.email}
+									onChange={handleInputChange}
+									placeholder="Enter your email"
+									className="input input-bordered w-full focus:input-primary transition-all duration-200"
+									required
+								/>
+							</div>
+
+							{/* Password Input */}
+							<div className="form-control">
+								<label className="label">
+									<span className="label-text font-medium text-gray-700">Password</span>
+								</label>
+								<div className="relative">
+									<input
+										type={showPassword ? 'text' : 'password'}
+										name="password"
+										value={formData.password}
+										onChange={handleInputChange}
+										placeholder="Enter your password"
+										className="input input-bordered w-full pr-12 focus:input-primary transition-all duration-200"
+										required
+									/>
+									<button
+										type="button"
+										onClick={() => setShowPassword(!showPassword)}
+										className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors">
+										{showPassword ? (
+											<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464m1.414 1.414L8.464 8.464m5.656 5.656l1.415 1.415m-1.415-1.415l1.415 1.415M12 3c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-.279.74"
+												/>
+											</svg>
+										) : (
+											<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+												/>
+											</svg>
+										)}
+									</button>
+								</div>
+							</div>
+
+							{/* Remember Me & Forgot Password */}
+							<div className="flex items-center justify-between">
+								<div className="form-control">
+									<label className="label cursor-pointer">
+										<input type="checkbox" name="rememberMe" checked={formData.rememberMe} onChange={handleInputChange} className="checkbox checkbox-primary checkbox-sm mr-2" />
+										<span className="label-text text-sm text-gray-600">Remember me</span>
+									</label>
+								</div>
+								<a href="#" className="text-sm text-primary hover:text-primary-focus transition-colors">
+									Forgot password?
+								</a>
+							</div>
+
+							{/* Submit Button */}
+							<button
+								type="button"
+								onClick={handleSubmit}
+								disabled={isLoading}
+								className="btn btn-primary w-full text-white font-medium py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
+								{isLoading ? (
+									<>
+										<span className="loading loading-spinner loading-sm mr-2"></span>
+										Signing in...
+									</>
+								) : (
+									'Sign In'
+								)}
+							</button>
+						</div>
+
+						{/* Divider */}
+						<div className="divider my-6 text-gray-400">or</div>
+
+						{/* Sign Up Link */}
+						<div className="text-center mt-6 pt-4 border-t border-gray-100">
+							<p className="text-gray-600">
+								Don't have an account?{' '}
+								<a href="/register" className="text-primary hover:text-primary-focus font-medium transition-colors">
+									Sign up for free
+								</a>
+							</p>
+						</div>
+					</div>
+				</div>
+
+				{/* Footer */}
+				<div className="text-center mt-6 text-sm text-gray-500">
+					<p>By signing in, you agree to our Terms of Service and Privacy Policy</p>
+				</div>
+			</div>
+		</div>
+	);
 };
+
+export default LoginPage;
