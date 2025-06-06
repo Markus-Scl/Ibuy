@@ -33,6 +33,7 @@ func main() {
 	mux := router.NewMiddlewareMux(middleware.Logging())
 
 	mux.Handle("POST /register", userhandler.AddUser)
+	mux.Handle("POST /login", userhandler.LoginUser)
 
     log.Println("Server listening on :8080")
     log.Fatal(http.ListenAndServe(":8080", mux))
