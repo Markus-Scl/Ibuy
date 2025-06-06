@@ -1,7 +1,8 @@
-package userhandler
+package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	crypto "ibuy-server/auth"
 	"ibuy-server/db"
 	"net/http"
@@ -18,15 +19,16 @@ type RegisterUser struct {
 }
 
 type UserResponse struct {
-    U_ID string `json:"U_id"`
+    U_Id string `json:"userId"`
     Name string `json:"name"`
     LastName string `json:"lastName"`
     Email string `json:"email"`
     Birthday time.Time `json:"birthday"`
     Created time.Time `json:"created"` 
+	AccessToken   string    `json:"access_token"`
 }
 type DbUserResponse struct {
-    U_ID string `json:"U_id"`
+    U_Id string `json:"userId"`
     Name string `json:"name"`
     LastName string `json:"lastName"`
     Email string `json:"email"`
@@ -42,6 +44,8 @@ type LoginCredentials struct {
 
 func AddUser(w http.ResponseWriter, r *http.Request){
 	var newUser RegisterUser
+
+	fmt.Printf("called")
 
 	if err := json.NewDecoder(r.Body).Decode(&newUser); err != nil{
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -89,7 +93,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request){
 
 	err := db.DB.QueryRow(
 		"SELECT u_id, name, last_name, email, birthday, created, password FROM web_user WHERE email = $1", credentials.Email,
-		).Scan(&dbu.U_ID, &dbu.Name, &dbu.LastName, &dbu.Email, &dbu.Birthday, &dbu.Created, &dbu.Password)
+		).Scan(&dbu.U_Id, &dbu.Name, &dbu.LastName, &dbu.Email, &dbu.Birthday, &dbu.Created, &dbu.Password)
 
 	if err != nil{
 		http.Error(w, "Failed to Login User", http.StatusUnauthorized)
@@ -100,14 +104,29 @@ func LoginUser(w http.ResponseWriter, r *http.Request){
 		http.Error(w, "Failed to Login User", http.StatusUnauthorized)
 		return
 	}
+	config := crypto.NewTokenConfig()
+	accessToken, refreshToken, err := crypto.GenerateTokens(dbu.U_Id, dbu.Email, config)
+
+	if err != nil {
+		http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
+		return
+	}
+
+	// Store refresh token
+	err = crypto.StoreRefreshToken(dbu.U_Id, refreshToken, time.Now().Add(config.RefreshTokenExpiry))
+	if err != nil {
+		http.Error(w, "Failed to store refresh token", http.StatusInternalServerError)
+		return
+	}
 
 	response := UserResponse{
-		U_ID:     dbu.U_ID,
+		U_Id:     dbu.U_Id,
 		Name:     dbu.Name,
 		LastName: dbu.LastName,
 		Email:    dbu.Email,
 		Birthday: dbu.Birthday,
 		Created:  dbu.Created,
+		AccessToken: accessToken,
 	}
 
 	w.WriteHeader(http.StatusOK)
