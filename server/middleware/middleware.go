@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -33,15 +32,15 @@ func Auth() Middleware {
 				next(w, r)
 				return
 			}
-			authHeader := r.Header.Get("Authorization")
-			if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-				http.Error(w, "Authorization header missing or invalid", http.StatusUnauthorized)
+
+			cookie, err := r.Cookie("access_token")
+			if err != nil {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
-
-			tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+			
 			accessSecret := os.Getenv("ACCESS_TOKEN_SECRET")
-			claims, err := crypto.ValidateToken(tokenStr, accessSecret)
+			claims, err := crypto.ValidateToken(cookie.Value, accessSecret)
 			if err != nil {
 				http.Error(w, "Invalid token", http.StatusUnauthorized)
 				return

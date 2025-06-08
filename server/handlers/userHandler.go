@@ -23,7 +23,6 @@ type UserResponse struct {
     LastName string `json:"lastName"`
     Email string `json:"email"`
     Created time.Time `json:"created"` 
-	AccessToken   string    `json:"access_token"`
 }
 type DbUserResponse struct {
     U_Id string `json:"userId"`
@@ -122,8 +121,17 @@ func LoginUser(w http.ResponseWriter, r *http.Request){
 		LastName: dbu.LastName,
 		Email:    dbu.Email,
 		Created:  dbu.Created,
-		AccessToken: accessToken,
 	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "access_token",
+		Value:    accessToken,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+		MaxAge:   int(config.AccessTokenExpiry),
+	})
 
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
