@@ -30,7 +30,7 @@ func main() {
 
     db.InitDB(dsn)
 
-	mux := router.NewMiddlewareMux(middleware.Logging(), middleware.Auth())
+	mux := router.NewMiddlewareMux(middleware.Logging(), middleware.Auth(), middleware.CORS())
 
 	mux.Handle("POST /register", userhandler.AddUser)
 	mux.Handle("POST /login", userhandler.LoginUser)

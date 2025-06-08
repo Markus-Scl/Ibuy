@@ -1,14 +1,13 @@
 import React, {useState} from 'react';
+import {mutationFetcher} from '../../utils/fetcher';
 
 export const RegisterPage: React.FC = () => {
 	const [formData, setFormData] = useState({
 		firstName: '',
 		lastName: '',
-		birthday: '',
 		email: '',
 		password: '',
 		confirmPassword: '',
-		agreeToTerms: false,
 	});
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -36,20 +35,22 @@ export const RegisterPage: React.FC = () => {
 			return;
 		}
 
-		setIsLoading(true);
+		const {confirmPassword, ...dataToSend} = formData;
 
-		// Simulate API call
-		await new Promise((resolve) => setTimeout(resolve, 2000));
-
-		console.log('Registration attempt:', {
-			...formData,
-			confirmPassword: undefined, // Don't send confirm password to API
-		});
-		setIsLoading(false);
+		mutationFetcher(`${import.meta.env.VITE_SERVER_API}register`, {
+			method: 'POST',
+			body: JSON.stringify(dataToSend),
+		})
+			.then((res) => {
+				console.log(res);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
 	};
 
 	const isFormValid = () => {
-		return formData.firstName && formData.lastName && formData.birthday && formData.email && formData.password && formData.confirmPassword && formData.agreeToTerms && passwordMatch;
+		return formData.firstName && formData.lastName && formData.email && formData.password && formData.confirmPassword && passwordMatch;
 	};
 
 	return (
@@ -211,30 +212,6 @@ export const RegisterPage: React.FC = () => {
 										<span className="label-text-alt text-error">Passwords do not match</span>
 									</label>
 								)}
-							</div>
-
-							{/* Terms Agreement */}
-							<div className="form-control">
-								<label className="label cursor-pointer justify-start">
-									<input
-										type="checkbox"
-										name="agreeToTerms"
-										checked={formData.agreeToTerms}
-										onChange={handleInputChange}
-										className="checkbox checkbox-primary checkbox-sm mr-3"
-										required
-									/>
-									<span className="label-text text-sm text-gray-600">
-										I agree to the{' '}
-										<a href="#" className="text-primary hover:text-primary-focus transition-colors">
-											Terms of Service
-										</a>{' '}
-										and{' '}
-										<a href="#" className="text-primary hover:text-primary-focus transition-colors">
-											Privacy Policy
-										</a>
-									</span>
-								</label>
 							</div>
 
 							{/* Submit Button */}

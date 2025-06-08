@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
+import {mutationFetcher} from '../../utils/fetcher';
 
 export const LoginPage: React.FC = () => {
 	const [formData, setFormData] = useState({
 		email: '',
 		password: '',
-		rememberMe: false,
 	});
 	const [showPassword, setShowPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
@@ -20,10 +20,17 @@ export const LoginPage: React.FC = () => {
 	const handleSubmit = async () => {
 		setIsLoading(true);
 
-		// Simulate API call
-		await new Promise((resolve) => setTimeout(resolve, 1500));
+		mutationFetcher(`${process.env.VITE_SERVER_API}login`, {
+			method: 'POST',
+			body: JSON.stringify(formData),
+		})
+			.then((res) => {
+				console.log(res);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
 
-		console.log('Login attempt:', formData);
 		setIsLoading(false);
 	};
 
@@ -106,7 +113,6 @@ export const LoginPage: React.FC = () => {
 							<div className="flex items-center justify-between">
 								<div className="form-control">
 									<label className="label cursor-pointer">
-										<input type="checkbox" name="rememberMe" checked={formData.rememberMe} onChange={handleInputChange} className="checkbox checkbox-primary checkbox-sm mr-2" />
 										<span className="label-text text-sm text-gray-600">Remember me</span>
 									</label>
 								</div>
