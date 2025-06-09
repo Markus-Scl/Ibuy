@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
+import React, {useState, type FC} from 'react';
 import {mutationFetcher} from '../../utils/fetcher';
-
-export const RegisterPage: React.FC = () => {
+import {useNavigate} from 'react-router-dom';
+export const RegisterPage: FC = () => {
 	const [formData, setFormData] = useState({
 		firstName: '',
 		lastName: '',
@@ -14,13 +14,14 @@ export const RegisterPage: React.FC = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [passwordMatch, setPasswordMatch] = useState(true);
 
+	const navigate = useNavigate();
+
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const {name, value, type, checked} = e.target;
 		setFormData((prev) => ({
 			...prev,
 			[name]: type === 'checkbox' ? checked : value,
 		}));
-		console.log('Current origin:', window.location.origin);
 
 		// Check password match
 		if (name === 'confirmPassword' || name === 'password') {
@@ -38,15 +39,14 @@ export const RegisterPage: React.FC = () => {
 
 		const {confirmPassword, ...dataToSend} = formData;
 
-		console.log('VITE_SERVER_API:', import.meta.env.VITE_SERVER_API);
-		console.log('Full URL:', `${import.meta.env.VITE_SERVER_API}register`);
-
-		mutationFetcher(`${import.meta.env.VITE_SERVER_API}register`, {
+		mutationFetcher<string>(`${import.meta.env.VITE_SERVER_API}register`, {
 			method: 'POST',
 			body: dataToSend,
 		})
 			.then((res) => {
-				console.log(res);
+				if (res !== null) {
+					navigate('/login');
+				}
 			})
 			.catch((error) => {
 				console.error('Error details:', error);

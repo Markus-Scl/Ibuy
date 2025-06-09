@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {mutationFetcher} from '../../utils/fetcher';
+import {useNavigate} from 'react-router-dom';
 
 export const LoginPage: React.FC = () => {
 	const [formData, setFormData] = useState({
@@ -8,6 +9,7 @@ export const LoginPage: React.FC = () => {
 	});
 	const [showPassword, setShowPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
+	const navigate = useNavigate();
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const {name, value, type, checked} = e.target;
@@ -20,12 +22,14 @@ export const LoginPage: React.FC = () => {
 	const handleSubmit = async () => {
 		setIsLoading(true);
 
-		mutationFetcher(`${process.env.VITE_SERVER_API}login`, {
+		mutationFetcher<string>(`${import.meta.env.VITE_SERVER_API}login`, {
 			method: 'POST',
-			body: JSON.stringify(formData),
+			body: formData,
 		})
 			.then((res) => {
-				console.log(res);
+				if (res !== null) {
+					navigate('/product');
+				}
 			})
 			.catch((error) => {
 				console.error(error);
