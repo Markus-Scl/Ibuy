@@ -59,7 +59,7 @@ func AddUser(w http.ResponseWriter, r *http.Request){
 	var userId string
 	
 	err = db.DB.QueryRow(
-		"INSERT INTO web_user (name, last_name, email, password) VALUES ($1, $2, $3, $4, $5) RETURNING u_id",
+		"INSERT INTO web_user (name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING u_id",
 		newUser.Name, newUser.LastName, newUser.Email, hashedPassword,
 	).Scan(&userId)
 

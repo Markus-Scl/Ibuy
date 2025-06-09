@@ -20,6 +20,7 @@ export const RegisterPage: React.FC = () => {
 			...prev,
 			[name]: type === 'checkbox' ? checked : value,
 		}));
+		console.log('Current origin:', window.location.origin);
 
 		// Check password match
 		if (name === 'confirmPassword' || name === 'password') {
@@ -37,15 +38,19 @@ export const RegisterPage: React.FC = () => {
 
 		const {confirmPassword, ...dataToSend} = formData;
 
+		console.log('VITE_SERVER_API:', import.meta.env.VITE_SERVER_API);
+		console.log('Full URL:', `${import.meta.env.VITE_SERVER_API}register`);
+
 		mutationFetcher(`${import.meta.env.VITE_SERVER_API}register`, {
 			method: 'POST',
-			body: JSON.stringify(dataToSend),
+			body: dataToSend,
 		})
 			.then((res) => {
 				console.log(res);
 			})
 			.catch((error) => {
-				console.error(error);
+				console.error('Error details:', error);
+				console.error('Error message:', error.message);
 			});
 	};
 

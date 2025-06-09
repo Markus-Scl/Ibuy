@@ -27,7 +27,6 @@ func Logging() Middleware {
 func Auth() Middleware {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			log.Println("CAuth is called")
 			// Skip authentication for /login and /register
 			if r.URL.Path == "/login" || r.URL.Path == "/register" {
 				next(w, r)
@@ -56,31 +55,29 @@ func Auth() Middleware {
 
 // CORS middleware function
 func CORS() Middleware {
-	return func(next http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			// Set CORS headers - be more specific with origin for production
-			origin := r.Header.Get("Origin")
-			if origin == "http://localhost:5173" || origin == "http://localhost:3000" {
-				w.Header().Set("Access-Control-Allow-Origin", origin)
-			}
-			
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie")
-			w.Header().Set("Access-Control-Allow-Credentials", "true")
-			
-			log.Printf("CORS middleware called for %s %s", r.Method, r.URL.Path)
-			
-			// Handle preflight OPTIONS request
-			if r.Method == "OPTIONS" {
-				log.Println("Handling OPTIONS preflight request")
-				w.WriteHeader(http.StatusOK)
-				return
-			}
-			
-			// Continue to the next handler
-			next(w, r)
-		}
-	}
+    return func(next http.HandlerFunc) http.HandlerFunc {
+        return func(w http.ResponseWriter, r *http.Request) {
+            
+            origin := r.Header.Get("Origin")
+            
+            // Set CORS headers for allowed origins
+            if origin == "http://localhost:5173" || origin == "http://localhost:3000" {
+                w.Header().Set("Access-Control-Allow-Origin", origin)
+                w.Header().Set("Access-Control-Allow-Credentials", "true")
+            }
+            
+            w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+            w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie")
+            
+            // Handle preflight OPTIONS request
+            if r.Method == "OPTIONS" {
+                w.WriteHeader(http.StatusOK)
+                return // Don't call next() for OPTIONS
+            }
+            
+            next(w, r)
+        }
+    }
 }
   
 
