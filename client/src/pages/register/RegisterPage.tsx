@@ -1,6 +1,7 @@
 import React, {useState, type FC} from 'react';
 import {mutationFetcher} from '../../utils/fetcher';
 import {useNavigate} from 'react-router-dom';
+import {FormInput} from '../../components/FormInput';
 export const RegisterPage: FC = () => {
 	const [formData, setFormData] = useState({
 		firstName: '',
@@ -80,30 +81,14 @@ export const RegisterPage: FC = () => {
 									<label className="label">
 										<span className="label-text font-medium text-gray-700">First Name</span>
 									</label>
-									<input
-										type="text"
-										name="firstName"
-										value={formData.firstName}
-										onChange={handleInputChange}
-										placeholder="Enter first name"
-										className="input input-bordered w-full focus:input-primary transition-all duration-200"
-										required
-									/>
+									<FormInput type="text" name="firstName" value={formData.firstName} inputChange={handleInputChange} placeHolder="Enter first name" />
 								</div>
 
 								<div className="form-control">
 									<label className="label">
 										<span className="label-text font-medium text-gray-700">Last Name</span>
 									</label>
-									<input
-										type="text"
-										name="lastName"
-										value={formData.lastName}
-										onChange={handleInputChange}
-										placeholder="Enter last name"
-										className="input input-bordered w-full focus:input-primary transition-all duration-200"
-										required
-									/>
+									<FormInput type="text" name="lastName" value={formData.lastName} inputChange={handleInputChange} placeHolder="Enter last name" />
 								</div>
 							</div>
 
@@ -112,15 +97,7 @@ export const RegisterPage: FC = () => {
 								<label className="label">
 									<span className="label-text font-medium text-gray-700">Email Address</span>
 								</label>
-								<input
-									type="email"
-									name="email"
-									value={formData.email}
-									onChange={handleInputChange}
-									placeholder="Enter your email"
-									className="input input-bordered w-full focus:input-primary transition-all duration-200"
-									required
-								/>
+								<FormInput type="email" name="email" value={formData.email} inputChange={handleInputChange} placeHolder="Enter your email" />
 							</div>
 
 							{/* Password Input */}
@@ -129,15 +106,7 @@ export const RegisterPage: FC = () => {
 									<span className="label-text font-medium text-gray-700">Password</span>
 								</label>
 								<div className="relative">
-									<input
-										type={showPassword ? 'text' : 'password'}
-										name="password"
-										value={formData.password}
-										onChange={handleInputChange}
-										placeholder="Create a password"
-										className="input input-bordered w-full pr-12 focus:input-primary transition-all duration-200"
-										required
-									/>
+									<FormInput type={showPassword ? 'text' : 'password'} name="password" value={formData.password} inputChange={handleInputChange} placeHolder="Create a password" />
 									<button
 										type="button"
 										onClick={() => setShowPassword(!showPassword)}
@@ -175,16 +144,12 @@ export const RegisterPage: FC = () => {
 									<span className="label-text font-medium text-gray-700">Confirm Password</span>
 								</label>
 								<div className="relative">
-									<input
-										type={showConfirmPassword ? 'text' : 'password'}
+									<FormInput
+										type={showPassword ? 'text' : 'password'}
 										name="confirmPassword"
 										value={formData.confirmPassword}
-										onChange={handleInputChange}
-										placeholder="Confirm your password"
-										className={`input input-bordered w-full pr-12 focus:input-primary transition-all duration-200 ${
-											!passwordMatch && formData.confirmPassword ? 'input-error' : ''
-										}`}
-										required
+										inputChange={handleInputChange}
+										placeHolder="Confirm your password"
 									/>
 									<button
 										type="button"

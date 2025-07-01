@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {mutationFetcher} from '../../utils/fetcher';
 import {useNavigate} from 'react-router-dom';
+import {FormInput} from '../../components/FormInput';
 
 export const LoginPage: React.FC = () => {
 	const [formData, setFormData] = useState({
@@ -59,15 +60,7 @@ export const LoginPage: React.FC = () => {
 								<label className="label">
 									<span className="label-text font-medium text-gray-700">Email Address</span>
 								</label>
-								<input
-									type="email"
-									name="email"
-									value={formData.email}
-									onChange={handleInputChange}
-									placeholder="Enter your email"
-									className="input input-bordered w-full focus:input-primary transition-all duration-200"
-									required
-								/>
+								<FormInput type="email" name="email" value={formData.email} inputChange={handleInputChange} placeHolder="Enter your email" />
 							</div>
 
 							{/* Password Input */}
@@ -76,15 +69,7 @@ export const LoginPage: React.FC = () => {
 									<span className="label-text font-medium text-gray-700">Password</span>
 								</label>
 								<div className="relative">
-									<input
-										type={showPassword ? 'text' : 'password'}
-										name="password"
-										value={formData.password}
-										onChange={handleInputChange}
-										placeholder="Enter your password"
-										className="input input-bordered w-full pr-12 focus:input-primary transition-all duration-200"
-										required
-									/>
+									<FormInput type={showPassword ? 'text' : 'password'} name="password" value={formData.password} inputChange={handleInputChange} placeHolder="Enter your password" />
 									<button
 										type="button"
 										onClick={() => setShowPassword(!showPassword)}
