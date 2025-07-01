@@ -31,8 +31,6 @@ export const fetcher = async <T>(url: string): Promise<T> => {
 					}
 				}
 
-				// If refresh failed or retry failed, redirect to login
-				handleAuthError();
 				throw new AuthError('Authentication failed', 401);
 			}
 
@@ -84,6 +82,7 @@ export const mutationFetcher = async <T>(
 		});
 
 		if (!response.ok) {
+			console.log(response);
 			if (response.status === 401) {
 				const refreshSuccess = await tryRefreshToken();
 				if (refreshSuccess) {
@@ -101,7 +100,6 @@ export const mutationFetcher = async <T>(
 					}
 				}
 
-				handleAuthError();
 				throw new AuthError('Authentication failed', 401);
 			}
 
@@ -131,14 +129,6 @@ const tryRefreshToken = async (): Promise<boolean> => {
 		return response.ok;
 	} catch {
 		return false;
-	}
-};
-
-// Handle authentication errors
-const handleAuthError = () => {
-	// For React Router - force navigation to login
-	if (typeof window !== 'undefined') {
-		window.location.href = '/login';
 	}
 };
 
