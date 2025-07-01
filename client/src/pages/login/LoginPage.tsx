@@ -10,6 +10,10 @@ export const LoginPage: React.FC = () => {
 	});
 	const [showPassword, setShowPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
+	const [fieldErrors, setFieldErrors] = useState({
+		email: false,
+		password: false,
+	});
 	const navigate = useNavigate();
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,9 +22,34 @@ export const LoginPage: React.FC = () => {
 			...prev,
 			[name]: type === 'checkbox' ? checked : value,
 		}));
+
+		// Clear field error when user starts typing
+		if (fieldErrors[name as keyof typeof fieldErrors]) {
+			setFieldErrors((prev) => ({
+				...prev,
+				[name]: false,
+			}));
+		}
+	};
+
+	const validateForm = () => {
+		const errors = {
+			email: !formData.email.trim(),
+			password: !formData.password.trim(),
+		};
+
+		setFieldErrors(errors);
+
+		// Check if any field has an error
+		return !Object.values(errors).some((error) => error);
 	};
 
 	const handleSubmit = async () => {
+		// Validate form before proceeding
+		if (!validateForm()) {
+			return; // Don't proceed if validation fails
+		}
+
 		setIsLoading(true);
 
 		mutationFetcher<string>(`${import.meta.env.VITE_SERVER_API}login`, {
@@ -34,9 +63,10 @@ export const LoginPage: React.FC = () => {
 			})
 			.catch((error) => {
 				console.error(error);
+			})
+			.finally(() => {
+				setIsLoading(false);
 			});
-
-		setIsLoading(false);
 	};
 
 	return (
@@ -60,7 +90,14 @@ export const LoginPage: React.FC = () => {
 								<label className="label">
 									<span className="label-text font-medium text-gray-700">Email Address</span>
 								</label>
-								<FormInput type="email" name="email" value={formData.email} inputChange={handleInputChange} placeHolder="Enter your email" />
+								<div className={fieldErrors.email ? 'border-2 border-red-500 rounded-lg' : ''}>
+									<FormInput type="email" name="email" value={formData.email} inputChange={handleInputChange} placeHolder="Enter your email" />
+								</div>
+								{fieldErrors.email && (
+									<label className="label">
+										<span className="label-text-alt text-red-500">Email is required</span>
+									</label>
+								)}
 							</div>
 
 							{/* Password Input */}
@@ -68,7 +105,7 @@ export const LoginPage: React.FC = () => {
 								<label className="label">
 									<span className="label-text font-medium text-gray-700">Password</span>
 								</label>
-								<div className="relative">
+								<div className={`relative ${fieldErrors.password ? 'border-2 border-red-500 rounded-lg' : ''}`}>
 									<FormInput type={showPassword ? 'text' : 'password'} name="password" value={formData.password} inputChange={handleInputChange} placeHolder="Enter your password" />
 									<button
 										type="button"
@@ -96,6 +133,11 @@ export const LoginPage: React.FC = () => {
 										)}
 									</button>
 								</div>
+								{fieldErrors.password && (
+									<label className="label">
+										<span className="label-text-alt text-red-500">Password is required</span>
+									</label>
+								)}
 							</div>
 
 							{/* Remember Me & Forgot Password */}
@@ -115,7 +157,7 @@ export const LoginPage: React.FC = () => {
 								type="button"
 								onClick={handleSubmit}
 								disabled={isLoading}
-								className="btn btn-primary w-full text-white font-medium py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
+								className="btn btn-primary w-full text-white font-medium py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:transform-none disabled:opacity-50">
 								{isLoading ? (
 									<>
 										<span className="loading loading-spinner loading-sm mr-2"></span>

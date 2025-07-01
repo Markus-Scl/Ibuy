@@ -2,6 +2,7 @@ import React, {useState, type FC} from 'react';
 import {mutationFetcher} from '../../utils/fetcher';
 import {useNavigate} from 'react-router-dom';
 import {FormInput} from '../../components/FormInput';
+
 export const RegisterPage: FC = () => {
 	const [formData, setFormData] = useState({
 		firstName: '',
@@ -14,6 +15,13 @@ export const RegisterPage: FC = () => {
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [passwordMatch, setPasswordMatch] = useState(true);
+	const [fieldErrors, setFieldErrors] = useState({
+		firstName: false,
+		lastName: false,
+		email: false,
+		password: false,
+		confirmPassword: false,
+	});
 
 	const navigate = useNavigate();
 
@@ -24,6 +32,14 @@ export const RegisterPage: FC = () => {
 			[name]: type === 'checkbox' ? checked : value,
 		}));
 
+		// Clear field error when user starts typing
+		if (fieldErrors[name as keyof typeof fieldErrors]) {
+			setFieldErrors((prev) => ({
+				...prev,
+				[name]: false,
+			}));
+		}
+
 		// Check password match
 		if (name === 'confirmPassword' || name === 'password') {
 			const password = name === 'password' ? value : formData.password;
@@ -32,11 +48,36 @@ export const RegisterPage: FC = () => {
 		}
 	};
 
-	const handleSubmit = async () => {
-		if (formData.password !== formData.confirmPassword) {
+	const validateForm = () => {
+		const errors = {
+			firstName: !formData.firstName.trim(),
+			lastName: !formData.lastName.trim(),
+			email: !formData.email.trim(),
+			password: !formData.password.trim(),
+			confirmPassword: !formData.confirmPassword.trim(),
+		};
+
+		setFieldErrors(errors);
+
+		// Check if any field has an error
+		const hasErrors = Object.values(errors).some((error) => error);
+
+		// Also check password match
+		const passwordsMatch = formData.password === formData.confirmPassword;
+		if (!passwordsMatch) {
 			setPasswordMatch(false);
-			return;
 		}
+
+		return !hasErrors && passwordsMatch;
+	};
+
+	const handleSubmit = async () => {
+		// Validate form before proceeding
+		if (!validateForm()) {
+			return; // Don't proceed if validation fails
+		}
+
+		setIsLoading(true);
 
 		const {confirmPassword, ...dataToSend} = formData;
 
@@ -52,11 +93,10 @@ export const RegisterPage: FC = () => {
 			.catch((error) => {
 				console.error('Error details:', error);
 				console.error('Error message:', error.message);
+			})
+			.finally(() => {
+				setIsLoading(false);
 			});
-	};
-
-	const isFormValid = () => {
-		return formData.firstName && formData.lastName && formData.email && formData.password && formData.confirmPassword && passwordMatch;
 	};
 
 	return (
@@ -81,14 +121,28 @@ export const RegisterPage: FC = () => {
 									<label className="label">
 										<span className="label-text font-medium text-gray-700">First Name</span>
 									</label>
-									<FormInput type="text" name="firstName" value={formData.firstName} inputChange={handleInputChange} placeHolder="Enter first name" />
+									<div className={fieldErrors.firstName ? 'border-2 border-red-500 rounded-lg' : ''}>
+										<FormInput type="text" name="firstName" value={formData.firstName} inputChange={handleInputChange} placeHolder="Enter first name" />
+									</div>
+									{fieldErrors.firstName && (
+										<label className="label">
+											<span className="label-text-alt text-red-500">First name is required</span>
+										</label>
+									)}
 								</div>
 
 								<div className="form-control">
 									<label className="label">
 										<span className="label-text font-medium text-gray-700">Last Name</span>
 									</label>
-									<FormInput type="text" name="lastName" value={formData.lastName} inputChange={handleInputChange} placeHolder="Enter last name" />
+									<div className={fieldErrors.lastName ? 'border-2 border-red-500 rounded-lg' : ''}>
+										<FormInput type="text" name="lastName" value={formData.lastName} inputChange={handleInputChange} placeHolder="Enter last name" />
+									</div>
+									{fieldErrors.lastName && (
+										<label className="label">
+											<span className="label-text-alt text-red-500">Last name is required</span>
+										</label>
+									)}
 								</div>
 							</div>
 
@@ -97,7 +151,14 @@ export const RegisterPage: FC = () => {
 								<label className="label">
 									<span className="label-text font-medium text-gray-700">Email Address</span>
 								</label>
-								<FormInput type="email" name="email" value={formData.email} inputChange={handleInputChange} placeHolder="Enter your email" />
+								<div className={fieldErrors.email ? 'border-2 border-red-500 rounded-lg' : ''}>
+									<FormInput type="email" name="email" value={formData.email} inputChange={handleInputChange} placeHolder="Enter your email" />
+								</div>
+								{fieldErrors.email && (
+									<label className="label">
+										<span className="label-text-alt text-red-500">Email is required</span>
+									</label>
+								)}
 							</div>
 
 							{/* Password Input */}
@@ -105,7 +166,7 @@ export const RegisterPage: FC = () => {
 								<label className="label">
 									<span className="label-text font-medium text-gray-700">Password</span>
 								</label>
-								<div className="relative">
+								<div className={`relative ${fieldErrors.password ? 'border-2 border-red-500 rounded-lg' : ''}`}>
 									<FormInput type={showPassword ? 'text' : 'password'} name="password" value={formData.password} inputChange={handleInputChange} placeHolder="Create a password" />
 									<button
 										type="button"
@@ -133,9 +194,15 @@ export const RegisterPage: FC = () => {
 										)}
 									</button>
 								</div>
-								<label className="label">
-									<span className="label-text-alt text-gray-500">Must be at least 8 characters</span>
-								</label>
+								{fieldErrors.password ? (
+									<label className="label">
+										<span className="label-text-alt text-red-500">Password is required</span>
+									</label>
+								) : (
+									<label className="label">
+										<span className="label-text-alt text-gray-500">Must be at least 8 characters</span>
+									</label>
+								)}
 							</div>
 
 							{/* Confirm Password Input */}
@@ -143,9 +210,9 @@ export const RegisterPage: FC = () => {
 								<label className="label">
 									<span className="label-text font-medium text-gray-700">Confirm Password</span>
 								</label>
-								<div className="relative">
+								<div className={`relative ${fieldErrors.confirmPassword || (!passwordMatch && formData.confirmPassword) ? 'border-2 border-red-500 rounded-lg' : ''}`}>
 									<FormInput
-										type={showPassword ? 'text' : 'password'}
+										type={showConfirmPassword ? 'text' : 'password'}
 										name="confirmPassword"
 										value={formData.confirmPassword}
 										inputChange={handleInputChange}
@@ -177,9 +244,14 @@ export const RegisterPage: FC = () => {
 										)}
 									</button>
 								</div>
-								{!passwordMatch && formData.confirmPassword && (
+								{fieldErrors.confirmPassword && (
 									<label className="label">
-										<span className="label-text-alt text-error">Passwords do not match</span>
+										<span className="label-text-alt text-red-500">Please confirm your password</span>
+									</label>
+								)}
+								{!fieldErrors.confirmPassword && !passwordMatch && formData.confirmPassword && (
+									<label className="label">
+										<span className="label-text-alt text-red-500">Passwords do not match</span>
 									</label>
 								)}
 							</div>
@@ -188,8 +260,8 @@ export const RegisterPage: FC = () => {
 							<button
 								type="button"
 								onClick={handleSubmit}
-								disabled={isLoading || !isFormValid()}
-								className="btn btn-primary w-full text-white font-medium py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:transform-none">
+								disabled={isLoading}
+								className="btn btn-primary w-full text-white font-medium py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:transform-none disabled:opacity-50">
 								{isLoading ? (
 									<>
 										<span className="loading loading-spinner loading-sm mr-2"></span>
