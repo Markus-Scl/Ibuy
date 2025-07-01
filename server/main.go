@@ -24,9 +24,10 @@ func main() {
     password := os.Getenv("DB_PASSWORD")
     dbname := os.Getenv("DB_NAME")
     host := os.Getenv("DB_HOST")
-    port := os.Getenv("DB_PORT")
+    dbPort := os.Getenv("DB_PORT")
 
-    dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, port, dbname)
+
+    dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, dbPort, dbname)
 
     db.InitDB(dsn)
 
@@ -38,6 +39,8 @@ func main() {
 	mux.Handle("POST /register", userhandler.AddUser)
 	mux.Handle("POST /login", userhandler.LoginUser)
 
-    log.Println("Server listening on :8080")
-    log.Fatal(http.ListenAndServe(":8080", mux))
+
+	serverPort:= ":" + os.Getenv("SERVER_PORT")
+    log.Println("Server listening on", serverPort)
+    log.Fatal(http.ListenAndServe(serverPort, mux))
 }
