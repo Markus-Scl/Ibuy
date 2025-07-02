@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	crypto "ibuy-server/auth"
 	"ibuy-server/db"
 	"net/http"
@@ -41,7 +40,6 @@ type LoginCredentials struct {
 func AddUser(w http.ResponseWriter, r *http.Request){
 	var newUser RegisterUser
 
-	fmt.Printf("called")
 
 	if err := json.NewDecoder(r.Body).Decode(&newUser); err != nil{
 		http.Error(w, "Invalid request body", http.StatusBadRequest)

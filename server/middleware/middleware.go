@@ -59,6 +59,12 @@ func CORS() Middleware {
         return func(w http.ResponseWriter, r *http.Request) {
             
             origin := r.Header.Get("Origin")
+
+			// Handle preflight OPTIONS request
+            if r.Method == "OPTIONS" {
+                w.WriteHeader(http.StatusOK)
+                return // Don't call next() for OPTIONS
+            }
             
             // Set CORS headers for allowed origins
             if origin == "http://localhost:5173" || origin == "http://localhost:3000" {
@@ -68,12 +74,6 @@ func CORS() Middleware {
             
             w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
             w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie")
-            
-            // Handle preflight OPTIONS request
-            if r.Method == "OPTIONS" {
-                w.WriteHeader(http.StatusOK)
-                return // Don't call next() for OPTIONS
-            }
             
             next(w, r)
         }

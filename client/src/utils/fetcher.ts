@@ -1,3 +1,4 @@
+import {logout} from '../auth/auth';
 import {AuthError} from '../types/types';
 import {useNavigate} from 'react-router-dom';
 
@@ -29,8 +30,8 @@ export const fetcher = async <T>(url: string): Promise<T> => {
 					if (retryResponse.ok) {
 						return retryResponse.json();
 					}
+					logout();
 				}
-
 				throw new AuthError('Authentication failed', 401);
 			}
 

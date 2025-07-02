@@ -4,8 +4,14 @@ import {LoginPage} from './pages/login/LoginPage';
 import {RegisterPage} from './pages/register/RegisterPage';
 import {OutletWrapper} from './components/OutletWrapper';
 import {ProductPage} from './pages/product/ProductPage';
+import {useEffect} from 'react';
+import {initAuth} from './auth/initAuth';
 
 function App() {
+	useEffect(() => {
+		initAuth();
+	}, []);
+
 	return (
 		<div>
 			<Routes>

@@ -9,8 +9,6 @@ interface PrivateRouteProps {
 
 const PrivateRoute: FC<PrivateRouteProps> = ({children}) => {
 	const {authenticated, loading} = useAuthStore();
-	console.log(authenticated);
-	console.log('loading', loading);
 	if (loading)
 		return (
 			<div className="h-dvh w-full bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
