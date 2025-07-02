@@ -2,35 +2,23 @@ package handlers
 
 import (
 	"encoding/json"
-	"ibuy-server/db"
+	crypto "ibuy-server/auth"
 	"net/http"
 )
 
 func CheckAuth(w http.ResponseWriter, r *http.Request){
-	var dbu DbUserResponse
-
-	userId, ok := r.Context().Value("userId").(string)
-
+    
+    claims, ok := r.Context().Value("claims").(*crypto.Claims)
 	if !ok {
-		http.Error(w, "User ID not found in context", http.StatusInternalServerError)
-		return
-	}
-
-	err := db.DB.QueryRow(
-		"SELECT u_id, name, last_name, email, created FROM web_user WHERE U_id = $1", userId,
-		).Scan(&dbu.U_Id, &dbu.Name, &dbu.LastName, &dbu.Email, &dbu.Created)
-
-	if err != nil{
-		http.Error(w, "Failed to get User", http.StatusUnauthorized)
+		http.Error(w, "No claims found in context", http.StatusUnauthorized)
 		return
 	}
 
 	response := UserResponse{
-		U_Id:     dbu.U_Id,
-		Name:     dbu.Name,
-		LastName: dbu.LastName,
-		Email:    dbu.Email,
-		Created:  dbu.Created,
+		U_Id:     claims.UserId,
+		Name:     claims.Name,
+		LastName: claims.LastName,
+		Email:    claims.Email,
 	}
 
 

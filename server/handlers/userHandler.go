@@ -20,8 +20,7 @@ type UserResponse struct {
     U_Id string `json:"userId"`
     Name string `json:"name"`
     LastName string `json:"lastName"`
-    Email string `json:"email"`
-    Created time.Time `json:"created"` 
+    Email string `json:"email"` 
 }
 type DbUserResponse struct {
     U_Id string `json:"userId"`
@@ -99,7 +98,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request){
 		return
 	}
 	config := crypto.NewTokenConfig()
-	accessToken, refreshToken, err := crypto.GenerateTokens(dbu.U_Id, dbu.Email, config)
+	accessToken, refreshToken, err := crypto.GenerateTokens(dbu.U_Id, dbu.Email, dbu.Name, dbu.LastName, config)
 
 	if err != nil {
 		http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
@@ -118,7 +117,6 @@ func LoginUser(w http.ResponseWriter, r *http.Request){
 		Name:     dbu.Name,
 		LastName: dbu.LastName,
 		Email:    dbu.Email,
-		Created:  dbu.Created,
 	}
 
 	http.SetCookie(w, &http.Cookie{
