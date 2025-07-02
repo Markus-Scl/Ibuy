@@ -3,7 +3,7 @@ import {useNavigate} from 'react-router-dom';
 
 export const fetcher = async <T>(url: string): Promise<T> => {
 	try {
-		const response = await fetch(url, {
+		const response = await fetch(`${import.meta.env.VITE_SERVER_API}${url}`, {
 			method: 'GET',
 			credentials: 'include', // Important: Include cookies in requests
 			headers: {
@@ -18,7 +18,7 @@ export const fetcher = async <T>(url: string): Promise<T> => {
 				const refreshSuccess = await tryRefreshToken();
 				if (refreshSuccess) {
 					// Retry the original request
-					const retryResponse = await fetch(url, {
+					const retryResponse = await fetch(`${import.meta.env.VITE_SERVER_API}${url}`, {
 						method: 'GET',
 						credentials: 'include',
 						headers: {
@@ -72,7 +72,7 @@ export const mutationFetcher = async <T>(
 	const {method = 'POST', body} = options;
 
 	try {
-		const response = await fetch(url, {
+		const response = await fetch(`${import.meta.env.VITE_SERVER_API}${url}`, {
 			method,
 			credentials: 'include',
 			headers: {
@@ -82,11 +82,10 @@ export const mutationFetcher = async <T>(
 		});
 
 		if (!response.ok) {
-			console.log(response);
 			if (response.status === 401) {
 				const refreshSuccess = await tryRefreshToken();
 				if (refreshSuccess) {
-					const retryResponse = await fetch(url, {
+					const retryResponse = await fetch(`${import.meta.env.VITE_SERVER_API}${url}`, {
 						method,
 						credentials: 'include',
 						headers: {
@@ -111,9 +110,6 @@ export const mutationFetcher = async <T>(
 
 		return response.json();
 	} catch (error) {
-		if (error instanceof AuthError) {
-			throw error;
-		}
 		throw error;
 	}
 };

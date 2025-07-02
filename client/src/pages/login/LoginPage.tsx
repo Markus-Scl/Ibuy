@@ -1,10 +1,11 @@
 import React, {useState} from 'react';
-import {mutationFetcher} from '../../utils/fetcher';
 import {useNavigate} from 'react-router-dom';
 import {FormInput} from '../../components/FormInput';
+import {authenticate} from '../../auth/auth';
+import type {LoginData} from '../../types/types';
 
 export const LoginPage: React.FC = () => {
-	const [formData, setFormData] = useState({
+	const [formData, setFormData] = useState<LoginData>({
 		email: '',
 		password: '',
 	});
@@ -53,23 +54,14 @@ export const LoginPage: React.FC = () => {
 
 		setIsLoading(true);
 
-		mutationFetcher<string>(`${import.meta.env.VITE_SERVER_API}login`, {
-			method: 'POST',
-			body: formData,
-		})
-			.then((res) => {
-				if (res !== null) {
-					setIsAuth(true);
-					navigate('/product');
-				}
-			})
-			.catch((error) => {
-				setIsAuth(false);
-				console.error(error);
-			})
-			.finally(() => {
-				setIsLoading(false);
-			});
+		const isAuthenticated = await authenticate(formData);
+
+		if (isAuthenticated.success) {
+			navigate('/');
+		} else {
+			setIsLoading(false);
+			setIsAuth(false);
+		}
 	};
 
 	return (
@@ -167,7 +159,6 @@ export const LoginPage: React.FC = () => {
 							<button
 								type="button"
 								onClick={handleSubmit}
-								disabled={isLoading}
 								className="btn btn-primary w-full text-white font-medium py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:transform-none disabled:opacity-50">
 								{isLoading ? (
 									<>

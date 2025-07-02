@@ -1,19 +1,28 @@
-import useSWR from "swr";
+import useSWR from 'swr';
 
-export const fetcher = async <T>(url: string): Promise<T> => {
-    const response = await fetch(url);
+export const swrFetcher = async <T>(url: string): Promise<T> => {
+	const response = await fetch(url, {credentials: 'include'});
 
-    if(response.status === 401){
-        localStorage.clear();
-        window.location.href = '/login'
-        return {
-            status: 'unauthorized'
-            message: 'Session expired, redirecting to login',
-        };
-    }
+	if (!response.ok) {
+		throw new Error(`API request failed with status ${response.status}`);
+	}
 
-    if(!response.ok){
-        throw new Error(`API request failed with status ${response.status}`);
-    }
+	return response.json();
+};
 
-}
+// Custom Hook
+export const useCustomSWR = <T>(url: string, options = {}) => {
+	const {data, error, isValidating, mutate} = useSWR<T>(url, swrFetcher, {
+		...options,
+		revalidateOnFocus: true,
+		revalidateOnReconnect: true,
+	});
+
+	return {
+		data,
+		isLoading: !error && !data,
+		isError: error,
+		isValidating,
+		mutate,
+	};
+};

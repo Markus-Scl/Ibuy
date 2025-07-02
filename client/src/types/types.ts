@@ -12,3 +12,15 @@ export class AuthError extends Error {
 		this.status = status;
 	}
 }
+
+export interface User {
+	name: string;
+	lastName: string;
+	email: string;
+	userId: string;
+}
+
+export interface LoginData {
+	email: string;
+	password: string;
+}

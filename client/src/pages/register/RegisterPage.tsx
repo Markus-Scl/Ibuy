@@ -81,7 +81,7 @@ export const RegisterPage: FC = () => {
 
 		const {confirmPassword, ...dataToSend} = formData;
 
-		mutationFetcher<string>(`${import.meta.env.VITE_SERVER_API}register`, {
+		mutationFetcher<string>('register', {
 			method: 'POST',
 			body: dataToSend,
 		})

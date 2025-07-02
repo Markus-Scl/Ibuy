@@ -2,6 +2,7 @@ import type {FC} from 'react';
 import {FormInput} from './FormInput';
 
 export const TopToolBar: FC = () => {
+	console.log('toolbar');
 	return (
 		<div className="navbar bg-gradient-to-r from-blue-600 to-purple-600 mb-4 shadow-lg w-full">
 			<div className="flex-none">
