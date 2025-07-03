@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	crypto "ibuy-server/auth"
+	user "ibuy-server/handlers"
 	"log"
 	"net/http"
 	"os"
@@ -45,9 +46,14 @@ func Auth() Middleware {
 				http.Error(w, "Invalid token", http.StatusUnauthorized)
 				return
 			}
-
+			userContext := user.UserContext{
+				UserId:   claims.UserId,
+				Name:     claims.Name,
+				LastName: claims.LastName,
+				Email:    claims.Email,
+			}
 			// Add claims to context for use in handlers
-			ctx := context.WithValue(r.Context(), "userId", claims.UserId)
+			ctx := context.WithValue(r.Context(), "userContext", userContext)
 			next(w, r.WithContext(ctx))
 		}
 	}
@@ -59,12 +65,6 @@ func CORS() Middleware {
         return func(w http.ResponseWriter, r *http.Request) {
             
             origin := r.Header.Get("Origin")
-
-			// Handle preflight OPTIONS request
-            if r.Method == "OPTIONS" {
-                w.WriteHeader(http.StatusOK)
-                return // Don't call next() for OPTIONS
-            }
             
             // Set CORS headers for allowed origins
             if origin == "http://localhost:5173" || origin == "http://localhost:3000" {
@@ -74,6 +74,12 @@ func CORS() Middleware {
             
             w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
             w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie")
+
+			// Handle preflight OPTIONS request
+            if r.Method == "OPTIONS" {
+                w.WriteHeader(http.StatusOK)
+                return // Don't call next() for OPTIONS
+            }
             
             next(w, r)
         }

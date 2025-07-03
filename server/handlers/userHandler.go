@@ -36,6 +36,13 @@ type LoginCredentials struct {
     Password string `json:"password"`
 }
 
+type UserContext struct {
+	UserId   string `json:"userId"`
+	Name     string `json:"name"`
+	LastName string `json:"lastName"`
+	Email    string `json:"email"`
+}
+
 func AddUser(w http.ResponseWriter, r *http.Request){
 	var newUser RegisterUser
 
