@@ -1,6 +1,7 @@
 import type {FC} from 'react';
 import {useState} from 'react';
 import {bottomItems, menuItems} from './Util/utils';
+import {CustomDropdown} from './CustomDropdown';
 
 interface SideNavbarProps {
 	isOpen?: boolean;
@@ -48,8 +49,8 @@ export const SideNavbar: FC<SideNavbarProps> = ({isOpen = true, onToggle}) => {
 
 			{/* User Profile Section (when expanded) */}
 			{isOpen && (
-				<div className="p-4 border-t border-gray-200">
-					<div className="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100">
+				<div className="p-4 border-t border-gray-200 cursor-pointer dropdown dropdown-end w-full">
+					<div tabIndex={0} role="button" className="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 focus:outline-none">
 						<div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
 							<span className="text-white font-semibold text-sm">JD</span>
 						</div>
@@ -58,6 +59,7 @@ export const SideNavbar: FC<SideNavbarProps> = ({isOpen = true, onToggle}) => {
 							<p className="text-xs text-gray-500 truncate">admin@ibuy.com</p>
 						</div>
 					</div>
+					<CustomDropdown />
 				</div>
 			)}
 		</div>
