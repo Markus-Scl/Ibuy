@@ -10,9 +10,15 @@ export const OutletWrapper: FC<OutletWrapperProps> = ({children}) => {
 	return (
 		<PrivateRoute>
 			<div className="h-dvh w-full bg-gradient-to-br from-blue-50 to-indigo-100">
-				<TopToolBar />
-				<SideNavbar />
-				{children}
+				<div className="h-[7%]">
+					<TopToolBar />
+				</div>
+				<div className="h-[93%] flex">
+					<div className="w-[15%]">
+						<SideNavbar />
+					</div>
+					{children}
+				</div>
 			</div>
 		</PrivateRoute>
 	);

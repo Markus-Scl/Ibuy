@@ -57,7 +57,7 @@ export const LoginPage: React.FC = () => {
 		const isAuthenticated = await authenticate(formData);
 
 		if (isAuthenticated.success) {
-			navigate('/');
+			navigate('/home');
 		} else {
 			setIsLoading(false);
 			setIsAuth(false);

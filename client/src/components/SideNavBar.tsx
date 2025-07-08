@@ -1,7 +1,8 @@
 import type {FC} from 'react';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {bottomItems, menuItems} from './Util/utils';
 import {CustomDropdown} from './CustomDropdown';
+import {useLocation, useNavigate} from 'react-router-dom';
 
 interface SideNavbarProps {
 	isOpen?: boolean;
@@ -9,16 +10,25 @@ interface SideNavbarProps {
 }
 
 export const SideNavbar: FC<SideNavbarProps> = ({isOpen = true, onToggle}) => {
-	const [activeItem, setActiveItem] = useState('dashboard');
+	const [activeItem, setActiveItem] = useState('home');
+	const navigate = useNavigate();
+	const location = useLocation();
+
+	useEffect(() => {
+		setActiveItem(location.pathname.replace('/', ''));
+	});
 
 	return (
-		<div className={`fixed left-0 top-16 h-full bg-white shadow-xl transition-all duration-300 z-50 ${isOpen ? 'w-64' : 'w-16'}`}>
+		<div className={`h-full bg-white shadow-xl transition-all duration-300 ${isOpen ? 'w-64' : 'w-16'}`}>
 			{/* Navigation Menu */}
 			<nav className="flex-1 p-4 space-y-2">
 				{menuItems.map((item) => (
 					<button
 						key={item.id}
-						onClick={() => setActiveItem(item.id)}
+						onClick={() => {
+							setActiveItem(item.id);
+							navigate(item.id);
+						}}
 						className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group ${
 							activeItem === item.id
 								? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'

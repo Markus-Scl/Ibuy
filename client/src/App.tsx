@@ -6,6 +6,7 @@ import {OutletWrapper} from './components/OutletWrapper';
 import {ProductPage} from './pages/product/ProductPage';
 import {useEffect} from 'react';
 import {initAuth} from './auth/initAuth';
+import {HomePage} from './pages/home/HomePage';
 
 function App() {
 	useEffect(() => {
@@ -22,7 +23,8 @@ function App() {
 							<Outlet />
 						</OutletWrapper>
 					}>
-					<Route path="/product" element={<ProductPage />} />
+					<Route path="/home" element={<HomePage />} />
+					<Route path="/products" element={<ProductPage />} />
 				</Route>
 				<Route path="/login" element={<LoginPage />} />
 				<Route path="/register" element={<RegisterPage />} />
