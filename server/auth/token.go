@@ -14,7 +14,7 @@ import (
 type Claims struct {
     UserId string `json:"userId"`
     Email  string `json:"email"`
-    Name  string `json:"name"`
+    FirstName  string `json:"firstName"`
     LastName  string `json:"lastName"`
     jwt.RegisteredClaims
 }
@@ -35,12 +35,12 @@ func NewTokenConfig() *TokenConfig {
 
 
 // GenerateTokens creates access and refresh tokens for a user
-func GenerateTokens(userId string, email string, name string, lastName string, config *TokenConfig) (string, string, error) {
+func GenerateTokens(userId string, email string, firstName string, lastName string, config *TokenConfig) (string, string, error) {
     // Generate access token
     accessClaims := &Claims{
         UserId: userId,
         Email:  email,
-        Name: name,
+        FirstName: firstName,
         LastName: lastName,
 
         RegisteredClaims: jwt.RegisteredClaims{
@@ -60,7 +60,7 @@ func GenerateTokens(userId string, email string, name string, lastName string, c
     refreshClaims := &Claims{
         UserId: userId,
         Email:  email,
-        Name: name,
+        FirstName: firstName,
         LastName: lastName,
         
         RegisteredClaims: jwt.RegisteredClaims{

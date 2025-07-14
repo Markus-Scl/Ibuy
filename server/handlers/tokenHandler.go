@@ -35,7 +35,7 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
     }
 
     // Generate new access token
-    accessToken, _, err := crypto.GenerateTokens(claims.UserId, claims.Email, claims.Name, claims.LastName, config)
+    accessToken, _, err := crypto.GenerateTokens(claims.UserId, claims.Email, claims.FirstName, claims.LastName, config)
     if err != nil {
         http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
         return

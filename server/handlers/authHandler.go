@@ -16,7 +16,7 @@ func CheckAuth(w http.ResponseWriter, r *http.Request){
 
 	response := UserResponse{
 		U_Id:     userContext.UserId,
-		Name:     userContext.Name,
+		FirstName:     userContext.FirstName,
 		LastName: userContext.LastName,
 		Email:    userContext.Email,
 	}

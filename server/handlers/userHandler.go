@@ -10,7 +10,7 @@ import (
 
 
 type RegisterUser struct {
-	Name string `json:"name"`
+	FirstName string `json:"firstName"`
 	LastName string `json:"lastName"`
 	Email string `json:"email"`
 	Password string `json:"password"`
@@ -18,13 +18,13 @@ type RegisterUser struct {
 
 type UserResponse struct {
     U_Id string `json:"userId"`
-    Name string `json:"name"`
+    FirstName string `json:"firstName"`
     LastName string `json:"lastName"`
     Email string `json:"email"` 
 }
 type DbUserResponse struct {
     U_Id string `json:"userId"`
-    Name string `json:"name"`
+    FirstName string `json:"firstName"`
     LastName string `json:"lastName"`
     Email string `json:"email"`
     Created time.Time `json:"created"` 
@@ -38,7 +38,7 @@ type LoginCredentials struct {
 
 type UserContext struct {
 	UserId   string `json:"userId"`
-	Name     string `json:"name"`
+	FirstName     string `json:"firstName"`
 	LastName string `json:"lastName"`
 	Email    string `json:"email"`
 }
@@ -63,8 +63,8 @@ func AddUser(w http.ResponseWriter, r *http.Request){
 	var userId string
 	
 	err = db.DB.QueryRow(
-		"INSERT INTO web_user (name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING u_id",
-		newUser.Name, newUser.LastName, newUser.Email, hashedPassword,
+		"INSERT INTO web_user (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING u_id",
+		newUser.FirstName, newUser.LastName, newUser.Email, hashedPassword,
 	).Scan(&userId)
 
 
@@ -92,8 +92,8 @@ func LoginUser(w http.ResponseWriter, r *http.Request){
 	}
 
 	err := db.DB.QueryRow(
-		"SELECT u_id, name, last_name, email, created, password FROM web_user WHERE email = $1", credentials.Email,
-		).Scan(&dbu.U_Id, &dbu.Name, &dbu.LastName, &dbu.Email, &dbu.Created, &dbu.Password)
+		"SELECT u_id, first_name, last_name, email, created, password FROM web_user WHERE email = $1", credentials.Email,
+		).Scan(&dbu.U_Id, &dbu.FirstName, &dbu.LastName, &dbu.Email, &dbu.Created, &dbu.Password)
 
 	if err != nil{
 		http.Error(w, "Failed to Login User", http.StatusUnauthorized)
@@ -105,7 +105,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request){
 		return
 	}
 	config := crypto.NewTokenConfig()
-	accessToken, refreshToken, err := crypto.GenerateTokens(dbu.U_Id, dbu.Email, dbu.Name, dbu.LastName, config)
+	accessToken, refreshToken, err := crypto.GenerateTokens(dbu.U_Id, dbu.Email, dbu.FirstName, dbu.LastName, config)
 
 	if err != nil {
 		http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
@@ -121,7 +121,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request){
 
 	response := UserResponse{
 		U_Id:     dbu.U_Id,
-		Name:     dbu.Name,
+		FirstName:     dbu.FirstName,
 		LastName: dbu.LastName,
 		Email:    dbu.Email,
 	}

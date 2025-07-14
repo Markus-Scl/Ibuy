@@ -48,7 +48,7 @@ func Auth() Middleware {
 			}
 			userContext := user.UserContext{
 				UserId:   claims.UserId,
-				Name:     claims.Name,
+				FirstName:     claims.FirstName,
 				LastName: claims.LastName,
 				Email:    claims.Email,
 			}

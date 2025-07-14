@@ -3,16 +3,17 @@ import {useEffect, useState} from 'react';
 import {bottomItems, menuItems} from './Util/utils';
 import {CustomDropdown} from './CustomDropdown';
 import {useLocation, useNavigate} from 'react-router-dom';
+import {useAuthStore} from '../stores/useAuthStore';
 
 interface SideNavbarProps {
 	isOpen?: boolean;
-	onToggle?: () => void;
 }
 
-export const SideNavbar: FC<SideNavbarProps> = ({isOpen = true, onToggle}) => {
+export const SideNavbar: FC<SideNavbarProps> = ({isOpen = true}) => {
 	const [activeItem, setActiveItem] = useState('home');
 	const navigate = useNavigate();
 	const location = useLocation();
+	const {user} = useAuthStore();
 
 	useEffect(() => {
 		setActiveItem(location.pathname.replace('/', ''));
