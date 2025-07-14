@@ -1,6 +1,5 @@
 import type {FC} from 'react';
 import {FormInput} from './FormInput';
-import {CustomDropdown} from './CustomDropdown';
 
 export const TopToolBar: FC = () => {
 	return (

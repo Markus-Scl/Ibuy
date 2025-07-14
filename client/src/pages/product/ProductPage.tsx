@@ -1,5 +1,37 @@
-import type {FC} from 'react';
+import {useState, type FC} from 'react';
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 
 export const ProductPage: FC = () => {
-	return <h1>Product page</h1>;
+	const [products, setProducts] = useState<string[]>(['hi']);
+
+	if (products.length === 0) {
+		return (
+			<div className="w-full h-full  flex justify-center items-center">
+				<ShoppingCartOutlinedIcon className="text-gradient-to-r from-blue-600 to-purple-600 shadow-lg rounded-2xl cursor-pointer" sx={{fontSize: '200px'}} />
+			</div>
+		);
+	}
+
+	return (
+		<div className="w-full h-full grid grid-cols-4 p-4 overflow-auto">
+			{products.map((product, idx) => (
+				<div key={idx} className="card bg-base-100 w-96 shadow-sm mr-2 mb-4">
+					<figure>
+						<img src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp" alt="Shoes" />
+					</figure>
+					<div className="card-body">
+						<h2 className="card-title">
+							Card Title
+							<div className="badge badge-secondary">NEW</div>
+						</h2>
+						<p>A card component has a figure, a body part, and inside body there are title and actions parts</p>
+						<div className="card-actions justify-end">
+							<div className="badge badge-outline">Fashion</div>
+							<div className="badge badge-outline">Products</div>
+						</div>
+					</div>
+				</div>
+			))}
+		</div>
+	);
 };

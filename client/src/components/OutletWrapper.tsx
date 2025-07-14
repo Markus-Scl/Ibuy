@@ -14,9 +14,8 @@ export const OutletWrapper: FC<OutletWrapperProps> = ({children}) => {
 					<TopToolBar />
 				</div>
 				<div className="h-[93%] flex">
-					<div className="w-[25%]">
-						<SideNavbar />
-					</div>
+					<SideNavbar />
+
 					{children}
 				</div>
 			</div>
