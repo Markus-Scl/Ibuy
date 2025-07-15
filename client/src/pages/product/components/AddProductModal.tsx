@@ -8,6 +8,8 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import LabelIcon from '@mui/icons-material/Label';
 import {categories, conditions} from '../utils';
 import {FormInput} from '../../../components/FormInput';
+import {CustomSelect} from '../../../components/CustomSelect';
+import PlaylistAddCheckOutlinedIcon from '@mui/icons-material/PlaylistAddCheckOutlined';
 
 interface AddProductModalProps {
 	onClose: () => void;
@@ -111,24 +113,15 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 							{/* Category */}
 							<div className="space-y-3">
 								<label className="block text-sm font-semibold text-gray-700">Category</label>
-								<div className="relative">
-									<div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-										<CategoryIcon className="w-5 h-5" />
-									</div>
-									<select
-										name="category_id"
-										value={formData.category_id}
-										onChange={handleInputChange}
-										className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors duration-200 appearance-none bg-white"
-										required>
-										<option value="">Select category</option>
-										{categories.map((category) => (
-											<option key={category.id} value={category.id}>
-												{category.name}
-											</option>
-										))}
-									</select>
-								</div>
+
+								<CustomSelect
+									name="category_id"
+									value={formData.category_id}
+									onChange={handleInputChange}
+									options={categories}
+									placeholder="Select category"
+									icon={<CategoryIcon className="w-5 h-5" />}
+								/>
 							</div>
 						</div>
 
@@ -137,37 +130,27 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 							{/* Condition */}
 							<div className="space-y-3">
 								<label className="block text-sm font-semibold text-gray-700">Condition</label>
-								<select
+								<CustomSelect
 									name="condition"
 									value={formData.condition}
 									onChange={handleInputChange}
-									className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors duration-200 appearance-none bg-white"
-									required>
-									<option value="">Select condition</option>
-									{conditions.map((condition) => (
-										<option key={condition} value={condition}>
-											{condition}
-										</option>
-									))}
-								</select>
+									options={conditions}
+									placeholder="Select condition"
+									icon={<PlaylistAddCheckOutlinedIcon className="w-5 h-5" />}
+								/>
 							</div>
 
 							{/* Location */}
 							<div className="space-y-3">
 								<label className="block text-sm font-semibold text-gray-700">Location</label>
-								<div className="relative">
-									<div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-										<LocationOnIcon className="w-5 h-5" />
-									</div>
-									<input
-										type="text"
-										name="location"
-										value={formData.location}
-										onChange={handleInputChange}
-										className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors duration-200"
-										placeholder="Enter location"
-									/>
-								</div>
+								<FormInput
+									type="text"
+									name="location"
+									value={formData.location}
+									onChange={handleInputChange}
+									placeHolder="Enter location"
+									icon={<LocationOnIcon className="w-5 h-5" />}
+								/>
 							</div>
 						</div>
 
