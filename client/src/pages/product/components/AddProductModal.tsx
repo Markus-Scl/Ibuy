@@ -166,7 +166,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 									value={formData.description}
 									onChange={handleInputChange}
 									rows={4}
-									className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors duration-200 resize-none"
+									className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors duration-200 resize-none placeholder-gray-400 text-gray-600 bg-white"
 									placeholder="Describe your product..."
 								/>
 							</div>
