@@ -13,9 +13,9 @@ export const ProductPage: FC = () => {
 	}
 
 	return (
-		<div className="w-full h-full grid grid-cols-4 p-4 overflow-auto">
+		<div className="w-full h-full p-4 grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mr-4 overflow-auto">
 			{products.map((product, idx) => (
-				<div key={idx} className="card bg-base-100 w-96 shadow-sm mr-2 mb-4">
+				<div key={idx} className="card bg-gradient-to-r from-blue-600 to-purple-600 max-w-sm  max-h-100 shadow-sm mr-2 mb-4">
 					<figure>
 						<img src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp" alt="Shoes" />
 					</figure>
