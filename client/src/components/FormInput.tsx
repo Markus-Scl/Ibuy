@@ -1,23 +1,29 @@
 import type {FC} from 'react';
 
-interface FormInputProps {
+interface FormInput {
 	name: string;
 	value: string;
 	placeHolder: string;
 	type: string;
-	inputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	step?: string;
+	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	icon?: React.ReactNode;
 }
 
-export const FormInput: FC<FormInputProps> = ({name, value, placeHolder, type, inputChange}) => {
+export const FormInput: FC<FormInput> = ({name, value, placeHolder, type, icon, step, onChange}) => {
 	return (
-		<input
-			type={type}
-			name={name}
-			value={value}
-			onChange={inputChange}
-			placeholder={placeHolder}
-			className="input input-bordered w-full focus:input-primary transition-all duration-200 placeholder-gray-400 bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-600"
-			required
-		/>
+		<div className="relative w-full">
+			{icon && <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">{icon}</div>}
+			<input
+				type={type}
+				step={step}
+				name={name}
+				value={value}
+				onChange={onChange}
+				placeholder={placeHolder}
+				className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors duration-200 placeholder-gray-400 text-gray-600 bg-white"
+				required
+			/>
+		</div>
 	);
 };

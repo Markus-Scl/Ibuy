@@ -8,7 +8,7 @@ export const TopToolBar: FC = () => {
 				<a className="text-xl cursor-pointer font-bold ml-3">IBuy</a>
 			</div>
 			<div className="flex gap-1">
-				<FormInput name="search" value="" placeHolder="Search..." type="text" inputChange={() => console.log('hi')} />
+				<FormInput name="search" value="" placeHolder="Search..." type="text" onChange={() => console.log('hi')} />
 			</div>
 		</div>
 	);

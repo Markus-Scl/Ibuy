@@ -3,6 +3,8 @@ import {useNavigate} from 'react-router-dom';
 import {FormInput} from '../../components/FormInput';
 import {authenticate} from '../../auth/auth';
 import type {LoginData} from '../../types/types';
+import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 
 export const LoginPage: React.FC = () => {
 	const [formData, setFormData] = useState<LoginData>({
@@ -94,7 +96,7 @@ export const LoginPage: React.FC = () => {
 									<span className="label-text font-medium text-gray-700">Email Address</span>
 								</label>
 								<div className={fieldErrors.email ? 'border-2 border-red-500 rounded-lg' : ''}>
-									<FormInput type="email" name="email" value={formData.email} inputChange={handleInputChange} placeHolder="Enter your email" />
+									<FormInput type="email" name="email" value={formData.email} onChange={handleInputChange} placeHolder="Enter your email" icon={<EmailOutlinedIcon />} />
 								</div>
 								{fieldErrors.email && (
 									<label className="label">
@@ -109,7 +111,14 @@ export const LoginPage: React.FC = () => {
 									<span className="label-text font-medium text-gray-700">Password</span>
 								</label>
 								<div className={`relative ${fieldErrors.password ? 'border-2 border-red-500 rounded-lg' : ''}`}>
-									<FormInput type={showPassword ? 'text' : 'password'} name="password" value={formData.password} inputChange={handleInputChange} placeHolder="Enter your password" />
+									<FormInput
+										type={showPassword ? 'text' : 'password'}
+										name="password"
+										value={formData.password}
+										onChange={handleInputChange}
+										placeHolder="Enter your password"
+										icon={<VpnKeyOutlinedIcon />}
+									/>
 									<button
 										type="button"
 										onClick={() => setShowPassword(!showPassword)}

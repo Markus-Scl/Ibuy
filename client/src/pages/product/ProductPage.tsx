@@ -1,9 +1,23 @@
 import {useState, type FC} from 'react';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
+import {AddProductModal} from './components/AddProductModal';
 
 export const ProductPage: FC = () => {
 	const [products, setProducts] = useState<string[]>([]);
+	const [modalOpen, setModalOpen] = useState<boolean>(false);
+
+	const handleCloseModal = () => {
+		setModalOpen(false);
+	};
+
+	if (modalOpen) {
+		return (
+			<div className="h-full w-full flex items-center justify-center">
+				<AddProductModal onClose={handleCloseModal} />
+			</div>
+		);
+	}
 
 	if (products.length === 0) {
 		return (
@@ -25,10 +39,10 @@ export const ProductPage: FC = () => {
 
 					{/* Create Button */}
 					<button
-						onClick={() => console.log('create product')}
+						onClick={() => setModalOpen(true)}
 						className="group relative bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-out cursor-pointer">
 						<div className="flex items-center space-x-3">
-							<div className="bg-white/20 rounded-full p-2 group-hover:bg-white/30 transition-colors">
+							<div className="bg-white/20 rounded-full p-2 group-hover:bg-white/30 transition-colors flex items-center">
 								<AddBoxOutlinedIcon className="w-5 h-5" />
 							</div>
 							<span>Create Your First Product</span>
