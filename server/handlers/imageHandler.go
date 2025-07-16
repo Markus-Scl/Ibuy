@@ -93,3 +93,19 @@ func saveImageFile(file io.Reader, originalFilename, productId string, userId st
 
     return filePath, nil
 }
+
+func GetMimeType(filePath string) (string, error) {
+    ext := strings.ToLower(filepath.Ext(filePath))
+    switch ext {
+    case ".jpg", ".jpeg":
+        return "image/jpeg", nil
+    case ".png":
+        return "image/png", nil
+    case ".gif":
+        return "image/gif", nil
+    case ".webp":
+        return "image/webp", nil
+    default:
+        return "", fmt.Errorf("unsupported image extension: %s", ext)
+    }
+}

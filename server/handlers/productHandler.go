@@ -1,9 +1,12 @@
 package handlers
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"ibuy-server/db"
 	"net/http"
+	"os"
 
 	"github.com/lib/pq"
 )
@@ -16,6 +19,18 @@ type NewProduct struct {
 	Status   int     `json:"status"`
 	Location    string  `json:"location"`
 	Description string  `json:"description"`
+}
+
+type ProductResponse struct {
+    ProductID   string   `json:"product_id"`
+    Name        string   `json:"name"`
+    Price       float32  `json:"price"`
+    Category    int      `json:"category"`
+    Condition   int      `json:"condition"`
+    Status      int      `json:"status"`
+    Location    string   `json:"location"`
+    Description string   `json:"description"`
+    Images      []string `json:"images"` // Base64-encoded image data
 }
 
 func AddProduct(w http.ResponseWriter, r *http.Request){
@@ -65,13 +80,40 @@ func AddProduct(w http.ResponseWriter, r *http.Request){
 		}
 	}
 
+	var base64Images []string
+    for _, path := range imagePaths {
+        imgData, err := os.ReadFile(path)
+        if err != nil {
+            http.Error(w, "Failed to read image file", http.StatusInternalServerError)
+            return
+        }
+        mimeType, err := GetMimeType(path)
+        if err != nil {
+            http.Error(w, "Failed to determine image type", http.StatusInternalServerError)
+            return
+        }
+        base64Str := fmt.Sprintf("data:%s;base64,%s", mimeType, base64.StdEncoding.EncodeToString(imgData))
+        base64Images = append(base64Images, base64Str)
+    }
 
-	w.WriteHeader(http.StatusCreated)
+	productResponse := ProductResponse{
+        ProductID:   productId,
+        Name:        newProduct.Name,
+        Price:       newProduct.Price,
+        Category:    newProduct.Category,
+        Condition:   newProduct.Condition,
+        Status:      newProduct.Status,
+        Location:    newProduct.Location,
+        Description: newProduct.Description,
+        Images:      base64Images,
+    }
 
-	if err:= json.NewEncoder(w).Encode(newProduct); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-		return
-	}
+    w.WriteHeader(http.StatusCreated)
+
+    if err := json.NewEncoder(w).Encode(productResponse); err != nil {
+        http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+        return
+    }
 }
 
 
