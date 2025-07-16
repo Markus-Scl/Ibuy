@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func UploadImageHandler(r *http.Request, userId string, productId string) []string {
+func UploadImageHandler(r *http.Request, userId string, productId string) ([]string, error){
 	//Process images
 	r.ParseMultipartForm(32 << 20)
 
@@ -24,23 +24,23 @@ func UploadImageHandler(r *http.Request, userId string, productId string) []stri
 
 		file, err := fileHeader.Open()
 		if err != nil {
-            return nil
+            return nil, err
         }
 		defer file.Close()
 
 		if !isValidImageType(fileHeader.Header.Get("Content-Type")) {
-            return nil
+           return nil, err
         }
 
 		savedPath, err := saveImageFile(file, fileHeader.Filename, productId, userId)
         if err != nil {
-            return nil
+            return nil, err
         }
         
         savedFiles = append(savedFiles, savedPath)
 	}
 
-	return savedFiles
+	return savedFiles, nil
 }
 
 

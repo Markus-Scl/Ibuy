@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"ibuy-server/db"
 	"net/http"
-	"time"
+
+	"github.com/lib/pq"
 )
 
 type NewProduct struct {
@@ -38,14 +39,32 @@ func AddProduct(w http.ResponseWriter, r *http.Request){
 	var productId string
 
 	err := db.DB.QueryRow(
-		"INSERT INTO product (name, description, price, uploaded_at, u_id, category_id, status_id, condition, location) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING p_id",
-		newProduct.Name, newProduct.Description, newProduct.Price, time.Now().Local(), userId, newProduct.Category, newProduct.Status, newProduct.Condition, newProduct.Location,
+		"INSERT INTO product (name, description, price, u_id, category_id, status_id, condition, location) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING p_id",
+		newProduct.Name, newProduct.Description, newProduct.Price, userId, newProduct.Category, newProduct.Status, newProduct.Condition, newProduct.Location,
 	).Scan(&productId)
 
 	if err != nil {
 		http.Error(w, "Failed to create product", http.StatusInternalServerError)
 		return
 	}
+
+	imagePaths, err := UploadImageHandler(r, userId, productId)
+
+	if err != nil {
+        http.Error(w, "Failed to save images", http.StatusInternalServerError)
+		return  
+    }
+
+	if len(imagePaths) > 0{
+ 		query := "INSERT INTO product_image (product_id, image_path) SELECT $1, UNNEST($2::text[])"
+
+		_, err := db.DB.Exec(query, productId, pq.Array(imagePaths))
+		if err != nil {
+			http.Error(w, "Failed to save product images", http.StatusInternalServerError)
+			return
+		}
+	}
+
 
 	w.WriteHeader(http.StatusCreated)
 
