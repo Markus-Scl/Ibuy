@@ -285,7 +285,6 @@ export const RegisterPage: FC = () => {
 							<button
 								type="button"
 								onClick={handleSubmit}
-								disabled={isLoading}
 								className="btn btn-primary w-full text-white font-medium py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:transform-none disabled:opacity-50">
 								{isLoading ? (
 									<>

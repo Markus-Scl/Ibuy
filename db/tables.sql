@@ -51,7 +51,6 @@ CREATE TABLE product (
     description TEXT,
     price NUMERIC(12, 2) NOT NULL,
     uploaded_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    image_path TEXT,
     u_id UUID NOT NULL,
     category_id INTEGER NOT NULL,
     status_id INTEGER NOT NULL DEFAULT 1, 
@@ -60,4 +59,12 @@ CREATE TABLE product (
     FOREIGN KEY (u_id) REFERENCES web_user(u_id),
     FOREIGN KEY (category_id) REFERENCES category(id),
     FOREIGN KEY (status_id) REFERENCES product_status(id)
+);
+
+CREATE TABLE product_image (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL,
+    image_path TEXT NOT NULL,
+    uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE
 );
