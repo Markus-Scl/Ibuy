@@ -1,4 +1,4 @@
-import {useState, type FC} from 'react';
+import {useRef, useState, type FC} from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -27,6 +27,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 	});
 
 	const [imagePreview, setImagePreview] = useState<string | null>(null);
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
 		const {name, value} = e.target;
@@ -58,6 +59,9 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 	const handleRemoveImage = () => {
 		setFormData((prev) => ({...prev, image: null}));
 		setImagePreview(null);
+		if (fileInputRef.current) {
+			fileInputRef.current.value = ''; // Reset the file input
+		}
 	};
 
 	return (
@@ -79,7 +83,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 							<label className="block text-sm font-semibold text-gray-700">Product Image</label>
 							<div className="flex items-center space-x-4">
 								<label className="relative cursor-pointer">
-									<input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+									<input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
 									<div className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200">
 										<PhotoCameraIcon className="w-5 h-5" />
 										<span>Upload Image</span>
