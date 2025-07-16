@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"ibuy-server/db"
-	userhandler "ibuy-server/handlers"
+	routeHandler "ibuy-server/handlers"
 	"ibuy-server/middleware"
 	"ibuy-server/router"
 	"log"
@@ -37,9 +37,10 @@ func main() {
         
     })
 
-	mux.Handle("POST /register", userhandler.AddUser)
-	mux.Handle("POST /login", userhandler.LoginUser)
-	mux.Handle("GET /auth/session", userhandler.CheckAuth)
+	mux.Handle("POST /register", routeHandler.AddUser)
+	mux.Handle("POST /login", routeHandler.LoginUser)
+	mux.Handle("GET /auth/session", routeHandler.CheckAuth)
+	mux.Handle("POST /product", routeHandler.AddProduct)
 
 
 	serverPort:= ":" + os.Getenv("SERVER_PORT")
