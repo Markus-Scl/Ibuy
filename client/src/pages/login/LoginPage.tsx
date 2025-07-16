@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {FormInput} from '../../components/FormInput';
+import {FormInput} from '../../components/Form/FormInput';
 import {authenticate} from '../../auth/auth';
 import type {LoginData} from '../../types/types';
 import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';

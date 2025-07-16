@@ -1,7 +1,7 @@
 import React, {useState, type FC} from 'react';
 import {mutationFetcher} from '../../utils/fetcher';
 import {useNavigate} from 'react-router-dom';
-import {FormInput} from '../../components/FormInput';
+import {FormInput} from '../../components/Form/FormInput';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';

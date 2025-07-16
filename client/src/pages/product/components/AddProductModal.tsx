@@ -7,8 +7,8 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import DescriptionIcon from '@mui/icons-material/Description';
 import LabelIcon from '@mui/icons-material/Label';
 import {categories, conditions} from '../utils';
-import {FormInput} from '../../../components/FormInput';
-import {CustomSelect} from '../../../components/CustomSelect';
+import {FormInput} from '../../../components/Form/FormInput';
+import {CustomSelect} from '../../../components/Form/CustomSelect';
 import PlaylistAddCheckOutlinedIcon from '@mui/icons-material/PlaylistAddCheckOutlined';
 
 interface AddProductModalProps {
@@ -177,7 +177,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 							<button
 								type="button"
 								onClick={onClose}
-								className="flex-1 py-3 px-6 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
+								className="flex-1 py-3 px-6 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-red-200 transition-colors duration-200 hover:border-white cursor-pointer">
 								Cancel
 							</button>
 							<button

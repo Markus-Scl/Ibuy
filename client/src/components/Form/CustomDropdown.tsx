@@ -1,5 +1,5 @@
 import type {FC} from 'react';
-import {logout} from '../auth/auth';
+import {logout} from '../../auth/auth';
 
 export const CustomDropdown: FC = () => {
 	return (

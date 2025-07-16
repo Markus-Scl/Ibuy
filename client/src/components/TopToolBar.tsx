@@ -1,5 +1,5 @@
 import type {FC} from 'react';
-import {FormInput} from './FormInput';
+import {FormInput} from './Form/FormInput';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 
 export const TopToolBar: FC = () => {
