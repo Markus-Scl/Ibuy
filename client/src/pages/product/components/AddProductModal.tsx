@@ -55,6 +55,11 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 		}
 	};
 
+	const handleRemoveImage = () => {
+		setFormData((prev) => ({...prev, image: null}));
+		setImagePreview(null);
+	};
+
 	return (
 		<div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={handleOverlayClick}>
 			<div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
@@ -81,8 +86,15 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 									</div>
 								</label>
 								{imagePreview && (
-									<div className="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200">
-										<img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+									<div className="relative w-32 h-32">
+										<div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-gray-200">
+											<img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+										</div>
+										<button
+											onClick={handleRemoveImage}
+											className="absolute -top-4 -right-4 w-8 h-8 text-white hover:shadow-lg transform hover:scale-105 transition-all duration-200 rounded-full p-2 transition-colors bg-gradient-to-r from-blue-600 to-purple-600 cursor-pointer flex items-center justify-center">
+											<CloseIcon />
+										</button>
 									</div>
 								)}
 							</div>
