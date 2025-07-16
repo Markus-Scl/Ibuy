@@ -7,7 +7,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import DescriptionIcon from '@mui/icons-material/Description';
 import LabelIcon from '@mui/icons-material/Label';
 import {categories, conditions} from '../utils';
-import {FormInput} from '../../../components/Form/FormInput';
+import {CustomInput} from '../../../components/Form/CustomInput';
 import {CustomSelect} from '../../../components/Form/CustomSelect';
 import PlaylistAddCheckOutlinedIcon from '@mui/icons-material/PlaylistAddCheckOutlined';
 
@@ -91,7 +91,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 						{/* Product Name */}
 						<div className="space-y-3">
 							<label className="block text-sm font-semibold text-gray-700">Product Name</label>
-							<FormInput type="text" name="name" value={formData.name} onChange={handleInputChange} placeHolder="Enter product name" icon={<LabelIcon className="w-5 h-5" />} />
+							<CustomInput type="text" name="name" value={formData.name} onChange={handleInputChange} placeHolder="Enter product name" icon={<LabelIcon className="w-5 h-5" />} />
 						</div>
 
 						{/* Price and Category Row */}
@@ -99,7 +99,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 							{/* Price */}
 							<div className="space-y-3">
 								<label className="block text-sm font-semibold text-gray-700">Price</label>
-								<FormInput
+								<CustomInput
 									type="number"
 									name="price"
 									value={formData.price}
@@ -143,7 +143,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 							{/* Location */}
 							<div className="space-y-3">
 								<label className="block text-sm font-semibold text-gray-700">Location</label>
-								<FormInput
+								<CustomInput
 									type="text"
 									name="location"
 									value={formData.location}

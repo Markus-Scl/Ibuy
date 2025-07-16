@@ -1,6 +1,6 @@
 import type {FC} from 'react';
 
-interface FormInput {
+interface CustomInputProps {
 	name: string;
 	value: string;
 	placeHolder: string;
@@ -10,7 +10,7 @@ interface FormInput {
 	icon?: React.ReactNode;
 }
 
-export const FormInput: FC<FormInput> = ({name, value, placeHolder, type, icon, step, onChange}) => {
+export const CustomInput: FC<CustomInputProps> = ({name, value, placeHolder, type, icon, step, onChange}) => {
 	return (
 		<div className="relative w-full">
 			{icon && <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">{icon}</div>}

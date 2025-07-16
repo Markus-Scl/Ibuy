@@ -12,10 +12,17 @@ import (
 
 func UploadImageHandler(r *http.Request, userId string, productId string) ([]string, error){
 	//Process images
-	r.ParseMultipartForm(32 << 20)
+	err := r.ParseMultipartForm(32 << 20) // 32MB max
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse multipart form: %w", err)
+	}
 
 	// Get the multipart form
     form := r.MultipartForm
+	if form == nil {
+		return []string{}, nil // No files uploaded, return empty slice
+	}
+	
 	files := form.File["images"]
 
 	var savedFiles []string

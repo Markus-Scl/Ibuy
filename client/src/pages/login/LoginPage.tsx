@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {FormInput} from '../../components/Form/FormInput';
+import {CustomInput} from '../../components/Form/CustomInput';
 import {authenticate} from '../../auth/auth';
 import type {LoginData} from '../../types/types';
 import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
@@ -96,7 +96,7 @@ export const LoginPage: React.FC = () => {
 									<span className="label-text font-medium text-gray-700">Email Address</span>
 								</label>
 								<div className={fieldErrors.email ? 'border-2 border-red-500 rounded-lg' : ''}>
-									<FormInput type="email" name="email" value={formData.email} onChange={handleInputChange} placeHolder="Enter your email" icon={<EmailOutlinedIcon />} />
+									<CustomInput type="email" name="email" value={formData.email} onChange={handleInputChange} placeHolder="Enter your email" icon={<EmailOutlinedIcon />} />
 								</div>
 								{fieldErrors.email && (
 									<label className="label">
@@ -111,7 +111,7 @@ export const LoginPage: React.FC = () => {
 									<span className="label-text font-medium text-gray-700">Password</span>
 								</label>
 								<div className={`relative ${fieldErrors.password ? 'border-2 border-red-500 rounded-lg' : ''}`}>
-									<FormInput
+									<CustomInput
 										type={showPassword ? 'text' : 'password'}
 										name="password"
 										value={formData.password}

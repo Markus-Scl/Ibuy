@@ -1,7 +1,7 @@
 import React, {useState, type FC} from 'react';
 import {mutationFetcher} from '../../utils/fetcher';
 import {useNavigate} from 'react-router-dom';
-import {FormInput} from '../../components/Form/FormInput';
+import {CustomInput} from '../../components/Form/CustomInput';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
@@ -125,7 +125,7 @@ export const RegisterPage: FC = () => {
 										<span className="label-text font-medium text-gray-700">First Name</span>
 									</label>
 									<div className={fieldErrors.firstName ? 'border-2 border-red-500 rounded-lg' : ''}>
-										<FormInput
+										<CustomInput
 											type="text"
 											name="firstName"
 											value={formData.firstName}
@@ -146,7 +146,7 @@ export const RegisterPage: FC = () => {
 										<span className="label-text font-medium text-gray-700">Last Name</span>
 									</label>
 									<div className={fieldErrors.lastName ? 'border-2 border-red-500 rounded-lg' : ''}>
-										<FormInput
+										<CustomInput
 											type="text"
 											name="lastName"
 											value={formData.lastName}
@@ -169,7 +169,7 @@ export const RegisterPage: FC = () => {
 									<span className="label-text font-medium text-gray-700">Email Address</span>
 								</label>
 								<div className={fieldErrors.email ? 'border-2 border-red-500 rounded-lg' : ''}>
-									<FormInput type="email" name="email" value={formData.email} onChange={handleInputChange} placeHolder="Enter your email" icon={<EmailOutlinedIcon />} />
+									<CustomInput type="email" name="email" value={formData.email} onChange={handleInputChange} placeHolder="Enter your email" icon={<EmailOutlinedIcon />} />
 								</div>
 								{fieldErrors.email && (
 									<label className="label">
@@ -184,7 +184,7 @@ export const RegisterPage: FC = () => {
 									<span className="label-text font-medium text-gray-700">Password</span>
 								</label>
 								<div className={`relative ${fieldErrors.password ? 'border-2 border-red-500 rounded-lg' : ''}`}>
-									<FormInput
+									<CustomInput
 										type={showPassword ? 'text' : 'password'}
 										name="password"
 										value={formData.password}
@@ -235,7 +235,7 @@ export const RegisterPage: FC = () => {
 									<span className="label-text font-medium text-gray-700">Confirm Password</span>
 								</label>
 								<div className={`relative ${fieldErrors.confirmPassword || (!passwordMatch && formData.confirmPassword) ? 'border-2 border-red-500 rounded-lg' : ''}`}>
-									<FormInput
+									<CustomInput
 										type={showConfirmPassword ? 'text' : 'password'}
 										name="confirmPassword"
 										value={formData.confirmPassword}
