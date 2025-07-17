@@ -17,7 +17,7 @@ type NewProduct struct {
 	Name        string  `json:"name"`
 	Price       float32 `json:"price"`
 	Category    int     `json:"category"`
-	Condition   int     `json:"condition"`
+	Condition   string     `json:"condition"`
 	Status   int     `json:"status"`
 	Location    string  `json:"location"`
 	Description string  `json:"description"`
@@ -28,7 +28,7 @@ type ProductResponse struct {
     Name        string   `json:"name"`
     Price       float32  `json:"price"`
     Category    int      `json:"category"`
-    Condition   int      `json:"condition"`
+    Condition   string      `json:"condition"`
     Status      int      `json:"status"`
     Location    string   `json:"location"`
     Description string   `json:"description"`
@@ -57,6 +57,7 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
         Name:        r.FormValue("name"),
         Description: r.FormValue("description"),
         Location:    r.FormValue("location"),
+		Condition: r.FormValue("condition"),
     }
 
     // Parse numeric fields with error handling
@@ -76,16 +77,6 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
         } else {
             log.Printf("Invalid category value: %s", category)
             http.Error(w, "Invalid category value", http.StatusBadRequest)
-            return
-        }
-    }
-
-    if condition := r.FormValue("condition"); condition != "" {
-        if c, err := strconv.Atoi(condition); err == nil {
-            newProduct.Condition = c
-        } else {
-            log.Printf("Invalid condition value: %s", condition)
-            http.Error(w, "Invalid condition value", http.StatusBadRequest)
             return
         }
     }

@@ -1,19 +1,19 @@
-export const categories = [
-	'Electronics',
-	'Fashion',
-	'Home & Garden',
-	'Sports & Outdoors',
-	'Automotive',
-	'Books & Media',
-	'Toys & Games',
-	'Collectibles & Art',
-	'Health & Beauty',
-	'Musical Instruments',
-	'Baby & Kids',
-	'Pet Supplies',
-	'Business & Industrial',
-	'Food & Beverages',
-	'Other',
-];
+export const categoryMap = new Map<number, string>([
+	[1, 'Electronics'],
+	[2, 'Fashion'],
+	[3, 'Home & Garden'],
+	[4, 'Sports & Outdoors'],
+	[5, 'Toys & Games'],
+	[6, 'Automotive'],
+	[7, 'Books & Media'],
+	[8, 'Collectibles & Art'],
+	[9, 'Health & Beauty'],
+	[10, 'Musical Instruments'],
+	[11, 'Baby & Kids'],
+	[12, 'Pet Supplies'],
+	[13, 'Business & Industrial'],
+	[14, 'Food & Beverages'],
+	[15, 'Other'],
+]);
 
 export const conditions = ['New', 'Like New', 'Good', 'Fair', 'Poor'];

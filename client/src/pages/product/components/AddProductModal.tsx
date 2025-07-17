@@ -6,7 +6,7 @@ import CategoryIcon from '@mui/icons-material/Category';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import DescriptionIcon from '@mui/icons-material/Description';
 import LabelIcon from '@mui/icons-material/Label';
-import {categories, conditions} from '../utils';
+import {categoryMap, conditions} from '../utils';
 import {CustomInput} from '../../../components/Form/CustomInput';
 import {CustomSelect} from '../../../components/Form/CustomSelect';
 import PlaylistAddCheckOutlinedIcon from '@mui/icons-material/PlaylistAddCheckOutlined';
@@ -21,7 +21,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 		name: '',
 		description: '',
 		price: '',
-		category: '',
+		category: 0,
 		condition: '',
 		location: '',
 		image: null as File | null,
@@ -34,7 +34,11 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
 		const {name, value} = e.target;
-		setFormData((prev) => ({...prev, [name]: value}));
+
+		// Convert category to number since it should be a number in your data
+		const processedValue = name === 'category' ? Number(value) : value;
+
+		setFormData((prev) => ({...prev, [name]: processedValue}));
 
 		// Clear validation error when user starts typing
 		if (validationErrors[name]) {
@@ -54,7 +58,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 
 	const validateForm = () => {
 		const errors: Record<string, boolean> = {};
-		const requiredFields = ['name', 'description', 'price', 'category_id', 'condition', 'location'];
+		const requiredFields = ['name', 'description', 'price', 'category', 'condition', 'location'];
 
 		requiredFields.forEach((field) => {
 			if (!formData[field as keyof typeof formData] || formData[field as keyof typeof formData] === '') {
@@ -184,12 +188,12 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 									<label className="block text-sm font-semibold text-gray-700">
 										Category <span className="text-red-500">*</span>
 									</label>
-									<div className={validationErrors.category_id ? 'border-2 border-red-500 rounded-xl' : ''}>
+									<div className={validationErrors.category ? 'border-2 border-red-500 rounded-xl' : ''}>
 										<CustomSelect
-											name="category_id"
+											name="category"
 											value={formData.category}
 											onChange={handleInputChange}
-											options={categories}
+											options={categoryMap}
 											placeholder="Select category"
 											icon={<CategoryIcon className="w-5 h-5" />}
 										/>
