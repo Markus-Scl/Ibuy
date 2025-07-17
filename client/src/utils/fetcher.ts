@@ -103,8 +103,8 @@ export const mutationFetcher = async <T>(
 				throw new AuthError('Authentication failed', 401);
 			}
 
-			const errorData = await response.json().catch(() => ({
-				message: 'An error occurred',
+			const errorData = await response.json().catch((err) => ({
+				message: err,
 			}));
 			throw new Error(errorData.message || `HTTP ${response.status}`);
 		}
