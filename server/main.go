@@ -34,9 +34,9 @@ func main() {
 	mux := router.NewMiddlewareMux(middleware.CORS(), middleware.Logging(), middleware.Auth())
 
 	mux.Handle("OPTIONS /", func(w http.ResponseWriter, r *http.Request) {
-        
+         w.WriteHeader(http.StatusOK)
     })
-	
+
 	//User handling
 	mux.Handle("POST /register", routeHandler.AddUser)
 	mux.Handle("POST /login", routeHandler.LoginUser)

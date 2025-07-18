@@ -7,6 +7,8 @@ import {useProducts} from '../../hooks/useProducts';
 export const ProductPage: FC = () => {
 	const [modalOpen, setModalOpen] = useState<boolean>(false);
 	const {products, isLoading, refreshProducts} = useProducts();
+	console.log(isLoading);
+	console.log(products);
 
 	const handleCloseModal = () => {
 		setModalOpen(false);
@@ -77,7 +79,7 @@ export const ProductPage: FC = () => {
 			<div className="flex justify-between items-center p-4 pb-2 h-[7%]">
 				<h1 className="text-2xl font-bold text-gray-800">My Products</h1>
 				<button
-					onClick={() => console.log('hi')}
+					onClick={() => setModalOpen(true)}
 					className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center space-x-2 cursor-pointer">
 					<AddBoxOutlinedIcon className="w-4 h-4" />
 					<span>Add Product</span>
@@ -93,10 +95,10 @@ export const ProductPage: FC = () => {
 						</figure>
 						<div className="card-body">
 							<h2 className="card-title">
-								Card Title
+								{product.name}
 								<div className="badge badge-secondary">NEW</div>
 							</h2>
-							<p>A card component has a figure, a body part, and inside body there are title and actions parts</p>
+							<p>{product.description}</p>
 							<div className="card-actions justify-end">
 								<div className="badge badge-outline">Fashion</div>
 								<div className="badge badge-outline">Products</div>

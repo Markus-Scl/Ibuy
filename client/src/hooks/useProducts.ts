@@ -15,11 +15,11 @@ export function useProducts() {
 		};
 	}
 
-	const {data, isLoading, mutate: refreshProducts} = useCustomSWR<ProductResponse[]>('product');
+	const {data, mutate: refreshProducts} = useCustomSWR<ProductResponse[]>('product');
 
 	return {
 		products: data ?? [],
-		isLoading,
+		isLoading: false,
 		refreshProducts,
 	};
 }
