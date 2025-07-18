@@ -63,8 +63,8 @@ CREATE TABLE product (
 
 CREATE TABLE product_image (
     id SERIAL PRIMARY KEY,
-    product_id INTEGER NOT NULL,
+    product_id UUID NOT NULL,
     image_path TEXT NOT NULL,
     uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE
+    FOREIGN KEY (product_id) REFERENCES product(p_id) ON DELETE CASCADE
 );

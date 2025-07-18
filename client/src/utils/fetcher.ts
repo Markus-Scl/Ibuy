@@ -72,14 +72,24 @@ export const mutationFetcher = async <T>(
 ): Promise<T> => {
 	const {method = 'POST', body} = options;
 
+	// Determine if we're dealing with FormData
+	const isFormData = body instanceof FormData;
+
+	// Prepare headers - don't set Content-Type for FormData (browser will set it with boundary)
+	const headers: Record<string, string> = {};
+	if (!isFormData) {
+		headers['Content-Type'] = 'application/json';
+	}
+
+	// Prepare body - don't stringify FormData
+	const requestBody = isFormData ? body : body ? JSON.stringify(body) : undefined;
+
 	try {
 		const response = await fetch(`${import.meta.env.VITE_SERVER_API}${url}`, {
 			method,
 			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: body ? JSON.stringify(body) : undefined,
+			headers,
+			body: requestBody,
 		});
 
 		if (!response.ok) {
@@ -89,10 +99,8 @@ export const mutationFetcher = async <T>(
 					const retryResponse = await fetch(`${import.meta.env.VITE_SERVER_API}${url}`, {
 						method,
 						credentials: 'include',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-						body: body ? JSON.stringify(body) : undefined,
+						headers, // Use the same headers logic
+						body: requestBody, // Use the same body logic
 					});
 
 					if (retryResponse.ok) {

@@ -66,10 +66,13 @@ func isValidImageType(contentType string) bool {
 func saveImageFile(file io.Reader, originalFilename, productId string, userId string) (string, error) {
     // Create upload directory if it doesn't exist
     uploadDir := filepath.Join("uploads", "products", userId, productId)
-    err := os.MkdirAll(uploadDir, 0755)
-    if err != nil {
-        return "", err
+
+    if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
+        err := os.MkdirAll(uploadDir, 0755)
+        if err != nil {
+            return "", err
     }
+}
 
     // Generate unique filename to prevent conflicts
     ext := filepath.Ext(originalFilename)

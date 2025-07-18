@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"ibuy-server/db"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -18,7 +17,6 @@ type NewProduct struct {
 	Price       float32 `json:"price"`
 	Category    int     `json:"category"`
 	Condition   string     `json:"condition"`
-	Status   int     `json:"status"`
 	Location    string  `json:"location"`
 	Description string  `json:"description"`
 }
@@ -42,12 +40,10 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
         return
     }
     var userId = userContext.UserId
-    log.Printf("User id: [%s]", userId)
 
     // Parse multipart form instead of JSON
     err := r.ParseMultipartForm(32 << 20) // 32MB max
     if err != nil {
-        log.Printf("Failed to parse multipart form: %v", err)
         http.Error(w, "Invalid request body", http.StatusBadRequest)
         return
     }
@@ -65,7 +61,6 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
         if p, err := strconv.ParseFloat(price, 32); err == nil {
             newProduct.Price = float32(p)
         } else {
-            log.Printf("Invalid price value: %s", price)
             http.Error(w, "Invalid price value", http.StatusBadRequest)
             return
         }
@@ -75,33 +70,19 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
         if c, err := strconv.Atoi(category); err == nil {
             newProduct.Category = c
         } else {
-            log.Printf("Invalid category value: %s", category)
             http.Error(w, "Invalid category value", http.StatusBadRequest)
             return
         }
     }
 
-    if status := r.FormValue("status"); status != "" {
-        if s, err := strconv.Atoi(status); err == nil {
-            newProduct.Status = s
-        } else {
-            log.Printf("Invalid status value: %s", status)
-            http.Error(w, "Invalid status value", http.StatusBadRequest)
-            return
-        }
-    }
-
-    log.Printf("Description: [%s]", newProduct.Description)
-
     var productId string
 
     err = db.DB.QueryRow(
         "INSERT INTO product (name, description, price, u_id, category_id, status_id, condition, location) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING p_id",
-        newProduct.Name, newProduct.Description, newProduct.Price, userId, newProduct.Category, newProduct.Status, newProduct.Condition, newProduct.Location,
+        newProduct.Name, newProduct.Description, newProduct.Price, userId, newProduct.Category, 1, newProduct.Condition, newProduct.Location,
     ).Scan(&productId)
 
     if err != nil {
-        log.Printf("Database error: %v", err)
         http.Error(w, "Failed to create product", http.StatusInternalServerError)
         return
     }
@@ -109,7 +90,6 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
     // Now handle image upload - the form is already parsed
     imagePaths, err := UploadImageHandler(r, userId, productId)
     if err != nil {
-        log.Printf("Image upload error: %v", err)
         http.Error(w, "Failed to save images", http.StatusInternalServerError)
         return
     }
@@ -118,7 +98,6 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
         query := "INSERT INTO product_image (product_id, image_path) SELECT $1, UNNEST($2::text[])"
         _, err := db.DB.Exec(query, productId, pq.Array(imagePaths))
         if err != nil {
-            log.Printf("Database error saving images: %v", err)
             http.Error(w, "Failed to save product images", http.StatusInternalServerError)
             return
         }
@@ -128,13 +107,11 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
     for _, path := range imagePaths {
         imgData, err := os.ReadFile(path)
         if err != nil {
-            log.Printf("Error reading image file: %v", err)
             http.Error(w, "Failed to read image file", http.StatusInternalServerError)
             return
         }
         mimeType, err := GetMimeType(path)
         if err != nil {
-            log.Printf("Error determining mime type: %v", err)
             http.Error(w, "Failed to determine image type", http.StatusInternalServerError)
             return
         }
@@ -148,7 +125,7 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
         Price:       newProduct.Price,
         Category:    newProduct.Category,
         Condition:   newProduct.Condition,
-        Status:      newProduct.Status,
+        Status:      1,
         Location:    newProduct.Location,
         Description: newProduct.Description,
         Images:      base64Images,
@@ -158,7 +135,6 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusCreated)
 
     if err := json.NewEncoder(w).Encode(productResponse); err != nil {
-        log.Printf("Error encoding response: %v", err)
         http.Error(w, "Failed to encode response", http.StatusInternalServerError)
         return
     }

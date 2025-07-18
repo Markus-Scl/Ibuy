@@ -77,9 +77,21 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 
 		setIsLoading(true);
 
+		const formDataObj = new FormData();
+		formDataObj.append('name', formData.name);
+		formDataObj.append('description', formData.description);
+		formDataObj.append('price', formData.price);
+		formDataObj.append('category', formData.category.toString());
+		formDataObj.append('condition', formData.condition);
+		formDataObj.append('location', formData.location);
+
+		if (formData.image) {
+			formDataObj.append('images', formData.image);
+		}
+
 		mutationFetcher<string>('product', {
 			method: 'POST',
-			body: formData,
+			body: formDataObj,
 		})
 			.then((res) => {
 				if (res !== null) {
