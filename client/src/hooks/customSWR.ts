@@ -1,6 +1,7 @@
 import useSWR from 'swr';
+import {fetcher} from '../utils/fetcher';
 
-export const swrFetcher = async <T>(url: string): Promise<T> => {
+/*export const swrFetcher = async <T>(url: string): Promise<T> => {
 	const response = await fetch(url, {credentials: 'include'});
 
 	if (!response.ok) {
@@ -8,11 +9,11 @@ export const swrFetcher = async <T>(url: string): Promise<T> => {
 	}
 
 	return response.json();
-};
+};*/
 
 // Custom Hook
 export const useCustomSWR = <T>(url: string, options = {}) => {
-	const {data, error, isValidating, mutate} = useSWR<T>(url, swrFetcher, {
+	const {data, error, isValidating, mutate} = useSWR<T>(url, fetcher, {
 		...options,
 		revalidateOnFocus: true,
 		revalidateOnReconnect: true,

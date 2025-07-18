@@ -36,10 +36,13 @@ func main() {
 	mux.Handle("OPTIONS /", func(w http.ResponseWriter, r *http.Request) {
         
     })
-
+	
+	//User handling
 	mux.Handle("POST /register", routeHandler.AddUser)
 	mux.Handle("POST /login", routeHandler.LoginUser)
 	mux.Handle("GET /auth/session", routeHandler.CheckAuth)
+
+	//Products
 	mux.Handle("POST /product", routeHandler.AddProduct)
 	mux.Handle("GET /product", routeHandler.GetUserProducts)
 

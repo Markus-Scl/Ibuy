@@ -2,10 +2,11 @@ import {useState, type FC} from 'react';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
 import {AddProductModal} from './components/AddProductModal';
+import {useProducts} from '../../hooks/useProducts';
 
 export const ProductPage: FC = () => {
-	const [products, setProducts] = useState<string[]>([]);
 	const [modalOpen, setModalOpen] = useState<boolean>(false);
+	const {products, isLoading, refreshProducts} = useProducts();
 
 	const handleCloseModal = () => {
 		setModalOpen(false);
@@ -14,7 +15,15 @@ export const ProductPage: FC = () => {
 	if (modalOpen) {
 		return (
 			<div className="h-full w-full flex items-center justify-center">
-				<AddProductModal onClose={handleCloseModal} />
+				<AddProductModal onClose={handleCloseModal} refreshProducts={refreshProducts} />
+			</div>
+		);
+	}
+
+	if (isLoading) {
+		return (
+			<div className="w-full h-full flex flex-col justify-center items-center p-8">
+				<span className="loading loading-spinner loading-sm mr-2 loading-xl text-primary"></span>
 			</div>
 		);
 	}

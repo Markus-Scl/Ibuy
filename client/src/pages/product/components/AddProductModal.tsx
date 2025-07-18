@@ -14,9 +14,10 @@ import {mutationFetcher} from '../../../utils/fetcher';
 
 interface AddProductModalProps {
 	onClose: () => void;
+	refreshProducts: () => void;
 }
 
-export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
+export const AddProductModal: FC<AddProductModalProps> = ({onClose, refreshProducts}) => {
 	const [formData, setFormData] = useState({
 		name: '',
 		description: '',
@@ -95,7 +96,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose}) => {
 		})
 			.then((res) => {
 				if (res !== null) {
-					console.log(res);
+					refreshProducts();
 				}
 			})
 			.catch((error) => {
