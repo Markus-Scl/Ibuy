@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -131,10 +132,113 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
         Images:      base64Images,
     }
 
-    w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(http.StatusCreated)
 
     if err := json.NewEncoder(w).Encode(productResponse); err != nil {
+        http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+        return
+    }
+}
+
+func GetUserProducts(w http.ResponseWriter, r *http.Request){
+
+    userContext, ok := r.Context().Value("userContext").(UserContext)
+    if !ok {
+        http.Error(w, "No user context found", http.StatusUnauthorized)
+        return
+    }
+    var userId = userContext.UserId
+
+    query := `
+        SELECT 
+            p.p_id,
+            p.name,
+            p.price,
+            p.category_id,
+            p.condition,
+            p.status_id,
+            p.location,
+            p.description,
+            pi.image_path
+        FROM product p
+        LEFT JOIN product_image pi ON p.p_id = pi.product_id
+        WHERE p.u_id = $1
+        ORDER BY p.p_id, pi.id`
+
+    rows, err := db.DB.Query(query, userId)
+
+    if err != nil {
+        http.Error(w, "Failed to get products", http.StatusInternalServerError)
+        return
+    }
+    defer rows.Close()
+
+    productMap := make(map[string]*ProductResponse)
+    
+    for rows.Next() {
+        var productID, name, condition, location, description string
+        var price float32
+        var category, status int
+        var imagePath sql.NullString
+
+        err := rows.Scan(
+            &productID,
+            &name,
+            &price,
+            &category,
+            &condition,
+            &status,
+            &location,
+            &description,
+            &imagePath,
+        )
+        if err != nil {
+            http.Error(w, "Failed to get all product info", http.StatusInternalServerError)
+            return
+        }
+
+        // Check if product already exists in map
+        if _, exists := productMap[productID]; !exists {
+            productMap[productID] = &ProductResponse{
+                ProductID:   productID,
+                Name:        name,
+                Price:       price,
+                Category:    category,
+                Condition:   condition,
+                Status:      status,
+                Location:    location,
+                Description: description,
+                Images:      []string{},
+            }
+        }
+
+        // Add image if it exists
+        if imagePath.Valid && imagePath.String != "" {
+            // Read the image file and encode to base64
+            imageData, err := os.ReadFile(imagePath.String)
+            if err != nil {
+                continue
+            }
+            
+            base64Image := base64.StdEncoding.EncodeToString(imageData)
+            productMap[productID].Images = append(productMap[productID].Images, base64Image)
+        }
+    }
+
+    if err = rows.Err(); err != nil {
+        http.Error(w, "Failed read product images", http.StatusInternalServerError)
+        return
+    }
+
+    // Convert map to slice
+    var products []ProductResponse
+    for _, product := range productMap {
+        products = append(products, *product)
+    }
+
+    w.WriteHeader(http.StatusCreated)
+
+    if err := json.NewEncoder(w).Encode(products); err != nil {
         http.Error(w, "Failed to encode response", http.StatusInternalServerError)
         return
     }

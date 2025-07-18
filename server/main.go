@@ -41,6 +41,7 @@ func main() {
 	mux.Handle("POST /login", routeHandler.LoginUser)
 	mux.Handle("GET /auth/session", routeHandler.CheckAuth)
 	mux.Handle("POST /product", routeHandler.AddProduct)
+	mux.Handle("GET /product", routeHandler.GetUserProducts)
 
 
 	serverPort:= ":" + os.Getenv("SERVER_PORT")
