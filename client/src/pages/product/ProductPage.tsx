@@ -3,10 +3,12 @@ import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
 import {AddProductModal} from './components/AddProductModal';
 import {useProducts} from '../../hooks/useProducts';
+import {useCategories} from '../../hooks/useCategories';
 
 export const ProductPage: FC = () => {
 	const [modalOpen, setModalOpen] = useState<boolean>(false);
-	const {products, isLoading, refreshProducts} = useProducts();
+	const {products, productsLoading, refreshProducts} = useProducts();
+	const {categories, categoriesLoading} = useCategories();
 
 	const handleCloseModal = () => {
 		setModalOpen(false);
@@ -20,7 +22,7 @@ export const ProductPage: FC = () => {
 		);
 	}
 
-	if (isLoading) {
+	if (productsLoading || categoriesLoading) {
 		return (
 			<div className="w-full h-full flex flex-col justify-center items-center p-8">
 				<span className="loading loading-spinner loading-sm mr-2 loading-xl text-primary"></span>
@@ -87,19 +89,21 @@ export const ProductPage: FC = () => {
 				{products.map((product, idx) => (
 					<div
 						key={idx}
-						className="card bg-gradient-to-r from-blue-600 to-purple-600 max-w-sm  max-h-100 shadow-sm hover:shadow-lg transform hover:scale-103 transition-all duration-200 cursor-pointer">
-						<figure>
+						className="card bg-gradient-to-r from-blue-600 to-purple-600 max-w-sm  h-100 shadow-sm hover:shadow-lg transform hover:scale-103 transition-all duration-200 cursor-pointer">
+						<figure className="h-1/2">
 							<img src={product.images.length > 0 ? `${import.meta.env.VITE_SERVER_API}${product.images[0]}` : '/placeholder-image.png'} alt="Product Image" />
 						</figure>
-						<div className="card-body">
-							<h2 className="card-title">
-								{product.name}
-								<div className="badge badge-secondary">NEW</div>
+						<div className="card-body h-1/2">
+							<h2 className="card-title flex justify-between items-center">
+								<div className="flex items-center gap-2">
+									{product.name}
+									<div className="badge badge-secondary">NEW</div>
+								</div>
+								<div>{product.price}$</div>
 							</h2>
-							<p>{product.description}</p>
+							<p>{product.description.length > 150 ? `${product.description.substring(0, 150)}...` : product.description}</p>
 							<div className="card-actions justify-end">
-								<div className="badge badge-outline">Fashion</div>
-								<div className="badge badge-outline">Products</div>
+								{categories && categories.get(product.category) && <div className="badge badge-outline">{categories.get(product.category)}</div>}
 							</div>
 						</div>
 					</div>

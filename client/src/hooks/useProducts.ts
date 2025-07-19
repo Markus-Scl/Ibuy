@@ -10,7 +10,7 @@ export function useProducts() {
 	if (!userId) {
 		return {
 			products: [],
-			isLoading: false,
+			productsLoading: false,
 			refreshProducts: () => Promise.resolve(),
 		};
 	}
@@ -19,7 +19,7 @@ export function useProducts() {
 
 	return {
 		products: data ?? [],
-		isLoading: false,
+		productsLoading: false,
 		refreshProducts,
 	};
 }

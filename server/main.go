@@ -52,6 +52,9 @@ func main() {
 	mux.Handle("POST /product", routeHandler.AddProduct)
 	mux.Handle("GET /product", routeHandler.GetUserProducts)
 
+	//Categories
+	mux.Handle("GET /category", routeHandler.GetCategory)
+
 
 	serverPort:= ":" + os.Getenv("SERVER_PORT")
     log.Println("Server listening on", serverPort)
