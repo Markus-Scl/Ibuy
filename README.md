@@ -1,9 +1,5 @@
 # 🛒 iBuy
 
-<div align="center">
-
-![iBuy Logo](https://via.placeholder.com/120x120/4F46E5/FFFFFF?text=iBuy)
-
 **A modern, simplified eBay-style marketplace**
 
 _Built with Go and React for seamless auction experiences_
