@@ -7,12 +7,12 @@ import (
 )
 
 
-func GetCategories(w http.ResponseWriter, r *http.Request) {
-	query := `SELECT id, name FROM category`
+func GetProductStatuses(w http.ResponseWriter, r *http.Request) {
+	query := `SELECT id, name FROM product_status`
 
 	rows, err := db.DB.Query(query)
 	if err != nil {
-		http.Error(w, "Failed to get categories", http.StatusInternalServerError)
+		http.Error(w, "Failed to get product statuses", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -24,7 +24,7 @@ func GetCategories(w http.ResponseWriter, r *http.Request) {
 		var name string
 
 		if err := rows.Scan(&id, &name); err != nil {
-			http.Error(w, "Failed to scan category", http.StatusInternalServerError)
+			http.Error(w, "Failed to scan product statuses", http.StatusInternalServerError)
 			return
 		}
 
@@ -32,7 +32,7 @@ func GetCategories(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := rows.Err(); err != nil {
-		http.Error(w, "Error iterating categories", http.StatusInternalServerError)
+		http.Error(w, "Error iterating product statuses", http.StatusInternalServerError)
 		return
 	}
 

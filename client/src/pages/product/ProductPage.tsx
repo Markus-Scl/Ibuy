@@ -4,11 +4,13 @@ import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
 import {AddProductModal} from './components/AddProductModal';
 import {useProducts} from '../../hooks/useProducts';
 import {useCategories} from '../../hooks/useCategories';
+import {useProductStatuses} from '../../hooks/useProductStatuses';
 
 export const ProductPage: FC = () => {
 	const [modalOpen, setModalOpen] = useState<boolean>(false);
 	const {products, productsLoading, refreshProducts} = useProducts();
 	const {categories, categoriesLoading} = useCategories();
+	const {productStatuses, statusesLoading} = useProductStatuses();
 
 	const handleCloseModal = () => {
 		setModalOpen(false);
@@ -22,7 +24,7 @@ export const ProductPage: FC = () => {
 		);
 	}
 
-	if (productsLoading || categoriesLoading) {
+	if (productsLoading || categoriesLoading || statusesLoading) {
 		return (
 			<div className="w-full h-full flex flex-col justify-center items-center p-8">
 				<span className="loading loading-spinner loading-sm mr-2 loading-xl text-primary"></span>
@@ -97,12 +99,13 @@ export const ProductPage: FC = () => {
 							<h2 className="card-title flex justify-between items-center">
 								<div className="flex items-center gap-2">
 									{product.name}
-									<div className="badge badge-secondary">NEW</div>
+									<div className="badge badge-secondary">{product.condition}</div>
 								</div>
 								<div>{product.price}$</div>
 							</h2>
 							<p>{product.description.length > 150 ? `${product.description.substring(0, 150)}...` : product.description}</p>
 							<div className="card-actions justify-end">
+								{productStatuses && productStatuses.get(product.status) && <div className="badge badge-accent">{productStatuses.get(product.status)}</div>}
 								{categories && categories.get(product.category) && <div className="badge badge-outline">{categories.get(product.category)}</div>}
 							</div>
 						</div>

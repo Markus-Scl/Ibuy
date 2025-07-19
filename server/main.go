@@ -53,7 +53,10 @@ func main() {
 	mux.Handle("GET /product", routeHandler.GetUserProducts)
 
 	//Categories
-	mux.Handle("GET /category", routeHandler.GetCategory)
+	mux.Handle("GET /category", routeHandler.GetCategories)
+
+	//Product statuses
+	mux.Handle("GET /productstatus", routeHandler.GetProductStatuses)
 
 
 	serverPort:= ":" + os.Getenv("SERVER_PORT")
