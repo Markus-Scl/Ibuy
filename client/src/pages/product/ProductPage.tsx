@@ -5,6 +5,7 @@ import {AddProductModal} from './components/AddProductModal';
 import {useProducts} from '../../hooks/useProducts';
 import {useCategories} from '../../hooks/useCategories';
 import {useProductStatuses} from '../../hooks/useProductStatuses';
+import {statusColorMap} from './utils';
 
 export const ProductPage: FC = () => {
 	const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -105,7 +106,9 @@ export const ProductPage: FC = () => {
 							</h2>
 							<p>{product.description.length > 150 ? `${product.description.substring(0, 150)}...` : product.description}</p>
 							<div className="card-actions justify-end">
-								{productStatuses && productStatuses.get(product.status) && <div className="badge badge-accent">{productStatuses.get(product.status)}</div>}
+								{productStatuses && productStatuses.get(product.status) && (
+									<div className={`badge badge-${statusColorMap.get(product.status)}`}>{productStatuses.get(product.status)}</div>
+								)}
 								{categories && categories.get(product.category) && <div className="badge badge-outline">{categories.get(product.category)}</div>}
 							</div>
 						</div>

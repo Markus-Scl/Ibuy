@@ -17,3 +17,9 @@ export const categoryMap = new Map<number, string>([
 ]);
 
 export const conditions = ['New', 'Like New', 'Good', 'Fair', 'Poor'];
+
+export const statusColorMap = new Map<number, string>([
+	[1, 'accent'],
+	[2, 'error'],
+	[3, 'warning'],
+]);
