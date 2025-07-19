@@ -37,6 +37,12 @@ func main() {
          w.WriteHeader(http.StatusOK)
     })
 
+	fileServer := http.FileServer(http.Dir("./"))
+	mux.Handle("GET /uploads/products/", func(w http.ResponseWriter, r *http.Request) {
+		http.StripPrefix("/", fileServer).ServeHTTP(w, r)
+	})
+
+
 	//User handling
 	mux.Handle("POST /register", routeHandler.AddUser)
 	mux.Handle("POST /login", routeHandler.LoginUser)

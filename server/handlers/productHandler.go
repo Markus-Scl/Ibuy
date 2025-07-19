@@ -2,13 +2,11 @@ package handlers
 
 import (
 	"database/sql"
-	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"ibuy-server/db"
 	"net/http"
-	"os"
 	"strconv"
+	"strings"
 
 	"github.com/lib/pq"
 )
@@ -54,7 +52,7 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
         Name:        r.FormValue("name"),
         Description: r.FormValue("description"),
         Location:    r.FormValue("location"),
-		Condition: r.FormValue("condition"),
+        Condition:   r.FormValue("condition"),
     }
 
     // Parse numeric fields with error handling
@@ -95,29 +93,22 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    if len(imagePaths) > 0 {
+    // Convert file paths to URL paths and normalize to forward slashes
+    var urlPaths []string
+    for _, path := range imagePaths {
+        // Convert backslashes to forward slashes for URL format
+        urlPath := strings.ReplaceAll(path, "\\", "/")
+        urlPaths = append(urlPaths, urlPath)
+    }
+
+    // Save URL paths (with forward slashes) to database
+    if len(urlPaths) > 0 {
         query := "INSERT INTO product_image (product_id, image_path) SELECT $1, UNNEST($2::text[])"
-        _, err := db.DB.Exec(query, productId, pq.Array(imagePaths))
+        _, err := db.DB.Exec(query, productId, pq.Array(urlPaths))
         if err != nil {
             http.Error(w, "Failed to save product images", http.StatusInternalServerError)
             return
         }
-    }
-
-    var base64Images []string
-    for _, path := range imagePaths {
-        imgData, err := os.ReadFile(path)
-        if err != nil {
-            http.Error(w, "Failed to read image file", http.StatusInternalServerError)
-            return
-        }
-        mimeType, err := GetMimeType(path)
-        if err != nil {
-            http.Error(w, "Failed to determine image type", http.StatusInternalServerError)
-            return
-        }
-        base64Str := fmt.Sprintf("data:%s;base64,%s", mimeType, base64.StdEncoding.EncodeToString(imgData))
-        base64Images = append(base64Images, base64Str)
     }
 
     productResponse := ProductResponse{
@@ -129,7 +120,7 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
         Status:      1,
         Location:    newProduct.Location,
         Description: newProduct.Description,
-        Images:      base64Images,
+        Images:      urlPaths, // Return URL paths instead of base64 images
     }
 
     w.WriteHeader(http.StatusCreated)
@@ -140,8 +131,7 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
     }
 }
 
-func GetUserProducts(w http.ResponseWriter, r *http.Request){
-
+func GetUserProducts(w http.ResponseWriter, r *http.Request) {
     userContext, ok := r.Context().Value("userContext").(UserContext)
     if !ok {
         http.Error(w, "No user context found", http.StatusUnauthorized)
@@ -166,7 +156,6 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request){
         ORDER BY p.p_id, pi.id`
 
     rows, err := db.DB.Query(query, userId)
-
     if err != nil {
         http.Error(w, "Failed to get products", http.StatusInternalServerError)
         return
@@ -212,21 +201,14 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request){
             }
         }
 
-        // Add image if it exists
+        // Add image path if it exists
         if imagePath.Valid && imagePath.String != "" {
-            // Read the image file and encode to base64
-            imageData, err := os.ReadFile(imagePath.String)
-            if err != nil {
-                continue
-            }
-            
-            base64Image := base64.StdEncoding.EncodeToString(imageData)
-            productMap[productID].Images = append(productMap[productID].Images, base64Image)
+            productMap[productID].Images = append(productMap[productID].Images, imagePath.String)
         }
     }
 
     if err = rows.Err(); err != nil {
-        http.Error(w, "Failed read product images", http.StatusInternalServerError)
+        http.Error(w, "Failed to read product images", http.StatusInternalServerError)
         return
     }
 
@@ -236,7 +218,8 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request){
         products = append(products, *product)
     }
 
-    w.WriteHeader(http.StatusCreated)
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
 
     if err := json.NewEncoder(w).Encode(products); err != nil {
         http.Error(w, "Failed to encode response", http.StatusInternalServerError)

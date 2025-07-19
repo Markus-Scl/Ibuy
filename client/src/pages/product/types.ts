@@ -7,5 +7,5 @@ export interface ProductResponse {
 	status: number;
 	location: string;
 	description: string;
-	Images: File[] | null;
+	images: string[];
 }

@@ -7,8 +7,6 @@ import {useProducts} from '../../hooks/useProducts';
 export const ProductPage: FC = () => {
 	const [modalOpen, setModalOpen] = useState<boolean>(false);
 	const {products, isLoading, refreshProducts} = useProducts();
-	console.log(isLoading);
-	console.log(products);
 
 	const handleCloseModal = () => {
 		setModalOpen(false);
@@ -91,7 +89,7 @@ export const ProductPage: FC = () => {
 						key={idx}
 						className="card bg-gradient-to-r from-blue-600 to-purple-600 max-w-sm  max-h-100 shadow-sm hover:shadow-lg transform hover:scale-103 transition-all duration-200 cursor-pointer">
 						<figure>
-							<img src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp" alt="Shoes" />
+							<img src={product.images.length > 0 ? `${import.meta.env.VITE_SERVER_API}${product.images[0]}` : '/placeholder-image.png'} alt="Product Image" />
 						</figure>
 						<div className="card-body">
 							<h2 className="card-title">
