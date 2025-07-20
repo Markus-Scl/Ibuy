@@ -92,7 +92,7 @@ export const ProductDetailPage: FC = () => {
 		<div className="w-full h-full overflow-auto bg-gray-50">
 			{/* Header with Back Button */}
 			<div className="bg-white shadow-sm border-b border-gray-200">
-				<div className="max-w-7xl mx-auto px-4 py-4">
+				<div className="max-w-9xl mx-auto px-12 py-4">
 					<div className="flex items-center justify-between">
 						<button onClick={() => navigate('/products')} className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors duration-200 cursor-pointer">
 							<ArrowBackIcon className="w-5 h-5" />
@@ -115,15 +115,15 @@ export const ProductDetailPage: FC = () => {
 			</div>
 
 			{/* Main Content */}
-			<div className="max-w-7xl mx-auto px-4 py-8">
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+			<div className="mx-auto px-12 py-8">
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 					{/* Image Section */}
 					<div className="space-y-4">
 						{/* Main Image */}
 						<div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden">
 							<div className="aspect-square">
 								{product.images && product.images.length > 0 ? (
-									<img src={getImageUrl(product.images[selectedImageIndex])} alt={product.name} className="w-full h-full object-contain" />
+									<img src={getImageUrl(product.images[selectedImageIndex])} alt={product.name} className="w-full h-full object-cover" />
 								) : (
 									<div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
 										<div className="text-center space-y-4">
@@ -249,14 +249,16 @@ export const ProductDetailPage: FC = () => {
 						)}*/}
 
 						{/* Action Buttons */}
-						<div className="space-y-3">
-							<button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer">
-								Contact Seller
-							</button>
-							<button className="w-full border-2 border-gray-300 text-gray-700 py-4 px-6 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all duration-200 cursor-pointer">
-								Add to Favorites
-							</button>
-						</div>
+						{product.userId !== user?.userId && (
+							<div className="space-y-3">
+								<button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer">
+									Contact Seller
+								</button>
+								<button className="w-full border-2 border-gray-300 text-gray-700 py-4 px-6 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all duration-200 cursor-pointer">
+									Add to Favorites
+								</button>
+							</div>
+						)}
 					</div>
 				</div>
 			</div>
