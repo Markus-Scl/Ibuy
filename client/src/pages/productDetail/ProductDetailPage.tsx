@@ -3,10 +3,10 @@ import {useParams, useNavigate} from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CategoryIcon from '@mui/icons-material/Category';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PlaylistAddCheckOutlinedIcon from '@mui/icons-material/PlaylistAddCheckOutlined';
+import MessageOutlinedIcon from '@mui/icons-material/MessageOutlined';
+import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import PersonIcon from '@mui/icons-material/Person';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ImageIcon from '@mui/icons-material/Image';
@@ -89,7 +89,7 @@ export const ProductDetailPage: FC = () => {
 	};
 
 	return (
-		<div className="w-full h-full bg-gray-50">
+		<div className="w-full h-full bg-gray-50 overflow-auto">
 			{/* Header with Back Button */}
 			<div className="bg-white shadow-sm border-b border-gray-200 h-[8%]">
 				<div className="max-w-9xl mx-auto px-12 py-4">
@@ -98,18 +98,35 @@ export const ProductDetailPage: FC = () => {
 							<ArrowBackIcon className="w-5 h-5" />
 							<span className="font-medium">Back to Products</span>
 						</button>
-						{product.userId === user?.userId && (
-							<div className="flex items-center space-x-3">
-								<button className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer">
-									<EditIcon className="w-4 h-4" />
-									<span>Edit</span>
-								</button>
-								<button className="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-pink-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer">
-									<DeleteIcon className="w-4 h-4" />
-									<span>Delete</span>
-								</button>
-							</div>
-						)}
+						<div className="flex items-center space-x-3">
+							{product.userId !== user?.userId ? (
+								<>
+									<button className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer">
+										<EditIcon className="w-4 h-4" />
+										<span>Edit</span>
+									</button>
+									<button className="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-pink-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer">
+										<DeleteIcon className="w-4 h-4" />
+										<span>Delete</span>
+									</button>
+								</>
+							) : (
+								<>
+									<div className="tooltip tooltip-bottom" data-tip="Contact Seller">
+										<button className="btn btn-circle btn-primary btn-lg shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300">
+											<MessageOutlinedIcon className="w-6 h-6" />
+										</button>
+									</div>
+
+									{/* Add to Favorites Button */}
+									<div className="tooltip tooltip-bottom" data-tip="Add to Favorites">
+										<button className="btn btn-circle btn-accent btn-lg shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300">
+											<BookmarkBorderOutlinedIcon className="w-6 h-6" />
+										</button>
+									</div>
+								</>
+							)}
+						</div>
 					</div>
 				</div>
 			</div>
@@ -135,7 +152,7 @@ export const ProductDetailPage: FC = () => {
 
 						{/* Thumbnail Images */}
 						{product.images && product.images.length > 1 && (
-							<div className="flex space-x-3 overflow-x-auto pb-2 h-[20%]">
+							<div className="flex space-x-3 overflow-x-auto p-2 h-[20%]">
 								{product.images.map((image, index) => (
 									<button
 										key={index}
@@ -151,9 +168,9 @@ export const ProductDetailPage: FC = () => {
 					</div>
 
 					{/* Product Details Section */}
-					<div className="space-y-6">
+					<div className="space-y-6 h-full">
 						{/* Title and Price */}
-						<div className="bg-white rounded-3xl p-6 shadow-lg">
+						<div className="bg-white rounded-3xl p-6 shadow-lg h-[20%]">
 							<div className="space-y-4">
 								<div className="flex items-start justify-between">
 									<h1 className="text-3xl font-bold text-gray-800 leading-tight">{product.name}</h1>
@@ -173,13 +190,13 @@ export const ProductDetailPage: FC = () => {
 						</div>
 
 						{/* Description */}
-						<div className="bg-white rounded-3xl p-6 shadow-lg">
+						<div className="bg-white rounded-3xl p-6 shadow-lg h-[35%] overflow-auto">
 							<h3 className="text-xl font-bold text-gray-800 mb-4">Description</h3>
 							<p className="text-gray-600 leading-relaxed text-lg">{product.description}</p>
 						</div>
 
 						{/* Product Details Grid */}
-						<div className="bg-white rounded-3xl p-6 shadow-lg">
+						<div className="bg-white rounded-3xl p-6 shadow-lg h-[40%]">
 							<h3 className="text-xl font-bold text-gray-800 mb-6">Product Details</h3>
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 								{/* Category */}

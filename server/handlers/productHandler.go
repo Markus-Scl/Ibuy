@@ -233,7 +233,7 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request) {
         FROM product p
         LEFT JOIN product_image pi ON p.p_id = pi.product_id
         WHERE p.u_id = $1
-        ORDER BY p.p_id, pi.id`
+        ORDER BY p.name`
 
     rows, err := db.DB.Query(query, userId)
     if err != nil {

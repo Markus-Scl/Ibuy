@@ -381,7 +381,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose, refreshProdu
 								<button
 									type="button"
 									onClick={onClose}
-									className="flex-1 py-3 px-6 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-red-200 transition-colors duration-200 hover:border-white cursor-pointer">
+									className="flex-1 py-3 px-6 bg-gradient-to-r from-red-600 to-pink-600 text-white px-4 py-2 rounded-lg font-semibold  shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer">
 									Cancel
 								</button>
 								<button
