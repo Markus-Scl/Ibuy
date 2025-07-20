@@ -89,9 +89,9 @@ export const ProductDetailPage: FC = () => {
 	};
 
 	return (
-		<div className="w-full h-full overflow-auto bg-gray-50">
+		<div className="w-full h-full bg-gray-50">
 			{/* Header with Back Button */}
-			<div className="bg-white shadow-sm border-b border-gray-200">
+			<div className="bg-white shadow-sm border-b border-gray-200 h-[8%]">
 				<div className="max-w-9xl mx-auto px-12 py-4">
 					<div className="flex items-center justify-between">
 						<button onClick={() => navigate('/products')} className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors duration-200 cursor-pointer">
@@ -115,29 +115,27 @@ export const ProductDetailPage: FC = () => {
 			</div>
 
 			{/* Main Content */}
-			<div className="mx-auto px-12 py-8">
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+			<div className="mx-auto px-12 py-8 h-[90%] w-full">
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-10 h-full w-full">
 					{/* Image Section */}
-					<div className="space-y-4">
+					<div className="space-y-4 h-full">
 						{/* Main Image */}
-						<div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden">
-							<div className="aspect-square">
-								{product.images && product.images.length > 0 ? (
-									<img src={getImageUrl(product.images[selectedImageIndex])} alt={product.name} className="w-full h-full object-cover" />
-								) : (
-									<div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-										<div className="text-center space-y-4">
-											<ImageIcon className="mx-auto text-gray-400" sx={{fontSize: '80px'}} />
-											<p className="text-gray-500 font-medium">No Image Available</p>
-										</div>
+						<div className="relative bg-white rounded-3xl shadow-2xl  h-[80%]">
+							{product.images && product.images.length > 0 ? (
+								<img src={getImageUrl(product.images[selectedImageIndex])} alt={product.name} className="w-full h-full object-cover rounded-3xl" />
+							) : (
+								<div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+									<div className="text-center space-y-4">
+										<ImageIcon className="mx-auto text-gray-400" sx={{fontSize: '80px'}} />
+										<p className="text-gray-500 font-medium">No Image Available</p>
 									</div>
-								)}
-							</div>
+								</div>
+							)}
 						</div>
 
 						{/* Thumbnail Images */}
 						{product.images && product.images.length > 1 && (
-							<div className="flex space-x-3 overflow-x-auto pb-2">
+							<div className="flex space-x-3 overflow-x-auto pb-2 h-[20%]">
 								{product.images.map((image, index) => (
 									<button
 										key={index}
