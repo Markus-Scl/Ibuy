@@ -1,5 +1,6 @@
 export interface ProductResponse {
 	productId: string;
+	userId: string;
 	name: string;
 	price: number;
 	category: number;
@@ -7,5 +8,6 @@ export interface ProductResponse {
 	status: number;
 	location: string;
 	description: string;
+	created: string;
 	images: string[];
 }

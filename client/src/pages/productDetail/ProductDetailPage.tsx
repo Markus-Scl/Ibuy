@@ -15,6 +15,7 @@ import {fetcher} from '../../utils/fetcher';
 import {useCategories} from '../../hooks/useCategories';
 import {useProductStatuses} from '../../hooks/useProductStatuses';
 import {statusColorMap} from '../product/utils';
+import {useAuthStore} from '../../stores/useAuthStore';
 
 export const ProductDetailPage: FC = () => {
 	const {productId} = useParams();
@@ -24,6 +25,7 @@ export const ProductDetailPage: FC = () => {
 	const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
 	const {categories} = useCategories();
 	const {productStatuses} = useProductStatuses();
+	const {user} = useAuthStore();
 
 	useEffect(() => {
 		if (!productId) return;
@@ -96,16 +98,18 @@ export const ProductDetailPage: FC = () => {
 							<ArrowBackIcon className="w-5 h-5" />
 							<span className="font-medium">Back to Products</span>
 						</button>
-						<div className="flex items-center space-x-3">
-							<button className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer">
-								<EditIcon className="w-4 h-4" />
-								<span>Edit</span>
-							</button>
-							<button className="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-pink-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer">
-								<DeleteIcon className="w-4 h-4" />
-								<span>Delete</span>
-							</button>
-						</div>
+						{product.userId === user?.userId && (
+							<div className="flex items-center space-x-3">
+								<button className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer">
+									<EditIcon className="w-4 h-4" />
+									<span>Edit</span>
+								</button>
+								<button className="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-pink-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer">
+									<DeleteIcon className="w-4 h-4" />
+									<span>Delete</span>
+								</button>
+							</div>
+						)}
 					</div>
 				</div>
 			</div>
@@ -119,7 +123,7 @@ export const ProductDetailPage: FC = () => {
 						<div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden">
 							<div className="aspect-square">
 								{product.images && product.images.length > 0 ? (
-									<img src={getImageUrl(product.images[selectedImageIndex])} alt={product.name} className="w-full h-full object-cover" />
+									<img src={getImageUrl(product.images[selectedImageIndex])} alt={product.name} className="w-full h-full object-contain" />
 								) : (
 									<div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
 										<div className="text-center space-y-4">
@@ -214,17 +218,17 @@ export const ProductDetailPage: FC = () => {
 								</div>
 
 								{/* Created Date */}
-								{/*<div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl">
-									<div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-full p-3">
-										<CalendarTodayIcon className="w-5 h-5 text-white" />
+								{
+									<div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl">
+										<div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-full p-3">
+											<CalendarTodayIcon className="w-5 h-5 text-white" />
+										</div>
+										<div>
+											<p className="text-sm font-medium text-gray-500">Listed On</p>
+											<p className="text-lg font-semibold text-gray-800">{product.created ? formatDate(product.created) : 'Unknown'}</p>
+										</div>
 									</div>
-									<div>
-										<p className="text-sm font-medium text-gray-500">Listed On</p>
-										<p className="text-lg font-semibold text-gray-800">
-											{product.createdAt ? formatDate(product.createdAt) : 'Unknown'}
-										</p>
-									</div>
-								</div>*/}
+								}
 							</div>
 						</div>
 

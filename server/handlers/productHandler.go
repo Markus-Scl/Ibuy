@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/lib/pq"
 )
@@ -23,6 +24,7 @@ type NewProduct struct {
 
 type ProductResponse struct {
     ProductID   string   `json:"productId"`
+    UserID      string   `json:"userId"`
     Name        string   `json:"name"`
     Price       float32  `json:"price"`
     Category    int      `json:"category"`
@@ -30,6 +32,7 @@ type ProductResponse struct {
     Status      int      `json:"status"`
     Location    string   `json:"location"`
     Description string   `json:"description"`
+    Created    time.Time `json:"created"`
     Images      []string `json:"images"` // Base64-encoded image data
 }
 
@@ -151,6 +154,7 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
     query := `
         SELECT 
             p.p_id,
+            p.u_id,
             p.name,
             p.price,
             p.category_id,
@@ -158,14 +162,16 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
             p.status_id,
             p.location,
             p.description,
+            p.created,
             string_agg(pi.image_path, ',') as image_paths
         FROM product p
         LEFT JOIN product_image pi ON p.p_id = pi.product_id
         WHERE p.p_id = $1
-        GROUP BY p.p_id, p.name, p.price, p.category_id, p.condition, p.status_id, p.location, p.description`
+        GROUP BY p.p_id, p.u_id, p.name, p.price, p.category_id, p.condition, p.status_id, p.location, p.description, p.created`
 
     err := db.DB.QueryRow(query, productId).Scan(
         &product.ProductID,
+        &product.UserID,
         &product.Name,
         &product.Price,
         &product.Category,
@@ -173,6 +179,7 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
         &product.Status,
         &product.Location,
         &product.Description,
+        &product.Created,
         &imagePathsStr,
     )
 
@@ -221,6 +228,7 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request) {
             p.status_id,
             p.location,
             p.description,
+            p.created,
             pi.image_path
         FROM product p
         LEFT JOIN product_image pi ON p.p_id = pi.product_id
@@ -241,6 +249,7 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request) {
         var price float32
         var category, status int
         var imagePath sql.NullString
+        var created time.Time
 
         err := rows.Scan(
             &productID,
@@ -251,6 +260,7 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request) {
             &status,
             &location,
             &description,
+            &created,
             &imagePath,
         )
         if err != nil {
@@ -269,6 +279,7 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request) {
                 Status:      status,
                 Location:    location,
                 Description: description,
+                Created:     created,
                 Images:      []string{},
             }
         }
