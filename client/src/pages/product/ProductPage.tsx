@@ -6,12 +6,15 @@ import {useProducts} from '../../hooks/useProducts';
 import {useCategories} from '../../hooks/useCategories';
 import {useProductStatuses} from '../../hooks/useProductStatuses';
 import {statusColorMap} from './utils';
+import {useNavigate} from 'react-router-dom';
 
 export const ProductPage: FC = () => {
 	const [modalOpen, setModalOpen] = useState<boolean>(false);
 	const {products, productsLoading, refreshProducts} = useProducts();
 	const {categories, categoriesLoading} = useCategories();
 	const {productStatuses, statusesLoading} = useProductStatuses();
+
+	const navigate = useNavigate();
 
 	const handleCloseModal = () => {
 		setModalOpen(false);
@@ -91,6 +94,7 @@ export const ProductPage: FC = () => {
 			<div className="w-full h-[93%] p-4 grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-auto">
 				{products.map((product, idx) => (
 					<div
+						onClick={() => navigate(`/product/${product.productId}`)}
 						key={idx}
 						className="card bg-gradient-to-r from-blue-600 to-purple-600 max-w-sm  h-100 shadow-sm hover:shadow-lg transform hover:scale-103 transition-all duration-200 cursor-pointer">
 						<figure className="h-1/2">

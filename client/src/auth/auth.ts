@@ -9,8 +9,6 @@ export async function authenticate(loginData: LoginData) {
 			body: loginData,
 		});
 
-		console.log(user);
-
 		useAuthStore.getState().setSession(user);
 		useAuthStore.getState().setLoading(false);
 

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"ibuy-server/db"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -21,7 +22,7 @@ type NewProduct struct {
 }
 
 type ProductResponse struct {
-    ProductID   string   `json:"product_id"`
+    ProductID   string   `json:"productId"`
     Name        string   `json:"name"`
     Price       float32  `json:"price"`
     Category    int      `json:"category"`
@@ -131,6 +132,77 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
     }
 }
 
+func GetProductById(w http.ResponseWriter, r *http.Request) {
+    path := r.URL.Path
+    parts := strings.Split(path, "/")
+
+    if len(parts) != 3 || parts[1] != "product" || parts[2] == "" {
+        http.Error(w, "Invalid product URL", http.StatusBadRequest)
+        return
+    }
+
+    productId := parts[2]
+    log.Printf("Product ID: %s", productId)
+
+    var product ProductResponse
+    var imagePathsStr sql.NullString
+
+    // Using string_agg to concatenate all image paths (PostgreSQL)
+    query := `
+        SELECT 
+            p.p_id,
+            p.name,
+            p.price,
+            p.category_id,
+            p.condition,
+            p.status_id,
+            p.location,
+            p.description,
+            string_agg(pi.image_path, ',') as image_paths
+        FROM product p
+        LEFT JOIN product_image pi ON p.p_id = pi.product_id
+        WHERE p.p_id = $1
+        GROUP BY p.p_id, p.name, p.price, p.category_id, p.condition, p.status_id, p.location, p.description`
+
+    err := db.DB.QueryRow(query, productId).Scan(
+        &product.ProductID,
+        &product.Name,
+        &product.Price,
+        &product.Category,
+        &product.Condition,
+        &product.Status,
+        &product.Location,
+        &product.Description,
+        &imagePathsStr,
+    )
+
+    if err != nil {
+        if err == sql.ErrNoRows {
+            http.Error(w, "Product not found", http.StatusNotFound)
+            return
+        }
+        log.Printf("Failed to scan product row: %v", err)
+        http.Error(w, "Failed to get product", http.StatusInternalServerError)
+        return
+    }
+
+    // Parse the comma-separated image paths
+    if imagePathsStr.Valid && imagePathsStr.String != "" {
+        product.Images = strings.Split(imagePathsStr.String, ",")
+    } else {
+        product.Images = []string{}
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
+
+    if err := json.NewEncoder(w).Encode(product); err != nil {
+        log.Printf("Failed to encode response: %v", err)
+        http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+        return
+    }
+}
+
 func GetUserProducts(w http.ResponseWriter, r *http.Request) {
     userContext, ok := r.Context().Value("userContext").(UserContext)
     if !ok {
@@ -218,7 +290,6 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request) {
         products = append(products, *product)
     }
 
-    w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(http.StatusOK)
 
     if err := json.NewEncoder(w).Encode(products); err != nil {

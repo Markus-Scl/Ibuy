@@ -7,6 +7,7 @@ import {ProductPage} from './pages/product/ProductPage';
 import {useEffect} from 'react';
 import {initAuth} from './auth/initAuth';
 import {HomePage} from './pages/home/HomePage';
+import {ProductDetailPage} from './pages/productDetail/ProductDetailPage';
 
 function App() {
 	useEffect(() => {
@@ -25,6 +26,7 @@ function App() {
 					}>
 					<Route path="/home" element={<HomePage />} />
 					<Route path="/products" element={<ProductPage />} />
+					<Route path="/product/:productId" element={<ProductDetailPage />} />
 				</Route>
 				<Route path="/login" element={<LoginPage />} />
 				<Route path="/register" element={<RegisterPage />} />

@@ -51,6 +51,7 @@ func main() {
 	//Products
 	mux.Handle("POST /product", routeHandler.AddProduct)
 	mux.Handle("GET /product", routeHandler.GetUserProducts)
+	mux.Handle("GET /product/{id}", routeHandler.GetProductById)
 
 	//Categories
 	mux.Handle("GET /category", routeHandler.GetCategories)
