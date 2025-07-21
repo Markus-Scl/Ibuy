@@ -7,6 +7,7 @@ import {useCategories} from '../../hooks/useCategories';
 import {useProductStatuses} from '../../hooks/useProductStatuses';
 import {statusClassMap} from './utils';
 import {useNavigate} from 'react-router-dom';
+import {CustomButton} from '../../components/CustomButton';
 
 export const ProductPage: FC = () => {
 	const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -88,12 +89,7 @@ export const ProductPage: FC = () => {
 		<div className="w-full h-full relative">
 			<div className="flex justify-between items-center p-4 pb-2 h-[7%]">
 				<h1 className="text-2xl font-bold text-gray-800">My Products</h1>
-				<button
-					onClick={() => setModalOpen(true)}
-					className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center space-x-2 cursor-pointer">
-					<AddBoxOutlinedIcon className="w-4 h-4" />
-					<span>Add Product</span>
-				</button>
+				<CustomButton title="Add Product" color=" from-blue-600 to-purple-600 text-white" icon={<AddBoxOutlinedIcon />} fullLength={false} handleClick={() => setModalOpen(true)} />
 			</div>
 			<div className="w-full h-[93%] p-4 grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-auto">
 				{sortedProducts.map((product, idx) => (

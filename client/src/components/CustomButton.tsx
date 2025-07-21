@@ -16,7 +16,7 @@ export const CustomButton: FC<CustomButtonProps> = ({title, icon, color, fullLen
 			} px-6 bg-gradient-to-r ${color} rounded-lg font-semibold  shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer`}
 			onClick={handleClick}>
 			{icon}
-			<span>{title}</span>
+			<span className="ml-1">{title}</span>
 		</button>
 	);
 };
