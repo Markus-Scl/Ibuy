@@ -5,6 +5,7 @@ import {CustomInput} from '../../components/Form/CustomInput';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import {CustomButton} from '../../components/CustomButton';
 
 export const RegisterPage: FC = () => {
 	const [formData, setFormData] = useState({
@@ -282,19 +283,14 @@ export const RegisterPage: FC = () => {
 							</div>
 
 							{/* Submit Button */}
-							<button
-								type="button"
-								onClick={handleSubmit}
-								className="btn btn-primary w-full text-white font-medium py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:transform-none disabled:opacity-50">
-								{isLoading ? (
-									<>
-										<span className="loading loading-spinner loading-sm mr-2"></span>
-										Creating Account...
-									</>
-								) : (
-									'Create Account'
-								)}
-							</button>
+							<CustomButton
+								title="Create Account"
+								isLoading={isLoading}
+								loadingMessage="Creating Account"
+								color="from-blue-600 to-purple-600 text-white"
+								fullLength={true}
+								handleClick={() => handleSubmit()}
+							/>
 						</div>
 
 						{/* Sign In Link */}

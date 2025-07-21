@@ -5,6 +5,7 @@ import {authenticate} from '../../auth/auth';
 import type {LoginData} from '../../types/types';
 import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import {CustomButton} from '../../components/CustomButton';
 
 export const LoginPage: React.FC = () => {
 	const [formData, setFormData] = useState<LoginData>({
@@ -165,19 +166,14 @@ export const LoginPage: React.FC = () => {
 							</div>
 
 							{/* Submit Button */}
-							<button
-								type="button"
-								onClick={handleSubmit}
-								className="btn btn-primary w-full text-white font-medium py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:transform-none disabled:opacity-50">
-								{isLoading ? (
-									<>
-										<span className="loading loading-spinner loading-sm mr-2"></span>
-										Signing in...
-									</>
-								) : (
-									'Sign In'
-								)}
-							</button>
+							<CustomButton
+								title="Sign In"
+								isLoading={isLoading}
+								loadingMessage="Signing in..."
+								color="from-blue-600 to-purple-600 text-white"
+								fullLength={true}
+								handleClick={() => handleSubmit()}
+							/>
 						</div>
 
 						{/* Sign Up Link */}
