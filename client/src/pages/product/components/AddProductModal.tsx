@@ -14,6 +14,7 @@ import {CustomSelect} from '../../../components/Form/CustomSelect';
 import PlaylistAddCheckOutlinedIcon from '@mui/icons-material/PlaylistAddCheckOutlined';
 import {mutationFetcher} from '../../../utils/fetcher';
 import {CustomButton} from '../../../components/CustomButton';
+import {deleteColor, primaryColor} from '../../../utils/theme';
 
 interface AddProductModalProps {
 	onClose: () => void;
@@ -175,7 +176,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose, refreshProdu
 			) : (
 				<div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
 					{/* Header */}
-					<div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 flex items-center justify-between">
+					<div className={`${primaryColor} px-6 py-4 flex items-center justify-between`}>
 						<h2 className="text-2xl font-bold text-white">Add New Product</h2>
 						<button onClick={onClose} className="text-white hover:bg-white/20 rounded-full p-2 transition-colors duration-200 cursor-pointer">
 							<CloseIcon />
@@ -197,9 +198,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose, refreshProdu
 										<input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" disabled={imagePreviews.length >= MAX_IMAGES} />
 										<div
 											className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-												imagePreviews.length >= MAX_IMAGES
-													? 'bg-gray-400 cursor-not-allowed'
-													: 'bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg transform hover:scale-105'
+												imagePreviews.length >= MAX_IMAGES ? 'bg-gray-400 cursor-not-allowed' : `${primaryColor} hover:shadow-lg transform hover:scale-105`
 											} text-white`}>
 											<PhotoCameraIcon className="w-5 h-5" />
 											<span>{imagePreviews.length === 0 ? 'Upload Images' : 'Add More Images'}</span>
@@ -258,7 +257,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose, refreshProdu
 																e.stopPropagation();
 																removeImage(index);
 															}}
-															className="absolute -top-3 -right-3 w-6 h-6 text-white hover:shadow-lg transform hover:scale-105 transition-all duration-200 rounded-full p-2 transition-colors bg-gradient-to-r from-blue-600 to-purple-600 cursor-pointer flex items-center justify-center">
+															className={`absolute -top-3 -right-3 w-6 h-6 ${primaryColor} text-white hover:shadow-lg transform hover:scale-105 transition-all duration-200 rounded-full p-2 transition-colors cursor-pointer flex items-center justify-center`}>
 															<CloseIcon />
 														</button>
 													</div>
@@ -378,8 +377,8 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose, refreshProdu
 
 							{/* Action Buttons */}
 							<div className="flex items-center space-x-4 pt-4">
-								<CustomButton title="Cancel" color="from-red-600 to-pink-600 text-white" fullLength={true} handleClick={() => onClose()} />
-								<CustomButton title="Create Product" color="from-blue-600 to-purple-600 text-white" fullLength={true} handleClick={() => handleSubmit()} />
+								<CustomButton title="Cancel" color={deleteColor} textColor="text-white" fullLength={true} handleClick={() => onClose()} />
+								<CustomButton title="Create Product" color={primaryColor} textColor="text-white" fullLength={true} handleClick={() => handleSubmit()} />
 							</div>
 						</div>
 					</div>

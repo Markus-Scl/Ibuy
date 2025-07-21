@@ -18,6 +18,7 @@ import {statusClassMap} from '../product/utils';
 import {useAuthStore} from '../../stores/useAuthStore';
 import {DeleteModal} from '../../components/DeleteModal';
 import {CustomButton} from '../../components/CustomButton';
+import {deleteColor, primaryColor} from '../../utils/theme';
 
 export const ProductDetailPage: FC = () => {
 	const {productId} = useParams();
@@ -83,7 +84,7 @@ export const ProductDetailPage: FC = () => {
 					</div>
 					<button
 						onClick={() => navigate('/products')}
-						className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-out cursor-pointer">
+						className={`${primaryColor} text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-out cursor-pointer`}>
 						Back to Products
 					</button>
 				</div>
@@ -116,8 +117,8 @@ export const ProductDetailPage: FC = () => {
 						<div className="flex items-center space-x-3">
 							{product.userId === user?.userId ? (
 								<>
-									<CustomButton title="Edit" color="from-blue-600 to-purple-600 text-white" fullLength={false} icon={<EditIcon />} handleClick={() => console.log('edit click')} />
-									<CustomButton title="Delete" color="from-red-600 to-pink-600 text-white" fullLength={false} icon={<DeleteIcon />} handleClick={() => setDeleteModalOpen(true)} />
+									<CustomButton title="Edit" color={primaryColor} textColor="text-white" fullLength={false} icon={<EditIcon />} handleClick={() => console.log('edit click')} />
+									<CustomButton title="Delete" color={deleteColor} textColor="text-white" fullLength={false} icon={<DeleteIcon />} handleClick={() => setDeleteModalOpen(true)} />
 								</>
 							) : (
 								<>
@@ -184,7 +185,7 @@ export const ProductDetailPage: FC = () => {
 								<div className="flex items-start justify-between">
 									<h1 className="text-3xl font-bold text-gray-800 leading-tight">{product.name}</h1>
 									<div className="text-right">
-										<div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">${product.price}</div>
+										<div className={`text-3xl font-bold ${primaryColor} bg-clip-text text-transparent`}>${product.price}</div>
 									</div>
 								</div>
 
@@ -210,7 +211,7 @@ export const ProductDetailPage: FC = () => {
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 								{/* Category */}
 								<div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl">
-									<div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-full p-3">
+									<div className={`${primaryColor} rounded-full p-3`}>
 										<CategoryIcon className="w-5 h-5 text-white" />
 									</div>
 									<div>
@@ -275,7 +276,8 @@ export const ProductDetailPage: FC = () => {
 						{/* Action Buttons */}
 						{product.userId !== user?.userId && (
 							<div className="space-y-3">
-								<button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer">
+								<button
+									className={`w-full ${primaryColor} text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer`}>
 									Contact Seller
 								</button>
 								<button className="w-full border-2 border-gray-300 text-gray-700 py-4 px-6 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all duration-200 cursor-pointer">

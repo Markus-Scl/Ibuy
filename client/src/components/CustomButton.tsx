@@ -3,6 +3,7 @@ import type {FC} from 'react';
 interface CustomButtonProps {
 	title: string;
 	color: string;
+	textColor: string;
 	fullLength?: boolean;
 	icon?: React.ReactNode;
 	isLoading?: boolean;
@@ -10,12 +11,12 @@ interface CustomButtonProps {
 	handleClick: () => void;
 }
 
-export const CustomButton: FC<CustomButtonProps> = ({title, icon, color, fullLength, isLoading, loadingMessage, handleClick}) => {
+export const CustomButton: FC<CustomButtonProps> = ({title, icon, color, textColor, fullLength, isLoading, loadingMessage, handleClick}) => {
 	return (
 		<button
 			className={`${
 				fullLength ? 'flex-1 py-3 w-full' : 'flex py-2'
-			} px-6 bg-gradient-to-r ${color} rounded-lg font-semibold  shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer`}
+			} px-6 ${color} ${textColor} rounded-lg font-semibold  shadow-md hover:shadow-lg transform hover:scale-102 transition-all duration-200 cursor-pointer`}
 			onClick={handleClick}>
 			{icon}
 			{isLoading ? (

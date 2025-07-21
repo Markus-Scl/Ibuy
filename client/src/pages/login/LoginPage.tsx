@@ -6,6 +6,7 @@ import type {LoginData} from '../../types/types';
 import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import {CustomButton} from '../../components/CustomButton';
+import {primaryColor} from '../../utils/theme';
 
 export const LoginPage: React.FC = () => {
 	const [formData, setFormData] = useState<LoginData>({
@@ -72,7 +73,7 @@ export const LoginPage: React.FC = () => {
 			<div className="w-full max-w-md">
 				{/* Logo Section */}
 				<div className="text-center mb-8">
-					<div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl mb-4 shadow-lg">
+					<div className={`inline-flex items-center justify-center w-16 h-16 ${primaryColor} rounded-2xl mb-4 shadow-lg`}>
 						<span className="text-2xl font-bold text-white">IBuy</span>
 					</div>
 					<h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
@@ -170,7 +171,8 @@ export const LoginPage: React.FC = () => {
 								title="Sign In"
 								isLoading={isLoading}
 								loadingMessage="Signing in..."
-								color="from-blue-600 to-purple-600 text-white"
+								color={primaryColor}
+								textColor="text-white"
 								fullLength={true}
 								handleClick={() => handleSubmit()}
 							/>

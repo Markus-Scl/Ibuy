@@ -2,6 +2,7 @@ import type {FC} from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined';
 import {CustomButton} from './CustomButton';
+import {deleteColor, neutralColor} from '../utils/theme';
 
 interface DeleteModalProps {
 	type: string;
@@ -51,8 +52,8 @@ export const DeleteModal: FC<DeleteModalProps> = ({type, name, onClose, onDelete
 
 					{/* Buttons */}
 					<div className="flex items-center space-x-3 pt-4">
-						<CustomButton title="Delete" color="from-red-600 to-pink-600 text-white" fullLength={true} handleClick={onDelete} />
-						<CustomButton title="Cancel" color="from-gray-100 to-gray-200 text-gray-700 border border-gray-300" fullLength={true} handleClick={onClose} />
+						<CustomButton title="Delete" color={deleteColor} textColor="text-white" fullLength={true} handleClick={onDelete} />
+						<CustomButton title="Cancel" color={neutralColor} textColor="text-gray-700" fullLength={true} handleClick={onClose} />
 					</div>
 				</div>
 			</div>
