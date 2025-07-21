@@ -16,6 +16,8 @@ import {useCategories} from '../../hooks/useCategories';
 import {useProductStatuses} from '../../hooks/useProductStatuses';
 import {statusClassMap} from '../product/utils';
 import {useAuthStore} from '../../stores/useAuthStore';
+import {DeleteModal} from '../../components/DeleteModal';
+import {CustomButton} from '../../components/CustomButton';
 
 export const ProductDetailPage: FC = () => {
 	const {productId} = useParams();
@@ -23,6 +25,7 @@ export const ProductDetailPage: FC = () => {
 	const [product, setProduct] = useState<ProductResponse>();
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+	const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
 	const {categories} = useCategories();
 	const {productStatuses} = useProductStatuses();
 	const {user} = useAuthStore();
@@ -43,6 +46,16 @@ export const ProductDetailPage: FC = () => {
 				setIsLoading(false);
 			});
 	}, [productId]);
+
+	const handleDelete = () => {};
+
+	if (deleteModalOpen) {
+		return (
+			<div className="h-full w-full flex items-center justify-center">
+				<DeleteModal type="Product" name={product?.name || ''} onClose={() => setDeleteModalOpen(false)} onDelete={handleDelete} />
+			</div>
+		);
+	}
 
 	if (isLoading) {
 		return (
@@ -101,14 +114,20 @@ export const ProductDetailPage: FC = () => {
 						<div className="flex items-center space-x-3">
 							{product.userId === user?.userId ? (
 								<>
-									<button className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer">
-										<EditIcon className="w-4 h-4" />
-										<span>Edit</span>
-									</button>
-									<button className="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-pink-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer">
-										<DeleteIcon className="w-4 h-4" />
-										<span>Delete</span>
-									</button>
+									<CustomButton
+										title="Edit"
+										color="from-blue-600 to-purple-600 text-white"
+										fullLength={false}
+										icon={<EditIcon className="w-4 h-4" />}
+										handleClick={() => console.log('edit click')}
+									/>
+									<CustomButton
+										title="Delete"
+										color="from-red-600 to-pink-600 text-white"
+										fullLength={false}
+										icon={<DeleteIcon className="w-4 h-4" />}
+										handleClick={() => setDeleteModalOpen(true)}
+									/>
 								</>
 							) : (
 								<>

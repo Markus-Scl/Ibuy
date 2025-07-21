@@ -8,12 +8,12 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import LabelIcon from '@mui/icons-material/Label';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import DeleteIcon from '@mui/icons-material/Delete';
 import {categoryMap, conditions} from '../utils';
 import {CustomInput} from '../../../components/Form/CustomInput';
 import {CustomSelect} from '../../../components/Form/CustomSelect';
 import PlaylistAddCheckOutlinedIcon from '@mui/icons-material/PlaylistAddCheckOutlined';
 import {mutationFetcher} from '../../../utils/fetcher';
+import {CustomButton} from '../../../components/CustomButton';
 
 interface AddProductModalProps {
 	onClose: () => void;
@@ -378,18 +378,8 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose, refreshProdu
 
 							{/* Action Buttons */}
 							<div className="flex items-center space-x-4 pt-4">
-								<button
-									type="button"
-									onClick={onClose}
-									className="flex-1 py-3 px-6 bg-gradient-to-r from-red-600 to-pink-600 text-white px-4 py-2 rounded-lg font-semibold  shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer">
-									Cancel
-								</button>
-								<button
-									type="button"
-									onClick={handleSubmit}
-									className="flex-1 py-3 px-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer">
-									Create Product
-								</button>
+								<CustomButton title="Cancel" color="from-red-600 to-pink-600 text-white" fullLength={true} handleClick={() => onClose()} />
+								<CustomButton title="Create Product" color="from-blue-600 to-purple-600 text-white" fullLength={true} handleClick={() => handleSubmit()} />
 							</div>
 						</div>
 					</div>
