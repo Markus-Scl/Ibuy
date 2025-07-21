@@ -145,7 +145,6 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
     }
 
     productId := parts[2]
-    log.Printf("Product ID: %s", productId)
 
     var product ProductResponse
     var imagePathsStr sql.NullString
@@ -188,7 +187,6 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
             http.Error(w, "Product not found", http.StatusNotFound)
             return
         }
-        log.Printf("Failed to scan product row: %v", err)
         http.Error(w, "Failed to get product", http.StatusInternalServerError)
         return
     }
@@ -204,7 +202,6 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusOK)
 
     if err := json.NewEncoder(w).Encode(product); err != nil {
-        log.Printf("Failed to encode response: %v", err)
         http.Error(w, "Failed to encode response", http.StatusInternalServerError)
         return
     }
@@ -312,7 +309,7 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request) {
 func DeleteProductById(w http.ResponseWriter, r *http.Request){
     productId := r.URL.Query().Get("id")
 
-    if productId != "" {
+    if productId == "" {
         http.Error(w, "Invalid product URL", http.StatusBadRequest)
         return
     }
@@ -335,11 +332,11 @@ func DeleteProductById(w http.ResponseWriter, r *http.Request){
         GROUP BY p.u_id`
 
     var productUserId string
-    var imagePaths []string
+    var imagePathsString sql.NullString
 
     err := db.DB.QueryRow(query, productId).Scan(
         &productUserId,
-        &imagePaths,
+        &imagePathsString,
     )
 
     if err != nil {
@@ -356,11 +353,23 @@ func DeleteProductById(w http.ResponseWriter, r *http.Request){
         return
     }
 
-    err = DeleteImageFiles(imagePaths);
+    // Convert to string array or empty array
+    var imagePaths []string
+    if imagePathsString.Valid && imagePathsString.String != "" {
+        imagePaths = strings.Split(imagePathsString.String, ",")
+    } else {
+        imagePaths = []string{} // Empty array if no images
+    }
 
-    if err != nil {
-        http.Error(w, "Failed to delete images", http.StatusInternalServerError)
-        return
+    log.Printf("Image paths: %v", imagePaths)
+
+    // Delete image files if any exist
+    if len(imagePaths) > 0 {
+        err = DeleteImageFiles(imagePaths)
+        if err != nil {
+            http.Error(w, "Failed to delete images", http.StatusInternalServerError)
+            return
+        }
     }
 
     _, err = db.DB.Exec("DELETE FROM product WHERE p_id = $1", productId)

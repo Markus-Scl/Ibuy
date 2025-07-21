@@ -23,7 +23,7 @@ import {deleteColor, primaryColor} from '../../utils/theme';
 export const ProductDetailPage: FC = () => {
 	const {productId} = useParams();
 	const navigate = useNavigate();
-	const [product, setProduct] = useState<ProductResponse>();
+	const [product, setProduct] = useState<ProductResponse | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
 	const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
@@ -51,9 +51,10 @@ export const ProductDetailPage: FC = () => {
 	const handleDelete = () => {
 		setDeleteModalOpen(false);
 		setIsLoading(true);
-		mutationFetcher(`product?id=${product?.productId}`, {method: 'DELETE'})
-			.then((res) => {
-				console.log(res);
+		mutationFetcher(`product?id=${product?.productId}`, {method: 'DELETE', body: {}})
+			.then(() => {
+				navigate('/products');
+				setProduct(null);
 			})
 			.catch((e) => {
 				console.error(e);
