@@ -18,8 +18,8 @@ export const categoryMap = new Map<number, string>([
 
 export const conditions = ['New', 'Like New', 'Good', 'Fair', 'Poor'];
 
-export const statusColorMap = new Map<number, string>([
-	[1, 'accent'],
-	[2, 'error'],
-	[3, 'warning'],
+export const statusClassMap = new Map([
+	[1, 'badge badge-success'],
+	[2, 'badge badge-warning'],
+	[3, 'badge badge-danger'],
 ]);

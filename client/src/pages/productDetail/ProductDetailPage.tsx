@@ -14,7 +14,7 @@ import type {ProductResponse} from '../product/types';
 import {fetcher} from '../../utils/fetcher';
 import {useCategories} from '../../hooks/useCategories';
 import {useProductStatuses} from '../../hooks/useProductStatuses';
-import {statusColorMap} from '../product/utils';
+import {statusClassMap} from '../product/utils';
 import {useAuthStore} from '../../stores/useAuthStore';
 
 export const ProductDetailPage: FC = () => {
@@ -99,7 +99,7 @@ export const ProductDetailPage: FC = () => {
 							<span className="font-medium">Back to Products</span>
 						</button>
 						<div className="flex items-center space-x-3">
-							{product.userId !== user?.userId ? (
+							{product.userId === user?.userId ? (
 								<>
 									<button className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer">
 										<EditIcon className="w-4 h-4" />
@@ -182,7 +182,7 @@ export const ProductDetailPage: FC = () => {
 								{/* Status and Condition Badges */}
 								<div className="flex items-center space-x-3">
 									{productStatuses && productStatuses.get(product.status) && (
-										<div className={`badge badge-${statusColorMap.get(product.status)} text-sm px-3 py-2`}>{productStatuses.get(product.status)}</div>
+										<div className={`${statusClassMap.get(product.status)} text-sm px-3 py-2`}>{productStatuses.get(product.status)}</div>
 									)}
 									<div className="badge badge-secondary text-sm px-3 py-2">{product.condition}</div>
 								</div>
