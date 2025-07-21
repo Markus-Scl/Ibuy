@@ -47,7 +47,9 @@ export const ProductDetailPage: FC = () => {
 			});
 	}, [productId]);
 
-	const handleDelete = () => {};
+	const handleDelete = () => {
+		setDeleteModalOpen(false);
+	};
 
 	if (deleteModalOpen) {
 		return (
@@ -114,33 +116,21 @@ export const ProductDetailPage: FC = () => {
 						<div className="flex items-center space-x-3">
 							{product.userId === user?.userId ? (
 								<>
-									<CustomButton
-										title="Edit"
-										color="from-blue-600 to-purple-600 text-white"
-										fullLength={false}
-										icon={<EditIcon className="w-4 h-4" />}
-										handleClick={() => console.log('edit click')}
-									/>
-									<CustomButton
-										title="Delete"
-										color="from-red-600 to-pink-600 text-white"
-										fullLength={false}
-										icon={<DeleteIcon className="w-4 h-4" />}
-										handleClick={() => setDeleteModalOpen(true)}
-									/>
+									<CustomButton title="Edit" color="from-blue-600 to-purple-600 text-white" fullLength={false} icon={<EditIcon />} handleClick={() => console.log('edit click')} />
+									<CustomButton title="Delete" color="from-red-600 to-pink-600 text-white" fullLength={false} icon={<DeleteIcon />} handleClick={() => setDeleteModalOpen(true)} />
 								</>
 							) : (
 								<>
 									<div className="tooltip tooltip-bottom" data-tip="Contact Seller">
 										<button className="btn btn-circle btn-primary btn-lg shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300">
-											<MessageOutlinedIcon className="w-6 h-6" />
+											<MessageOutlinedIcon />
 										</button>
 									</div>
 
 									{/* Add to Favorites Button */}
 									<div className="tooltip tooltip-bottom" data-tip="Add to Favorites">
 										<button className="btn btn-circle btn-accent btn-lg shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300">
-											<BookmarkBorderOutlinedIcon className="w-6 h-6" />
+											<BookmarkBorderOutlinedIcon />
 										</button>
 									</div>
 								</>
