@@ -309,4 +309,66 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request) {
 }
 
 
+func DeleteProductById(w http.ResponseWriter, r *http.Request){
+    productId := r.URL.Query().Get("id")
 
+    if productId != "" {
+        http.Error(w, "Invalid product URL", http.StatusBadRequest)
+        return
+    }
+
+    userContext, ok := r.Context().Value("userContext").(UserContext)
+    if !ok {
+        http.Error(w, "No user context found", http.StatusUnauthorized)
+        return
+    }
+
+    var userId = userContext.UserId
+
+    query := `
+        SELECT 
+            p.u_id,
+            string_agg(pi.image_path, ',') as image_paths
+        FROM product p
+        LEFT JOIN product_image pi ON p.p_id = pi.product_id
+        WHERE p.p_id = $1
+        GROUP BY p.u_id`
+
+    var productUserId string
+    var imagePaths []string
+
+    err := db.DB.QueryRow(query, productId).Scan(
+        &productUserId,
+        &imagePaths,
+    )
+
+    if err != nil {
+        if err == sql.ErrNoRows {
+            http.Error(w, "Product not found", http.StatusNotFound)
+            return
+        }
+        http.Error(w, "Failed to delete product", http.StatusInternalServerError)
+        return
+    }
+
+    if productUserId != userId {
+        http.Error(w, "Not Authorized", http.StatusForbidden)
+        return
+    }
+
+    err = DeleteImageFiles(imagePaths);
+
+    if err != nil {
+        http.Error(w, "Failed to delete images", http.StatusInternalServerError)
+        return
+    }
+
+    _, err = db.DB.Exec("DELETE FROM product WHERE p_id = $1", productId)
+    if err != nil {
+        http.Error(w, "Failed to delete product from database", http.StatusInternalServerError)
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte(`{"message": "Product deleted successfully"}`))
+}

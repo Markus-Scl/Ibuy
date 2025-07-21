@@ -45,6 +45,60 @@ func UploadImageHandler(r *http.Request, userId string, productId string) ([]str
 	return savedFiles, nil
 }
 
+func DeleteImageFiles(imagePaths []string) error {
+    if len(imagePaths) == 0 {
+        return nil
+    }
+
+    // Track unique parent directories
+    parentDirs := make(map[string]bool)
+
+    // Delete each image file and collect parent directories
+    for _, imagePath := range imagePaths {
+        // Skip empty paths
+        if strings.TrimSpace(imagePath) == "" {
+            continue
+        }
+
+        // Check if file exists before attempting to delete
+        if _, err := os.Stat(imagePath); os.IsNotExist(err) {
+            continue // Skip non-existent files
+        }
+
+        // Delete the image file
+        if err := os.Remove(imagePath); err != nil {
+            return fmt.Errorf("failed to delete file %s: %w", imagePath, err)
+        }
+
+        // Get parent directory
+        parentDir := filepath.Dir(imagePath)
+        parentDirs[parentDir] = true
+    }
+
+    // Delete parent directories if they're empty
+    for parentDir := range parentDirs {
+        // Check if directory exists
+        if _, err := os.Stat(parentDir); os.IsNotExist(err) {
+            continue
+        }
+
+        // Check if directory is empty
+        entries, err := os.ReadDir(parentDir)
+        if err != nil {
+            return fmt.Errorf("failed to read directory %s: %w", parentDir, err)
+        }
+
+        // If directory is empty, delete it
+        if len(entries) == 0 {
+            if err := os.Remove(parentDir); err != nil {
+                return fmt.Errorf("failed to delete directory %s: %w", parentDir, err)
+            }
+        }
+    }
+
+    return nil
+}
+
 
 func isValidImageType(contentType string) bool {
     validTypes := []string{
@@ -98,6 +152,8 @@ func saveImageFile(file io.Reader, originalFilename, productId string, userId st
 
     return filePath, nil
 }
+
+
 
 func GetMimeType(filePath string) (string, error) {
     ext := strings.ToLower(filepath.Ext(filePath))

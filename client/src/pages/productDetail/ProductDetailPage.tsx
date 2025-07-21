@@ -11,7 +11,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ImageIcon from '@mui/icons-material/Image';
 import type {ProductResponse} from '../product/types';
-import {fetcher} from '../../utils/fetcher';
+import {fetcher, mutationFetcher} from '../../utils/fetcher';
 import {useCategories} from '../../hooks/useCategories';
 import {useProductStatuses} from '../../hooks/useProductStatuses';
 import {statusClassMap} from '../product/utils';
@@ -50,6 +50,15 @@ export const ProductDetailPage: FC = () => {
 
 	const handleDelete = () => {
 		setDeleteModalOpen(false);
+		setIsLoading(true);
+		mutationFetcher(`product?id=${product?.productId}`, {method: 'DELETE'})
+			.then((res) => {
+				console.log(res);
+			})
+			.catch((e) => {
+				console.error(e);
+			})
+			.finally(() => setIsLoading(false));
 	};
 
 	if (deleteModalOpen) {

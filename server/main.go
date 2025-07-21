@@ -52,6 +52,7 @@ func main() {
 	mux.Handle("POST /product", routeHandler.AddProduct)
 	mux.Handle("GET /product", routeHandler.GetUserProducts)
 	mux.Handle("GET /product/{id}", routeHandler.GetProductById)
+	mux.Handle("DELETE /product", routeHandler.DeleteProductById)
 
 	//Categories
 	mux.Handle("GET /category", routeHandler.GetCategories)
