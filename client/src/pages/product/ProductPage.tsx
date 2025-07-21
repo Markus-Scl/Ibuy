@@ -1,4 +1,4 @@
-import {useState, type FC} from 'react';
+import {useMemo, useState, type FC} from 'react';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
 import {AddProductModal} from './components/AddProductModal';
@@ -13,6 +13,10 @@ export const ProductPage: FC = () => {
 	const {products, productsLoading, refreshProducts} = useProducts();
 	const {categories, categoriesLoading} = useCategories();
 	const {productStatuses, statusesLoading} = useProductStatuses();
+
+	const sortedProducts = useMemo(() => {
+		return [...products].sort((a, b) => a.name.localeCompare(b.name));
+	}, [products]);
 
 	const navigate = useNavigate();
 
@@ -92,7 +96,7 @@ export const ProductPage: FC = () => {
 				</button>
 			</div>
 			<div className="w-full h-[93%] p-4 grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-auto">
-				{products.map((product, idx) => (
+				{sortedProducts.map((product, idx) => (
 					<div
 						onClick={() => navigate(`/product/${product.productId}`)}
 						key={idx}
