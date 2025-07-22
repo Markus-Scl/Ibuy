@@ -255,7 +255,11 @@ export const EditProductModal: FC<EditProductModalProps> = ({onClose, onSubmit, 
 										{/* Main Image Display */}
 										<div className="relative mb-4">
 											<div className="relative w-full h-64 rounded-xl overflow-hidden bg-white shadow-lg">
-												<img src={getImageUrl(images[currentImageIndex]?.preview)} alt={`Preview ${currentImageIndex + 1}`} className="w-full h-full object-contain" />
+												<img
+													src={images[currentImageIndex].isExisting ? getImageUrl(images[currentImageIndex]?.preview) : images[currentImageIndex]?.preview}
+													alt={`Preview ${currentImageIndex + 1}`}
+													className="w-full h-full object-contain"
+												/>
 
 												{/* Navigation Arrows */}
 												{images.length > 1 && (
@@ -299,7 +303,11 @@ export const EditProductModal: FC<EditProductModalProps> = ({onClose, onSubmit, 
 														className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
 															index === currentImageIndex ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200 hover:border-gray-400'
 														}`}>
-														<img src={getImageUrl(image.preview)} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
+														<img
+															src={image.isExisting ? getImageUrl(image.preview) : image.preview}
+															alt={`Thumbnail ${index + 1}`}
+															className="w-full h-full object-cover"
+														/>
 													</button>
 
 													<button
