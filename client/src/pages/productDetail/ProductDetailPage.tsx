@@ -71,7 +71,7 @@ export const ProductDetailPage: FC = () => {
 				{deleteModalOpen ? (
 					<DeleteModal type="Product" name={product?.name || ''} onClose={() => setDeleteModalOpen(false)} onDelete={handleDelete} />
 				) : (
-					<EditProductModal product={product} onClose={() => setEditModalOpen(false)} onSubmit={() => console.log('submit')} />
+					<EditProductModal product={product} onClose={() => setEditModalOpen(false)} setUpdatedProduct={setProduct} />
 				)}
 			</div>
 		);

@@ -22,6 +22,17 @@ type NewProduct struct {
 	Description string  `json:"description"`
 }
 
+type UpdatedProduct struct {
+	Name        string  `json:"name"`
+	Price       float32 `json:"price"`
+	Category    int     `json:"category"`
+    Status      int     `json:"status"`
+	Condition   string     `json:"condition"`
+	Location    string  `json:"location"`
+	Description string  `json:"description"`
+    DeletedImages []string `json:"deletedImages"`
+}
+
 type ProductResponse struct {
     ProductID   string   `json:"productId"`
     UserID      string   `json:"userId"`
@@ -128,6 +139,172 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
     }
 
     w.WriteHeader(http.StatusCreated)
+
+    if err := json.NewEncoder(w).Encode(productResponse); err != nil {
+        http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+        return
+    }
+}
+
+func UpdateProduct(w http.ResponseWriter, r *http.Request){
+    productId := r.URL.Query().Get("id")
+
+    if productId == "" {
+        http.Error(w, "Invalid product URL", http.StatusBadRequest)
+        return
+    }
+
+    userContext, ok := r.Context().Value("userContext").(UserContext)
+    if !ok {
+        http.Error(w, "No user context found", http.StatusUnauthorized)
+        return
+    }
+
+    var userId = userContext.UserId
+
+    // Parse multipart form instead of JSON
+    err := r.ParseMultipartForm(32 << 20) // 32MB max
+    if err != nil {
+        http.Error(w, "Invalid request body", http.StatusBadRequest)
+        return
+    }
+
+    // Extract form values and create UpdateProduct struct
+    updateProduct := UpdatedProduct{
+        Name:        r.FormValue("name"),
+        Description: r.FormValue("description"),
+        Location:    r.FormValue("location"),
+        Condition:   r.FormValue("condition"),
+    }
+
+    // Parse numeric fields with error handling
+    if price := r.FormValue("price"); price != "" {
+        if p, err := strconv.ParseFloat(price, 32); err == nil {
+            updateProduct.Price = float32(p)
+        } else {
+            http.Error(w, "Invalid price value", http.StatusBadRequest)
+            return
+        }
+    }
+
+    if category := r.FormValue("category"); category != "" {
+        if c, err := strconv.Atoi(category); err == nil {
+            updateProduct.Category = c
+        } else {
+            http.Error(w, "Invalid category value", http.StatusBadRequest)
+            return
+        }
+    }
+
+    if status := r.FormValue("status"); status != "" {
+        if s, err := strconv.Atoi(status); err == nil {
+            updateProduct.Status = s
+        } else {
+            http.Error(w, "Invalid status value", http.StatusBadRequest)
+            return
+        }
+    }
+
+    // Parse deleted images array if provided
+    if deletedImagesStr := r.FormValue("deletedImages"); deletedImagesStr != "" {
+        err := json.Unmarshal([]byte(deletedImagesStr), &updateProduct.DeletedImages)
+        if err != nil {
+            http.Error(w, "Invalid deletedImages format", http.StatusBadRequest)
+            return
+        }
+    }
+
+    // Update the product in database
+    _, err = db.DB.Exec(`
+        UPDATE product 
+        SET name = $1, description = $2, price = $3, category_id = $4, status_id = $5, condition = $6, location = $7
+        WHERE p_id = $8 AND u_id = $9`,
+        updateProduct.Name, updateProduct.Description, updateProduct.Price, 
+        updateProduct.Category, updateProduct.Status, updateProduct.Condition, 
+        updateProduct.Location, productId, userId,
+    )
+
+
+    if err != nil {
+        log.Printf("In the if [%s]", err)
+        http.Error(w, "Failed to update product", http.StatusInternalServerError)
+        return
+    }
+
+    
+    // Handle deleted images
+    if len(updateProduct.DeletedImages) > 0 {
+        // Delete image files from filesystem
+        err = DeleteImageFiles(updateProduct.DeletedImages)
+        if err != nil {
+            http.Error(w, "Failed to delete image files", http.StatusInternalServerError)
+            return
+        }
+
+        // Remove deleted images from database
+        query := "DELETE FROM product_image WHERE product_id = $1 AND image_path = ANY($2)"
+        _, err = db.DB.Exec(query, productId, pq.Array(updateProduct.DeletedImages))
+        if err != nil {
+            http.Error(w, "Failed to delete product images from database", http.StatusInternalServerError)
+            return
+        }
+    }
+
+    // Handle new image uploads
+    var newImagePaths []string
+    imagePaths, err := UploadImageHandler(r, userId, productId)
+    if err != nil {
+        http.Error(w, "Failed to save new images", http.StatusInternalServerError)
+        return
+    }
+
+    // Convert file paths to URL paths and normalize to forward slashes
+    for _, path := range imagePaths {
+        urlPath := strings.ReplaceAll(path, "\\", "/")
+        newImagePaths = append(newImagePaths, urlPath)
+    }
+
+    // Save new image URL paths to database
+    if len(newImagePaths) > 0 {
+        query := "INSERT INTO product_image (product_id, image_path) SELECT $1, UNNEST($2::text[])"
+        _, err := db.DB.Exec(query, productId, pq.Array(newImagePaths))
+        if err != nil {
+            http.Error(w, "Failed to save new product images", http.StatusInternalServerError)
+            return
+        }
+    }
+
+    // Get all current images for the product to return in response
+    var allImagePaths []string
+    rows, err := db.DB.Query("SELECT image_path FROM product_image WHERE product_id = $1", productId)
+    if err != nil {
+        http.Error(w, "Failed to retrieve updated product images", http.StatusInternalServerError)
+        return
+    }
+    defer rows.Close()
+
+    for rows.Next() {
+        var imagePath string
+        if err := rows.Scan(&imagePath); err != nil {
+            continue
+        }
+        allImagePaths = append(allImagePaths, imagePath)
+    }
+
+    productResponse := ProductResponse{
+        ProductID:   productId,
+        UserID:      userId,
+        Name:        updateProduct.Name,
+        Price:       updateProduct.Price,
+        Category:    updateProduct.Category,
+        Condition:   updateProduct.Condition,
+        Status:      updateProduct.Status,
+        Location:    updateProduct.Location,
+        Description: updateProduct.Description,
+        Images:      allImagePaths,
+    }
+
+    w.WriteHeader(http.StatusOK)
 
     if err := json.NewEncoder(w).Encode(productResponse); err != nil {
         http.Error(w, "Failed to encode response", http.StatusInternalServerError)
@@ -360,8 +537,6 @@ func DeleteProductById(w http.ResponseWriter, r *http.Request){
     } else {
         imagePaths = []string{} // Empty array if no images
     }
-
-    log.Printf("Image paths: %v", imagePaths)
 
     // Delete image files if any exist
     if len(imagePaths) > 0 {

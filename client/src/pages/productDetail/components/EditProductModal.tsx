@@ -24,7 +24,7 @@ import OutlinedFlagOutlinedIcon from '@mui/icons-material/OutlinedFlagOutlined';
 interface EditProductModalProps {
 	product: ProductResponse;
 	onClose: () => void;
-	onSubmit: () => void;
+	setUpdatedProduct: (product: ProductResponse) => void;
 }
 
 // Unified image interface to handle both existing URLs and new file uploads
@@ -36,7 +36,7 @@ interface ImageItem {
 	originalUrl?: string; // Store original URL for existing images
 }
 
-export const EditProductModal: FC<EditProductModalProps> = ({onClose, onSubmit, product}) => {
+export const EditProductModal: FC<EditProductModalProps> = ({onClose, setUpdatedProduct, product}) => {
 	const [formData, setFormData] = useState({
 		name: product.name,
 		description: product.description,
@@ -45,6 +45,7 @@ export const EditProductModal: FC<EditProductModalProps> = ({onClose, onSubmit, 
 		status: product.status,
 		condition: product.condition,
 		location: product.location,
+		deletedImages: [] as string[],
 	});
 
 	// Use unified image structure
@@ -110,6 +111,9 @@ export const EditProductModal: FC<EditProductModalProps> = ({onClose, onSubmit, 
 	};
 
 	const removeImage = (indexToRemove: number) => {
+		if (images[indexToRemove].originalUrl) {
+			formData.deletedImages.push(images[indexToRemove].originalUrl);
+		}
 		setImages((prev) => prev.filter((_, index) => index !== indexToRemove));
 
 		// Adjust current index if necessary
@@ -155,29 +159,21 @@ export const EditProductModal: FC<EditProductModalProps> = ({onClose, onSubmit, 
 		formDataObj.append('condition', formData.condition);
 		formDataObj.append('status', formData.status.toString());
 		formDataObj.append('location', formData.location);
+		formDataObj.append('deletedImages', JSON.stringify(formData.deletedImages));
 
 		// Handle images intelligently
 		const newFiles: File[] = [];
-		const existingImageUrls: string[] = [];
 
 		images.forEach((image) => {
-			if (image.isExisting && image.originalUrl) {
-				// Keep existing images by sending their URLs
-				existingImageUrls.push(image.originalUrl);
-			} else if (image.file) {
+			if (image.file) {
 				// Add new files to be uploaded
 				newFiles.push(image.file);
 			}
 		});
 
-		// Append existing image URLs
-		existingImageUrls.forEach((url, index) => {
-			formDataObj.append(`existingImages[${index}]`, url);
-		});
-
 		// Append new image files
 		newFiles.forEach((file) => {
-			formDataObj.append('newImages', file);
+			formDataObj.append('images', file);
 		});
 
 		// Or alternatively, you might want to send the image order
@@ -190,13 +186,13 @@ export const EditProductModal: FC<EditProductModalProps> = ({onClose, onSubmit, 
 
 		formDataObj.append('imageOrder', JSON.stringify(imageOrder));
 
-		mutationFetcher<string>(`product/${product.productId}`, {
+		mutationFetcher<ProductResponse>(`product?id=${product.productId}`, {
 			method: 'PUT',
 			body: formDataObj,
 		})
 			.then((res) => {
 				if (res !== null) {
-					onSubmit();
+					setUpdatedProduct(res);
 				}
 			})
 			.catch((error) => {

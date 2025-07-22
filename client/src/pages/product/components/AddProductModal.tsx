@@ -142,7 +142,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose, refreshProdu
 		formDataObj.append('location', formData.location);
 
 		// Append all images
-		formData.images.forEach((image, index) => {
+		formData.images.forEach((image) => {
 			formDataObj.append('images', image);
 		});
 
