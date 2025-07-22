@@ -31,6 +31,8 @@ export const ProductDetailPage: FC = () => {
 	const {user} = useAuthStore();
 	const {categories} = useCategoriesStore();
 
+	console.log(product);
+
 	useEffect(() => {
 		if (!productId) return;
 		fetcher(`product/${productId}`)
@@ -115,7 +117,7 @@ export const ProductDetailPage: FC = () => {
 	};
 
 	return (
-		<div className="w-full h-full bg-gray-50 overflow-auto">
+		<div className="w-full h-full bg-gray-50">
 			{/* Header with Back Button */}
 			<div className="bg-white shadow-sm border-b border-gray-200 h-[8%]">
 				<div className="max-w-9xl mx-auto px-12 py-4">
@@ -152,7 +154,7 @@ export const ProductDetailPage: FC = () => {
 			</div>
 
 			{/* Main Content */}
-			<div className="mx-auto px-12 py-8 h-[90%] w-full">
+			<div className="mx-auto px-12 py-8 h-[90%] w-full overflow-auto">
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-10 h-full w-full">
 					{/* Image Section */}
 					<div className="space-y-4 h-full">

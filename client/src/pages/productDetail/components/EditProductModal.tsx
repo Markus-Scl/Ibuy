@@ -8,13 +8,13 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import LabelIcon from '@mui/icons-material/Label';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import {conditions} from '../utils';
 import {CustomInput} from '../../../components/Form/CustomInput';
 import {CustomSelect} from '../../../components/Form/CustomSelect';
 import PlaylistAddCheckOutlinedIcon from '@mui/icons-material/PlaylistAddCheckOutlined';
 import {mutationFetcher} from '../../../utils/fetcher';
 import {CustomButton} from '../../../components/CustomButton';
 import {deleteColor, primaryColor} from '../../../utils/theme';
+import {conditions} from '../../product/utils';
 import {useCategoriesStore} from '../../../stores/useCategoriesStore';
 
 interface AddProductModalProps {
@@ -44,6 +44,7 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose, refreshProdu
 	const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
 	const {categories} = useCategoriesStore();
 
 	const MAX_IMAGES = 5;
