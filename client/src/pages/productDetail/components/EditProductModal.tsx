@@ -16,8 +16,10 @@ import {CustomButton} from '../../../components/CustomButton';
 import {deleteColor, primaryColor} from '../../../utils/theme';
 import {conditions} from '../../product/utils';
 import {useCategoriesStore} from '../../../stores/useCategoriesStore';
+import type {ProductResponse} from '../../product/types';
 
-interface AddProductModalProps {
+interface EditProductModalProps {
+	product: ProductResponse;
 	onClose: () => void;
 	refreshProducts: () => void;
 }
@@ -28,7 +30,7 @@ interface ImagePreview {
 	id: string;
 }
 
-export const AddProductModal: FC<AddProductModalProps> = ({onClose, refreshProducts}) => {
+export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProducts, product}) => {
 	const [formData, setFormData] = useState({
 		name: '',
 		description: '',
