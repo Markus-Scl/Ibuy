@@ -19,6 +19,8 @@ import {CustomButton} from '../../components/CustomButton';
 import {deleteColor, primaryColor} from '../../utils/theme';
 import {useCategoriesStore} from '../../stores/useCategoriesStore';
 import {useProductStatusesStore} from '../../stores/UseProductStatusesStore';
+import {EditProductModal} from './components/EditProductModal';
+import {getImageUrl} from './utils';
 
 export const ProductDetailPage: FC = () => {
 	const {productId} = useParams();
@@ -27,11 +29,10 @@ export const ProductDetailPage: FC = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
 	const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+	const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
 	const {productStatuses} = useProductStatusesStore();
 	const {user} = useAuthStore();
 	const {categories} = useCategoriesStore();
-
-	console.log(product);
 
 	useEffect(() => {
 		if (!productId) return;
@@ -64,10 +65,14 @@ export const ProductDetailPage: FC = () => {
 			.finally(() => setIsLoading(false));
 	};
 
-	if (deleteModalOpen) {
+	if ((deleteModalOpen || editModalOpen) && product) {
 		return (
 			<div className="h-full w-full flex items-center justify-center">
-				<DeleteModal type="Product" name={product?.name || ''} onClose={() => setDeleteModalOpen(false)} onDelete={handleDelete} />
+				{deleteModalOpen ? (
+					<DeleteModal type="Product" name={product?.name || ''} onClose={() => setDeleteModalOpen(false)} onDelete={handleDelete} />
+				) : (
+					<EditProductModal product={product} onClose={() => setEditModalOpen(false)} onSubmit={() => console.log('submit')} />
+				)}
 			</div>
 		);
 	}
@@ -112,10 +117,6 @@ export const ProductDetailPage: FC = () => {
 		});
 	};
 
-	const getImageUrl = (imagePath: string) => {
-		return `${import.meta.env.VITE_SERVER_API}${imagePath}`;
-	};
-
 	return (
 		<div className="w-full h-full bg-gray-50">
 			{/* Header with Back Button */}
@@ -129,7 +130,7 @@ export const ProductDetailPage: FC = () => {
 						<div className="flex items-center space-x-3">
 							{product.userId === user?.userId ? (
 								<>
-									<CustomButton title="Edit" color={primaryColor} textColor="text-white" fullLength={false} icon={<EditIcon />} handleClick={() => console.log('edit click')} />
+									<CustomButton title="Edit" color={primaryColor} textColor="text-white" fullLength={false} icon={<EditIcon />} handleClick={() => setEditModalOpen(true)} />
 									<CustomButton title="Delete" color={deleteColor} textColor="text-white" fullLength={false} icon={<DeleteIcon />} handleClick={() => setDeleteModalOpen(true)} />
 								</>
 							) : (

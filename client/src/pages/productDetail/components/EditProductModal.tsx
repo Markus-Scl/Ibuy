@@ -1,4 +1,4 @@
-import {useRef, useState, type FC} from 'react';
+import {useRef, useState, useEffect, type FC} from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -17,31 +17,36 @@ import {deleteColor, primaryColor} from '../../../utils/theme';
 import {conditions} from '../../product/utils';
 import {useCategoriesStore} from '../../../stores/useCategoriesStore';
 import type {ProductResponse} from '../../product/types';
+import {getImageUrl} from '../utils';
 
 interface EditProductModalProps {
 	product: ProductResponse;
 	onClose: () => void;
-	refreshProducts: () => void;
+	onSubmit: () => void;
 }
 
-interface ImagePreview {
-	file: File;
-	preview: string;
+// Unified image interface to handle both existing URLs and new file uploads
+interface ImageItem {
 	id: string;
+	preview: string; // Always a URL - either existing URL or blob URL for new files
+	file?: File; // Only present for new uploads
+	isExisting: boolean; // Flag to distinguish between existing and new images
+	originalUrl?: string; // Store original URL for existing images
 }
 
-export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProducts, product}) => {
+export const EditProductModal: FC<EditProductModalProps> = ({onClose, onSubmit, product}) => {
 	const [formData, setFormData] = useState({
-		name: '',
-		description: '',
-		price: '',
-		category: 0,
-		condition: '',
-		location: '',
-		images: [] as File[],
+		name: product.name,
+		description: product.description,
+		price: product.price,
+		category: product.category,
+		status: product.status,
+		condition: product.condition,
+		location: product.location,
 	});
 
-	const [imagePreviews, setImagePreviews] = useState<ImagePreview[]>([]);
+	// Use unified image structure
+	const [images, setImages] = useState<ImageItem[]>([]);
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
 	const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -51,15 +56,25 @@ export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProd
 
 	const MAX_IMAGES = 5;
 
+	// Initialize existing images on component mount
+	useEffect(() => {
+		if (product.images && product.images.length > 0) {
+			const existingImages: ImageItem[] = product.images.map((imageUrl, index) => ({
+				id: `existing-${index}`,
+				preview: imageUrl,
+				isExisting: true,
+				originalUrl: imageUrl,
+			}));
+			setImages(existingImages);
+		}
+	}, [product.images]);
+
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
 		const {name, value} = e.target;
-
-		// Convert category to number since it should be a number in your data
 		const processedValue = name === 'category' ? Number(value) : value;
 
 		setFormData((prev) => ({...prev, [name]: processedValue}));
 
-		// Clear validation error when user starts typing
 		if (validationErrors[name]) {
 			setValidationErrors((prev) => ({...prev, [name]: false}));
 		}
@@ -67,23 +82,20 @@ export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProd
 
 	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const files = Array.from(e.target.files || []);
-		const remainingSlots = MAX_IMAGES - imagePreviews.length;
+		const remainingSlots = MAX_IMAGES - images.length;
 		const filesToAdd = files.slice(0, remainingSlots);
 
 		filesToAdd.forEach((file) => {
 			const reader = new FileReader();
 			reader.onload = (e) => {
-				const newPreview: ImagePreview = {
-					file,
+				const newImage: ImageItem = {
+					id: `new-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
 					preview: e.target?.result as string,
-					id: Math.random().toString(36).substr(2, 9),
+					file: file,
+					isExisting: false,
 				};
 
-				setImagePreviews((prev) => [...prev, newPreview]);
-				setFormData((prevForm) => ({
-					...prevForm,
-					images: [...prevForm.images, file],
-				}));
+				setImages((prev) => [...prev, newImage]);
 			};
 			reader.readAsDataURL(file);
 		});
@@ -95,24 +107,20 @@ export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProd
 	};
 
 	const removeImage = (indexToRemove: number) => {
-		setImagePreviews((prev) => prev.filter((_, index) => index !== indexToRemove));
-		setFormData((prev) => ({
-			...prev,
-			images: prev.images.filter((_, index) => index !== indexToRemove),
-		}));
+		setImages((prev) => prev.filter((_, index) => index !== indexToRemove));
 
 		// Adjust current index if necessary
-		if (currentImageIndex >= imagePreviews.length - 1) {
-			setCurrentImageIndex(Math.max(0, imagePreviews.length - 2));
+		if (currentImageIndex >= images.length - 1) {
+			setCurrentImageIndex(Math.max(0, images.length - 2));
 		}
 	};
 
 	const nextImage = () => {
-		setCurrentImageIndex((prev) => (prev + 1) % imagePreviews.length);
+		setCurrentImageIndex((prev) => (prev + 1) % images.length);
 	};
 
 	const prevImage = () => {
-		setCurrentImageIndex((prev) => (prev - 1 + imagePreviews.length) % imagePreviews.length);
+		setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
 	};
 
 	const validateForm = () => {
@@ -139,23 +147,52 @@ export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProd
 		const formDataObj = new FormData();
 		formDataObj.append('name', formData.name);
 		formDataObj.append('description', formData.description);
-		formDataObj.append('price', formData.price);
+		formDataObj.append('price', formData.price.toString());
 		formDataObj.append('category', formData.category.toString());
 		formDataObj.append('condition', formData.condition);
 		formDataObj.append('location', formData.location);
 
-		// Append all images
-		formData.images.forEach((image, index) => {
-			formDataObj.append('images', image);
+		// Handle images intelligently
+		const newFiles: File[] = [];
+		const existingImageUrls: string[] = [];
+
+		images.forEach((image) => {
+			if (image.isExisting && image.originalUrl) {
+				// Keep existing images by sending their URLs
+				existingImageUrls.push(image.originalUrl);
+			} else if (image.file) {
+				// Add new files to be uploaded
+				newFiles.push(image.file);
+			}
 		});
 
-		mutationFetcher<string>('product', {
-			method: 'POST',
+		// Append existing image URLs
+		existingImageUrls.forEach((url, index) => {
+			formDataObj.append(`existingImages[${index}]`, url);
+		});
+
+		// Append new image files
+		newFiles.forEach((file) => {
+			formDataObj.append('newImages', file);
+		});
+
+		// Or alternatively, you might want to send the image order
+		const imageOrder = images.map((image, index) => ({
+			index,
+			isExisting: image.isExisting,
+			url: image.originalUrl || null,
+			isNew: !image.isExisting,
+		}));
+		formDataObj.append('imageOrder', JSON.stringify(imageOrder));
+
+		mutationFetcher<string>(`product/${product.productId}`, {
+			// Note: assuming this is an edit, so include product ID
+			method: 'PUT', // or PATCH for updates
 			body: formDataObj,
 		})
 			.then((res) => {
 				if (res !== null) {
-					refreshProducts();
+					onSubmit();
 				}
 			})
 			.catch((error) => {
@@ -182,7 +219,7 @@ export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProd
 				<div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
 					{/* Header */}
 					<div className={`${primaryColor} px-6 py-4 flex items-center justify-between`}>
-						<h2 className="text-2xl font-bold text-white">Add New Product</h2>
+						<h2 className="text-2xl font-bold text-white">Edit Product</h2>
 						<button onClick={onClose} className="text-white hover:bg-white/20 rounded-full p-2 transition-colors duration-200 cursor-pointer">
 							<CloseIcon />
 						</button>
@@ -194,34 +231,34 @@ export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProd
 							{/* Image Upload Section */}
 							<div className="space-y-4">
 								<label className="block text-sm font-semibold text-gray-700">
-									Product Images ({imagePreviews.length}/{MAX_IMAGES})
+									Product Images ({images.length}/{MAX_IMAGES})
 								</label>
 
 								{/* Upload Button */}
 								<div className="flex items-center space-x-4">
 									<label className="relative cursor-pointer">
-										<input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" disabled={imagePreviews.length >= MAX_IMAGES} />
+										<input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" disabled={images.length >= MAX_IMAGES} />
 										<div
 											className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-												imagePreviews.length >= MAX_IMAGES ? 'bg-gray-400 cursor-not-allowed' : `${primaryColor} hover:shadow-lg transform hover:scale-105`
+												images.length >= MAX_IMAGES ? 'bg-gray-400 cursor-not-allowed' : `${primaryColor} hover:shadow-lg transform hover:scale-105`
 											} text-white`}>
 											<PhotoCameraIcon className="w-5 h-5" />
-											<span>{imagePreviews.length === 0 ? 'Upload Images' : 'Add More Images'}</span>
+											<span>{images.length === 0 ? 'Upload Images' : 'Add More Images'}</span>
 										</div>
 									</label>
-									{imagePreviews.length >= MAX_IMAGES && <span className="text-sm text-gray-500">Maximum {MAX_IMAGES} images allowed</span>}
+									{images.length >= MAX_IMAGES && <span className="text-sm text-gray-500">Maximum {MAX_IMAGES} images allowed</span>}
 								</div>
 
 								{/* Image Carousel */}
-								{imagePreviews.length > 0 && (
+								{images.length > 0 && (
 									<div className="bg-gray-50 rounded-2xl p-4">
 										{/* Main Image Display */}
 										<div className="relative mb-4">
 											<div className="relative w-full h-64 rounded-xl overflow-hidden bg-white shadow-lg">
-												<img src={imagePreviews[currentImageIndex]?.preview} alt={`Preview ${currentImageIndex + 1}`} className="w-full h-full object-contain" />
+												<img src={getImageUrl(images[currentImageIndex]?.preview)} alt={`Preview ${currentImageIndex + 1}`} className="w-full h-full object-contain" />
 
 												{/* Navigation Arrows */}
-												{imagePreviews.length > 1 && (
+												{images.length > 1 && (
 													<>
 														<button
 															onClick={prevImage}
@@ -238,41 +275,49 @@ export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProd
 
 												{/* Image Counter */}
 												<div className="absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded-lg text-sm">
-													{currentImageIndex + 1} / {imagePreviews.length}
+													{currentImageIndex + 1} / {images.length}
+												</div>
+
+												{/* Image Type Indicator */}
+												<div className="absolute top-2 right-2">
+													<span
+														className={`px-2 py-1 rounded-lg text-xs font-medium ${
+															images[currentImageIndex]?.isExisting ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'
+														}`}>
+														{images[currentImageIndex]?.isExisting ? 'Existing' : 'New'}
+													</span>
 												</div>
 											</div>
 										</div>
 
 										{/* Thumbnail Navigation */}
-										{imagePreviews.length > 0 && (
-											<div className="flex space-x-3 overflow-x-auto pb-2 p-4">
-												{imagePreviews.map((preview, index) => (
-													<div className="relative">
-														<button
-															key={preview.id}
-															onClick={() => setCurrentImageIndex(index)}
-															className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-																index === currentImageIndex ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200 hover:border-gray-400'
-															}`}>
-															<img src={preview.preview} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
-															{/* Remove button on thumbnail */}
-														</button>
-														<button
-															onClick={(e) => {
-																e.stopPropagation();
-																removeImage(index);
-															}}
-															className={`absolute -top-3 -right-3 w-6 h-6 ${primaryColor} text-white hover:shadow-lg transform hover:scale-105 transition-all duration-200 rounded-full p-2 transition-colors cursor-pointer flex items-center justify-center`}>
-															<CloseIcon />
-														</button>
-													</div>
-												))}
-											</div>
-										)}
+										<div className="flex space-x-3 overflow-x-auto pb-2 p-4">
+											{images.map((image, index) => (
+												<div key={image.id} className="relative">
+													<button
+														onClick={() => setCurrentImageIndex(index)}
+														className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+															index === currentImageIndex ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200 hover:border-gray-400'
+														}`}>
+														<img src={getImageUrl(image.preview)} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
+													</button>
+
+													<button
+														onClick={(e) => {
+															e.stopPropagation();
+															removeImage(index);
+														}}
+														className={`absolute -top-3 -right-3 w-6 h-6 ${primaryColor} text-white hover:shadow-lg transform hover:scale-105 transition-all duration-200 rounded-full p-2 transition-colors cursor-pointer flex items-center justify-center`}>
+														<CloseIcon />
+													</button>
+												</div>
+											))}
+										</div>
 									</div>
 								)}
 							</div>
 
+							{/* Rest of your form fields remain the same */}
 							{/* Product Name */}
 							<div className="space-y-3">
 								<label className="block text-sm font-semibold text-gray-700">
@@ -285,7 +330,6 @@ export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProd
 
 							{/* Price and Category Row */}
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								{/* Price */}
 								<div className="space-y-3">
 									<label className="block text-sm font-semibold text-gray-700">
 										Price <span className="text-red-500">*</span>
@@ -294,7 +338,7 @@ export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProd
 										<CustomInput
 											type="number"
 											name="price"
-											value={formData.price}
+											value={formData.price.toString()}
 											onChange={handleInputChange}
 											placeHolder="0.00"
 											step={'0.01'}
@@ -303,7 +347,6 @@ export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProd
 									</div>
 								</div>
 
-								{/* Category */}
 								<div className="space-y-3">
 									<label className="block text-sm font-semibold text-gray-700">
 										Category <span className="text-red-500">*</span>
@@ -323,7 +366,6 @@ export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProd
 
 							{/* Condition and Location Row */}
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								{/* Condition */}
 								<div className="space-y-3">
 									<label className="block text-sm font-semibold text-gray-700">
 										Condition <span className="text-red-500">*</span>
@@ -340,7 +382,6 @@ export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProd
 									</div>
 								</div>
 
-								{/* Location */}
 								<div className="space-y-3">
 									<label className="block text-sm font-semibold text-gray-700">
 										Location <span className="text-red-500">*</span>
@@ -383,7 +424,7 @@ export const AddProductModal: FC<EditProductModalProps> = ({onClose, refreshProd
 							{/* Action Buttons */}
 							<div className="flex items-center space-x-4 pt-4">
 								<CustomButton title="Cancel" color={deleteColor} textColor="text-white" fullLength={true} handleClick={() => onClose()} />
-								<CustomButton title="Create Product" color={primaryColor} textColor="text-white" fullLength={true} handleClick={() => handleSubmit()} />
+								<CustomButton title="Update Product" color={primaryColor} textColor="text-white" fullLength={true} handleClick={() => handleSubmit()} />
 							</div>
 						</div>
 					</div>
