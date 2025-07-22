@@ -128,7 +128,7 @@ export const EditProductModal: FC<EditProductModalProps> = ({onClose, onSubmit, 
 
 	const validateForm = () => {
 		const errors: Record<string, boolean> = {};
-		const requiredFields = ['name', 'description', 'price', 'category', 'condition', 'location'];
+		const requiredFields = ['name', 'description', 'price', 'category', 'condition', 'status', 'location'];
 
 		requiredFields.forEach((field) => {
 			if (!formData[field as keyof typeof formData] || formData[field as keyof typeof formData] === '') {
@@ -153,6 +153,7 @@ export const EditProductModal: FC<EditProductModalProps> = ({onClose, onSubmit, 
 		formDataObj.append('price', formData.price.toString());
 		formDataObj.append('category', formData.category.toString());
 		formDataObj.append('condition', formData.condition);
+		formDataObj.append('status', formData.status.toString());
 		formDataObj.append('location', formData.location);
 
 		// Handle images intelligently
@@ -186,11 +187,11 @@ export const EditProductModal: FC<EditProductModalProps> = ({onClose, onSubmit, 
 			url: image.originalUrl || null,
 			isNew: !image.isExisting,
 		}));
+
 		formDataObj.append('imageOrder', JSON.stringify(imageOrder));
 
 		mutationFetcher<string>(`product/${product.productId}`, {
-			// Note: assuming this is an edit, so include product ID
-			method: 'PUT', // or PATCH for updates
+			method: 'PUT',
 			body: formDataObj,
 		})
 			.then((res) => {

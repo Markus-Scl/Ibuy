@@ -1,6 +1,7 @@
 import {useMemo, useState, type FC} from 'react';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
+import ImageIcon from '@mui/icons-material/Image';
 import {AddProductModal} from './components/AddProductModal';
 import {useProducts} from '../../hooks/useProducts';
 import {statusClassMap} from './utils';
@@ -9,6 +10,7 @@ import {CustomButton} from '../../components/CustomButton';
 import {primaryColor} from '../../utils/theme';
 import {useCategoriesStore} from '../../stores/useCategoriesStore';
 import {useProductStatusesStore} from '../../stores/UseProductStatusesStore';
+import {getImageUrl} from '../productDetail/utils';
 
 export const ProductPage: FC = () => {
 	const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -100,7 +102,16 @@ export const ProductPage: FC = () => {
 						key={idx}
 						className={`card ${primaryColor} max-w-sm  h-100 shadow-sm hover:shadow-lg transform hover:scale-103 transition-all duration-200 cursor-pointer`}>
 						<figure className="h-1/2">
-							<img src={product.images.length > 0 ? `${import.meta.env.VITE_SERVER_API}${product.images[0]}` : '/placeholder-image.png'} alt="Product Image" />
+							{product.images.length > 0 ? (
+								<img src={getImageUrl(product.images[0])} alt="Product Image" />
+							) : (
+								<div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+									<div className="text-center space-y-4">
+										<ImageIcon className="mx-auto text-gray-400" sx={{fontSize: '80px'}} />
+										<p className="text-gray-500 font-medium">No Image Available</p>
+									</div>
+								</div>
+							)}
 						</figure>
 						<div className="card-body h-1/2">
 							<h2 className="card-title flex justify-between items-center">
