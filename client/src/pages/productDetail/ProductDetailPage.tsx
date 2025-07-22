@@ -12,13 +12,13 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ImageIcon from '@mui/icons-material/Image';
 import type {ProductResponse} from '../product/types';
 import {fetcher, mutationFetcher} from '../../utils/fetcher';
-import {useCategories} from '../../hooks/useCategories';
-import {useProductStatuses} from '../../hooks/useProductStatuses';
 import {statusClassMap} from '../product/utils';
 import {useAuthStore} from '../../stores/useAuthStore';
 import {DeleteModal} from '../../components/DeleteModal';
 import {CustomButton} from '../../components/CustomButton';
 import {deleteColor, primaryColor} from '../../utils/theme';
+import {useCategoriesStore} from '../../stores/useCategoriesStore';
+import {useProductStatusesStore} from '../../stores/UseProductStatusesStore';
 
 export const ProductDetailPage: FC = () => {
 	const {productId} = useParams();
@@ -27,9 +27,9 @@ export const ProductDetailPage: FC = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
 	const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
-	const {categories} = useCategories();
-	const {productStatuses} = useProductStatuses();
+	const {productStatuses} = useProductStatusesStore();
 	const {user} = useAuthStore();
+	const {categories} = useCategoriesStore();
 
 	useEffect(() => {
 		if (!productId) return;

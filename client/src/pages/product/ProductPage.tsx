@@ -3,18 +3,19 @@ import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
 import {AddProductModal} from './components/AddProductModal';
 import {useProducts} from '../../hooks/useProducts';
-import {useCategories} from '../../hooks/useCategories';
-import {useProductStatuses} from '../../hooks/useProductStatuses';
 import {statusClassMap} from './utils';
 import {useNavigate} from 'react-router-dom';
 import {CustomButton} from '../../components/CustomButton';
 import {primaryColor} from '../../utils/theme';
+import {useCategoriesStore} from '../../stores/useCategoriesStore';
+import {useProductStatusesStore} from '../../stores/UseProductStatusesStore';
 
 export const ProductPage: FC = () => {
 	const [modalOpen, setModalOpen] = useState<boolean>(false);
 	const {products, productsLoading, refreshProducts} = useProducts();
-	const {categories, categoriesLoading} = useCategories();
-	const {productStatuses, statusesLoading} = useProductStatuses();
+	const {productStatuses} = useProductStatusesStore();
+
+	const {categories} = useCategoriesStore();
 
 	const sortedProducts = useMemo(() => {
 		return [...products].sort((a, b) => a.name.localeCompare(b.name));
@@ -34,7 +35,7 @@ export const ProductPage: FC = () => {
 		);
 	}
 
-	if (productsLoading || categoriesLoading || statusesLoading) {
+	if (productsLoading) {
 		return (
 			<div className="w-full h-full flex flex-col justify-center items-center p-8">
 				<span className="loading loading-spinner loading-sm mr-2 loading-xl text-primary"></span>
