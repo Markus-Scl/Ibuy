@@ -98,7 +98,15 @@ export const LoginPage: React.FC = () => {
 									<span className="label-text font-medium text-gray-700">Email Address</span>
 								</label>
 								<div className={fieldErrors.email ? 'border-2 border-red-500 rounded-lg' : ''}>
-									<CustomInput type="email" name="email" value={formData.email} onChange={handleInputChange} placeHolder="Enter your email" icon={<EmailOutlinedIcon />} />
+									<CustomInput
+										type="email"
+										name="email"
+										value={formData.email}
+										onChange={handleInputChange}
+										onEnter={handleSubmit}
+										placeHolder="Enter your email"
+										icon={<EmailOutlinedIcon />}
+									/>
 								</div>
 								{fieldErrors.email && (
 									<label className="label">
@@ -118,6 +126,7 @@ export const LoginPage: React.FC = () => {
 										name="password"
 										value={formData.password}
 										onChange={handleInputChange}
+										onEnter={handleSubmit}
 										placeHolder="Enter your password"
 										icon={<VpnKeyOutlinedIcon />}
 									/>

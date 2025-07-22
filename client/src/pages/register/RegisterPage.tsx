@@ -132,6 +132,7 @@ export const RegisterPage: FC = () => {
 											name="firstName"
 											value={formData.firstName}
 											onChange={handleInputChange}
+											onEnter={handleSubmit}
 											placeHolder="Enter first name"
 											icon={<PersonOutlineOutlinedIcon />}
 										/>
@@ -153,6 +154,7 @@ export const RegisterPage: FC = () => {
 											name="lastName"
 											value={formData.lastName}
 											onChange={handleInputChange}
+											onEnter={handleSubmit}
 											placeHolder="Enter last name"
 											icon={<PersonOutlineOutlinedIcon />}
 										/>
@@ -171,7 +173,15 @@ export const RegisterPage: FC = () => {
 									<span className="label-text font-medium text-gray-700">Email Address</span>
 								</label>
 								<div className={fieldErrors.email ? 'border-2 border-red-500 rounded-lg' : ''}>
-									<CustomInput type="email" name="email" value={formData.email} onChange={handleInputChange} placeHolder="Enter your email" icon={<EmailOutlinedIcon />} />
+									<CustomInput
+										type="email"
+										name="email"
+										value={formData.email}
+										onChange={handleInputChange}
+										onEnter={handleSubmit}
+										placeHolder="Enter your email"
+										icon={<EmailOutlinedIcon />}
+									/>
 								</div>
 								{fieldErrors.email && (
 									<label className="label">
@@ -191,6 +201,7 @@ export const RegisterPage: FC = () => {
 										name="password"
 										value={formData.password}
 										onChange={handleInputChange}
+										onEnter={handleSubmit}
 										placeHolder="Create a password"
 										icon={<VpnKeyOutlinedIcon />}
 									/>
@@ -242,6 +253,7 @@ export const RegisterPage: FC = () => {
 										name="confirmPassword"
 										value={formData.confirmPassword}
 										onChange={handleInputChange}
+										onEnter={handleSubmit}
 										placeHolder="Confirm your password"
 										icon={<VpnKeyOutlinedIcon />}
 									/>
