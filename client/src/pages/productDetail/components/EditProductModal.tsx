@@ -18,6 +18,8 @@ import {conditions} from '../../product/utils';
 import {useCategoriesStore} from '../../../stores/useCategoriesStore';
 import type {ProductResponse} from '../../product/types';
 import {getImageUrl} from '../utils';
+import {useProductStatusesStore} from '../../../stores/UseProductStatusesStore';
+import OutlinedFlagOutlinedIcon from '@mui/icons-material/OutlinedFlagOutlined';
 
 interface EditProductModalProps {
 	product: ProductResponse;
@@ -53,6 +55,7 @@ export const EditProductModal: FC<EditProductModalProps> = ({onClose, onSubmit, 
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const {categories} = useCategoriesStore();
+	const {productStatuses} = useProductStatusesStore();
 
 	const MAX_IMAGES = 5;
 
@@ -373,7 +376,7 @@ export const EditProductModal: FC<EditProductModalProps> = ({onClose, onSubmit, 
 							</div>
 
 							{/* Condition and Location Row */}
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-2">
 								<div className="space-y-3">
 									<label className="block text-sm font-semibold text-gray-700">
 										Condition <span className="text-red-500">*</span>
@@ -386,6 +389,22 @@ export const EditProductModal: FC<EditProductModalProps> = ({onClose, onSubmit, 
 											options={conditions}
 											placeholder="Select condition"
 											icon={<PlaylistAddCheckOutlinedIcon className="w-5 h-5" />}
+										/>
+									</div>
+								</div>
+
+								<div className="space-y-3">
+									<label className="block text-sm font-semibold text-gray-700">
+										Status <span className="text-red-500">*</span>
+									</label>
+									<div className={validationErrors.status ? 'border-2 border-red-500 rounded-xl' : ''}>
+										<CustomSelect
+											name="status"
+											value={formData.status}
+											onChange={handleInputChange}
+											options={productStatuses ? productStatuses : []}
+											placeholder="Select status"
+											icon={<OutlinedFlagOutlinedIcon className="w-5 h-5" />}
 										/>
 									</div>
 								</div>
