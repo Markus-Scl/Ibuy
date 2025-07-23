@@ -143,3 +143,44 @@ func LoginUser(w http.ResponseWriter, r *http.Request){
 	}
 
 }
+
+func LogoutUser(w http.ResponseWriter, r *http.Request) {
+    // Get user ID from context
+    userContext, ok := r.Context().Value("userContext").(UserContext)
+    if !ok {
+        // Clear cookie even if context is missing to ensure logout
+        http.SetCookie(w, &http.Cookie{
+            Name:     "access_token",
+            Value:    "",
+            HttpOnly: true,
+            Secure:   true,
+            SameSite: http.SameSiteStrictMode,
+            Path:     "/",
+            MaxAge:   -1,
+            Expires:  time.Now().Add(-24 * time.Hour),
+        })
+        w.WriteHeader(http.StatusOK)
+        return
+    }
+
+    // Clear the access_token cookie
+    http.SetCookie(w, &http.Cookie{
+        Name:     "access_token",
+        Value:    "",
+        HttpOnly: true,
+        Secure:   true,
+        SameSite: http.SameSiteStrictMode,
+        Path:     "/",
+        MaxAge:   -1,
+        Expires:  time.Now().Add(-24 * time.Hour),
+    })
+
+    // Delete the refresh token from the database
+    err := crypto.DeleteRefreshToken(userContext.UserId)
+    if err != nil {
+        http.Error(w, "Failed to invalidate refresh token", http.StatusInternalServerError)
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
+}

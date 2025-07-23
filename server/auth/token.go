@@ -124,4 +124,13 @@ func GetRefreshToken(userId string) (string, time.Time, error) {
     return token, expiry, nil
 }
 
+func DeleteRefreshToken(userId string) error {
+    _, err := db.DB.Exec(
+        `UPDATE web_user 
+         SET refresh_token = NULL, refresh_token_expiry = NULL 
+         WHERE u_id = $1`,
+        userId,
+    )
+    return err
+}
 

@@ -50,6 +50,7 @@ func main() {
 	//User handling
 	mux.Handle("POST /register", routeHandler.AddUser)
 	mux.Handle("POST /login", routeHandler.LoginUser)
+	mux.Handle("PUT /logout", routeHandler.LogoutUser)
 	mux.Handle("GET /auth/session", routeHandler.CheckAuth)
 
 	//Products

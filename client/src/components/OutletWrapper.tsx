@@ -5,6 +5,7 @@ import {SideNavbar} from './SideNavBar';
 import {useCategoriesStore} from '../stores/useCategoriesStore';
 import {fetcher} from '../utils/fetcher';
 import {useProductStatusesStore} from '../stores/UseProductStatusesStore';
+import {initAuth} from '../auth/initAuth';
 
 interface OutletWrapperProps {
 	children: ReactNode;
@@ -14,6 +15,7 @@ export const OutletWrapper: FC<OutletWrapperProps> = ({children}) => {
 
 	useEffect(() => {
 		const fetchData = async () => {
+			await initAuth();
 			try {
 				setIsLoading(true);
 
