@@ -28,8 +28,6 @@ services:
         container_name: ibuy-server
         ports:
             - '8080:8080'
-        env_file:
-            - ./server/.env
         environment:
             - DATABASE_URL=postgres://user:password@db:5432/myapp?sslmode=disable
             - DB_USER=user
@@ -54,8 +52,6 @@ services:
         container_name: ibuy-client
         ports:
             - '3000:80'
-        env_file:
-            - ./client/.env
         environment:
             - VITE_SERVER_API=http://localhost:8080/
         volumes:
