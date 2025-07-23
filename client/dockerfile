@@ -12,6 +12,9 @@ RUN npm install -g serve
 # Copy source code
 COPY . .
 
+ARG VITE_SERVER_API
+ENV VITE_SERVER_API=$VITE_SERVER_API
+
 # Build the app
 RUN npm run build
 
