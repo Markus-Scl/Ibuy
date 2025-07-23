@@ -87,7 +87,13 @@ git clone https://github.com/Markus-Scl/Ibuy.git
 cd ibuy
 ```
 
-### 2️⃣ Environment Configuration
+### 2️⃣ To simply run the application
+
+```bash
+docker compose up -d
+```
+
+### 2️⃣ To run application for development: Environment Configuration
 
 <details>
 <summary><strong>📱 Client Configuration</strong></summary>
