@@ -93,6 +93,8 @@ cd ibuy
 docker compose up -d
 ```
 
+Access the app in your browser: http://localhost:3000
+
 ### 2️⃣ To run application for development: Environment Configuration
 
 <details>
