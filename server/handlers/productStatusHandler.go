@@ -6,13 +6,13 @@ import (
 	"net/http"
 )
 
-
 func GetProductStatuses(w http.ResponseWriter, r *http.Request) {
 	query := `SELECT id, name FROM product_status`
 
 	rows, err := db.DB.Query(query)
 	if err != nil {
-		http.Error(w, "Failed to get product statuses", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to get product statuses"})
 		return
 	}
 	defer rows.Close()
@@ -24,7 +24,8 @@ func GetProductStatuses(w http.ResponseWriter, r *http.Request) {
 		var name string
 
 		if err := rows.Scan(&id, &name); err != nil {
-			http.Error(w, "Failed to scan product statuses", http.StatusInternalServerError)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to scan product statuses"})
 			return
 		}
 
@@ -32,15 +33,16 @@ func GetProductStatuses(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := rows.Err(); err != nil {
-		http.Error(w, "Error iterating product statuses", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Error iterating product statuses"})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(categoryMap); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to encode response"})
 		return
 	}
 }

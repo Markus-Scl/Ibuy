@@ -95,48 +95,54 @@ func AddUser(w http.ResponseWriter, r *http.Request){
 	}
 }
 
-func LoginUser(w http.ResponseWriter, r *http.Request){
+func LoginUser(w http.ResponseWriter, r *http.Request) {
 	var credentials LoginCredentials
 	var dbu DbUserResponse
 
 	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request body"})
 		return
 	}
 
 	err := db.DB.QueryRow(
 		"SELECT u_id, first_name, last_name, email, created, password FROM web_user WHERE email = $1", credentials.Email,
-		).Scan(&dbu.U_Id, &dbu.FirstName, &dbu.LastName, &dbu.Email, &dbu.Created, &dbu.Password)
+	).Scan(&dbu.U_Id, &dbu.FirstName, &dbu.LastName, &dbu.Email, &dbu.Created, &dbu.Password)
 
-	if err != nil{
-		http.Error(w, "Failed to Login User", http.StatusUnauthorized)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to Login User"})
 		return
 	}
 
-	if !crypto.CheckPasswordHash(credentials.Password, dbu.Password){
-		http.Error(w, "Failed to Login User", http.StatusUnauthorized)
+	if !crypto.CheckPasswordHash(credentials.Password, dbu.Password) {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to Login User"})
 		return
 	}
+
 	config := crypto.NewTokenConfig()
 	accessToken, refreshToken, err := crypto.GenerateTokens(dbu.U_Id, dbu.Email, dbu.FirstName, dbu.LastName, config)
 
 	if err != nil {
-		http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to generate tokens"})
 		return
 	}
 
 	// Store refresh token
 	err = crypto.StoreRefreshToken(dbu.U_Id, refreshToken, time.Now().Add(config.RefreshTokenExpiry))
 	if err != nil {
-		http.Error(w, "Failed to store refresh token", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to store refresh token"})
 		return
 	}
 
 	response := UserResponse{
-		U_Id:     dbu.U_Id,
-		FirstName:     dbu.FirstName,
-		LastName: dbu.LastName,
-		Email:    dbu.Email,
+		U_Id:      dbu.U_Id,
+		FirstName: dbu.FirstName,
+		LastName:  dbu.LastName,
+		Email:     dbu.Email,
 	}
 
 	http.SetCookie(w, &http.Cookie{
@@ -151,49 +157,50 @@ func LoginUser(w http.ResponseWriter, r *http.Request){
 
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to encode response"})
 		return
 	}
-
 }
 
 func LogoutUser(w http.ResponseWriter, r *http.Request) {
-    // Get user ID from context
-    userContext, ok := r.Context().Value("userContext").(UserContext)
-    if !ok {
-        // Clear cookie even if context is missing to ensure logout
-        http.SetCookie(w, &http.Cookie{
-            Name:     "access_token",
-            Value:    "",
-            HttpOnly: true,
-            Secure:   true,
-            SameSite: http.SameSiteStrictMode,
-            Path:     "/",
-            MaxAge:   -1,
-            Expires:  time.Now().Add(-24 * time.Hour),
-        })
-        w.WriteHeader(http.StatusOK)
-        return
-    }
+	// Get user ID from context
+	userContext, ok := r.Context().Value("userContext").(UserContext)
+	if !ok {
+		// Clear cookie even if context is missing to ensure logout
+		http.SetCookie(w, &http.Cookie{
+			Name:     "access_token",
+			Value:    "",
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteStrictMode,
+			Path:     "/",
+			MaxAge:   -1,
+			Expires:  time.Now().Add(-24 * time.Hour),
+		})
+		w.WriteHeader(http.StatusOK)
+		return
+	}
 
-    // Clear the access_token cookie
-    http.SetCookie(w, &http.Cookie{
-        Name:     "access_token",
-        Value:    "",
-        HttpOnly: true,
-        Secure:   true,
-        SameSite: http.SameSiteStrictMode,
-        Path:     "/",
-        MaxAge:   -1,
-        Expires:  time.Now().Add(-24 * time.Hour),
-    })
+	// Clear the access_token cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+		MaxAge:   -1,
+		Expires:  time.Now().Add(-24 * time.Hour),
+	})
 
-    // Delete the refresh token from the database
-    err := crypto.DeleteRefreshToken(userContext.UserId)
-    if err != nil {
-        http.Error(w, "Failed to invalidate refresh token", http.StatusInternalServerError)
-        return
-    }
+	// Delete the refresh token from the database
+	err := crypto.DeleteRefreshToken(userContext.UserId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to invalidate refresh token"})
+		return
+	}
 
-    w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusOK)
 }

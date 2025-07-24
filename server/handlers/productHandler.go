@@ -50,7 +50,8 @@ type ProductResponse struct {
 func AddProduct(w http.ResponseWriter, r *http.Request) {
     userContext, ok := r.Context().Value("userContext").(UserContext)
     if !ok {
-        http.Error(w, "No user context found", http.StatusUnauthorized)
+        w.WriteHeader(http.StatusUnauthorized)
+        json.NewEncoder(w).Encode(map[string]string{"error": "No user context found"})
         return
     }
     var userId = userContext.UserId
@@ -58,7 +59,8 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
     // Parse multipart form instead of JSON
     err := r.ParseMultipartForm(32 << 20) // 32MB max
     if err != nil {
-        http.Error(w, "Invalid request body", http.StatusBadRequest)
+        w.WriteHeader(http.StatusBadRequest)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request body"})
         return
     }
 
@@ -75,7 +77,8 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
         if p, err := strconv.ParseFloat(price, 32); err == nil {
             newProduct.Price = float32(p)
         } else {
-            http.Error(w, "Invalid price value", http.StatusBadRequest)
+            w.WriteHeader(http.StatusBadRequest)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Invalid price value"})
             return
         }
     }
@@ -84,7 +87,8 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
         if c, err := strconv.Atoi(category); err == nil {
             newProduct.Category = c
         } else {
-            http.Error(w, "Invalid category value", http.StatusBadRequest)
+            w.WriteHeader(http.StatusBadRequest)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Invalid category value"})
             return
         }
     }
@@ -97,14 +101,16 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
     ).Scan(&productId)
 
     if err != nil {
-        http.Error(w, "Failed to create product", http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to create product"})
         return
     }
 
     // Now handle image upload - the form is already parsed
     imagePaths, err := UploadImageHandler(r, userId, productId)
     if err != nil {
-        http.Error(w, "Failed to save images", http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to save images"})
         return
     }
 
@@ -121,7 +127,8 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
         query := "INSERT INTO product_image (product_id, image_path) SELECT $1, UNNEST($2::text[])"
         _, err := db.DB.Exec(query, productId, pq.Array(urlPaths))
         if err != nil {
-            http.Error(w, "Failed to save product images", http.StatusInternalServerError)
+            w.WriteHeader(http.StatusInternalServerError)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Failed to save product images"})
             return
         }
     }
@@ -141,7 +148,8 @@ func AddProduct(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusCreated)
 
     if err := json.NewEncoder(w).Encode(productResponse); err != nil {
-        http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to encode response"})
         return
     }
 }
@@ -150,13 +158,15 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request){
     productId := r.URL.Query().Get("id")
 
     if productId == "" {
-        http.Error(w, "Invalid product URL", http.StatusBadRequest)
+        w.WriteHeader(http.StatusBadRequest)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Invalid product URL"})
         return
     }
 
     userContext, ok := r.Context().Value("userContext").(UserContext)
     if !ok {
-        http.Error(w, "No user context found", http.StatusUnauthorized)
+        w.WriteHeader(http.StatusUnauthorized)
+        json.NewEncoder(w).Encode(map[string]string{"error": "No user context found"})
         return
     }
 
@@ -165,7 +175,8 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request){
     // Parse multipart form instead of JSON
     err := r.ParseMultipartForm(32 << 20) // 32MB max
     if err != nil {
-        http.Error(w, "Invalid request body", http.StatusBadRequest)
+        w.WriteHeader(http.StatusBadRequest)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request body"})
         return
     }
 
@@ -182,7 +193,8 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request){
         if p, err := strconv.ParseFloat(price, 32); err == nil {
             updateProduct.Price = float32(p)
         } else {
-            http.Error(w, "Invalid price value", http.StatusBadRequest)
+            w.WriteHeader(http.StatusBadRequest)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Invalid price value"})
             return
         }
     }
@@ -191,7 +203,8 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request){
         if c, err := strconv.Atoi(category); err == nil {
             updateProduct.Category = c
         } else {
-            http.Error(w, "Invalid category value", http.StatusBadRequest)
+            w.WriteHeader(http.StatusBadRequest)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Invalid category value"})
             return
         }
     }
@@ -200,7 +213,8 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request){
         if s, err := strconv.Atoi(status); err == nil {
             updateProduct.Status = s
         } else {
-            http.Error(w, "Invalid status value", http.StatusBadRequest)
+            w.WriteHeader(http.StatusBadRequest)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Invalid status value"})
             return
         }
     }
@@ -209,7 +223,8 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request){
     if deletedImagesStr := r.FormValue("deletedImages"); deletedImagesStr != "" {
         err := json.Unmarshal([]byte(deletedImagesStr), &updateProduct.DeletedImages)
         if err != nil {
-            http.Error(w, "Invalid deletedImages format", http.StatusBadRequest)
+            w.WriteHeader(http.StatusBadRequest)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Invalid deletedImages format"})
             return
         }
     }
@@ -224,20 +239,20 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request){
         updateProduct.Location, productId, userId,
     )
 
-
     if err != nil {
         log.Printf("In the if [%s]", err)
-        http.Error(w, "Failed to update product", http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to update product"})
         return
     }
 
-    
     // Handle deleted images
     if len(updateProduct.DeletedImages) > 0 {
         // Delete image files from filesystem
         err = DeleteImageFiles(updateProduct.DeletedImages)
         if err != nil {
-            http.Error(w, "Failed to delete image files", http.StatusInternalServerError)
+            w.WriteHeader(http.StatusInternalServerError)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Failed to delete image files"})
             return
         }
 
@@ -245,7 +260,8 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request){
         query := "DELETE FROM product_image WHERE product_id = $1 AND image_path = ANY($2)"
         _, err = db.DB.Exec(query, productId, pq.Array(updateProduct.DeletedImages))
         if err != nil {
-            http.Error(w, "Failed to delete product images from database", http.StatusInternalServerError)
+            w.WriteHeader(http.StatusInternalServerError)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Failed to delete product images from database"})
             return
         }
     }
@@ -254,7 +270,8 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request){
     var newImagePaths []string
     imagePaths, err := UploadImageHandler(r, userId, productId)
     if err != nil {
-        http.Error(w, "Failed to save new images", http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to save new images"})
         return
     }
 
@@ -269,7 +286,8 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request){
         query := "INSERT INTO product_image (product_id, image_path) SELECT $1, UNNEST($2::text[])"
         _, err := db.DB.Exec(query, productId, pq.Array(newImagePaths))
         if err != nil {
-            http.Error(w, "Failed to save new product images", http.StatusInternalServerError)
+            w.WriteHeader(http.StatusInternalServerError)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Failed to save new product images"})
             return
         }
     }
@@ -278,7 +296,8 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request){
     var allImagePaths []string
     rows, err := db.DB.Query("SELECT image_path FROM product_image WHERE product_id = $1", productId)
     if err != nil {
-        http.Error(w, "Failed to retrieve updated product images", http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to retrieve updated product images"})
         return
     }
     defer rows.Close()
@@ -307,7 +326,8 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request){
     w.WriteHeader(http.StatusOK)
 
     if err := json.NewEncoder(w).Encode(productResponse); err != nil {
-        http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to encode response"})
         return
     }
 }
@@ -317,7 +337,8 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
     parts := strings.Split(path, "/")
 
     if len(parts) != 3 || parts[1] != "product" || parts[2] == "" {
-        http.Error(w, "Invalid product URL", http.StatusBadRequest)
+        w.WriteHeader(http.StatusBadRequest)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Invalid product URL"})
         return
     }
 
@@ -361,10 +382,12 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
 
     if err != nil {
         if err == sql.ErrNoRows {
-            http.Error(w, "Product not found", http.StatusNotFound)
+            w.WriteHeader(http.StatusNotFound)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Product not found"})
             return
         }
-        http.Error(w, "Failed to get product", http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to get product"})
         return
     }
 
@@ -375,11 +398,11 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
         product.Images = []string{}
     }
 
-    w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(http.StatusOK)
 
     if err := json.NewEncoder(w).Encode(product); err != nil {
-        http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to encode response"})
         return
     }
 }
@@ -387,7 +410,8 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
 func GetUserProducts(w http.ResponseWriter, r *http.Request) {
     userContext, ok := r.Context().Value("userContext").(UserContext)
     if !ok {
-        http.Error(w, "No user context found", http.StatusUnauthorized)
+        w.WriteHeader(http.StatusUnauthorized)
+        json.NewEncoder(w).Encode(map[string]string{"error": "No user context found"})
         return
     }
     var userId = userContext.UserId
@@ -410,7 +434,8 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request) {
 
     rows, err := db.DB.Query(query, userId)
     if err != nil {
-        http.Error(w, "Failed to get products", http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to get products"})
         return
     }
     defer rows.Close()
@@ -437,7 +462,8 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request) {
             &imagePath,
         )
         if err != nil {
-            http.Error(w, "Failed to get all product info", http.StatusInternalServerError)
+            w.WriteHeader(http.StatusInternalServerError)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Failed to get all product info"})
             return
         }
 
@@ -464,7 +490,8 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request) {
     }
 
     if err = rows.Err(); err != nil {
-        http.Error(w, "Failed to read product images", http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to read product images"})
         return
     }
 
@@ -477,23 +504,25 @@ func GetUserProducts(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusOK)
 
     if err := json.NewEncoder(w).Encode(products); err != nil {
-        http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to encode response"})
         return
     }
 }
-
 
 func DeleteProductById(w http.ResponseWriter, r *http.Request){
     productId := r.URL.Query().Get("id")
 
     if productId == "" {
-        http.Error(w, "Invalid product URL", http.StatusBadRequest)
+        w.WriteHeader(http.StatusBadRequest)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Invalid product URL"})
         return
     }
 
     userContext, ok := r.Context().Value("userContext").(UserContext)
     if !ok {
-        http.Error(w, "No user context found", http.StatusUnauthorized)
+        w.WriteHeader(http.StatusUnauthorized)
+        json.NewEncoder(w).Encode(map[string]string{"error": "No user context found"})
         return
     }
 
@@ -518,15 +547,18 @@ func DeleteProductById(w http.ResponseWriter, r *http.Request){
 
     if err != nil {
         if err == sql.ErrNoRows {
-            http.Error(w, "Product not found", http.StatusNotFound)
+            w.WriteHeader(http.StatusNotFound)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Product not found"})
             return
         }
-        http.Error(w, "Failed to delete product", http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to delete product"})
         return
     }
 
     if productUserId != userId {
-        http.Error(w, "Not Authorized", http.StatusForbidden)
+        w.WriteHeader(http.StatusForbidden)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Not Authorized"})
         return
     }
 
@@ -542,17 +574,19 @@ func DeleteProductById(w http.ResponseWriter, r *http.Request){
     if len(imagePaths) > 0 {
         err = DeleteImageFiles(imagePaths)
         if err != nil {
-            http.Error(w, "Failed to delete images", http.StatusInternalServerError)
+            w.WriteHeader(http.StatusInternalServerError)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Failed to delete images"})
             return
         }
     }
 
     _, err = db.DB.Exec("DELETE FROM product WHERE p_id = $1", productId)
     if err != nil {
-        http.Error(w, "Failed to delete product from database", http.StatusInternalServerError)
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to delete product from database"})
         return
     }
 
     w.WriteHeader(http.StatusOK)
-    w.Write([]byte(`{"message": "Product deleted successfully"}`))
+    json.NewEncoder(w).Encode(map[string]string{"message": "Product deleted successfully"})
 }
