@@ -5,6 +5,7 @@ import (
 	crypto "ibuy-server/auth"
 	"ibuy-server/db"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -43,12 +44,13 @@ type UserContext struct {
 	Email    string `json:"email"`
 }
 
+
 func AddUser(w http.ResponseWriter, r *http.Request){
 	var newUser RegisterUser
 
-
 	if err := json.NewDecoder(r.Body).Decode(&newUser); err != nil{
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request body"})
 		return
 	}
 
@@ -56,7 +58,9 @@ func AddUser(w http.ResponseWriter, r *http.Request){
 	
 	hashedPassword, err := crypto.HashPassword(newUser.Password)
 	if err != nil {
-		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to hash password"})
 		return
 	}
 
@@ -67,19 +71,28 @@ func AddUser(w http.ResponseWriter, r *http.Request){
 		newUser.FirstName, newUser.LastName, newUser.Email, hashedPassword,
 	).Scan(&userId)
 
-
 	if err != nil {
-		http.Error(w, "Failed to register user", http.StatusInternalServerError)
+		// Check if it's a unique constraint violation on email
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") && 
+		   strings.Contains(err.Error(), "email") {
+
+			w.WriteHeader(http.StatusConflict)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Email already exists"})
+			return
+		}
+
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to register user"})
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
 	
-	if err := json.NewEncoder(w).Encode(userId); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	if err := json.NewEncoder(w).Encode(map[string]string{"userId": userId}); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to encode response"})
 		return
 	}
-
 }
 
 func LoginUser(w http.ResponseWriter, r *http.Request){

@@ -40,10 +40,8 @@ export const fetcher = async <T>(url: string): Promise<T> => {
 			}
 
 			// Handle other HTTP errors
-			const errorData = await response.json().catch(() => ({
-				message: 'An error occurred',
-			}));
-			throw new Error(errorData.message || `HTTP ${response.status}`);
+			const errorData = await response.json();
+			throw new Error(errorData.error || `HTTP ${response.status}`);
 		}
 
 		return response.json();
@@ -111,10 +109,9 @@ export const mutationFetcher = async <T>(
 				throw new AuthError('Authentication failed', 401);
 			}
 
-			const errorData = await response.json().catch((err) => ({
-				message: err,
-			}));
-			throw new Error(errorData.message || `HTTP ${response.status}`);
+			const errorData = await response.json();
+
+			throw new Error(errorData.error || `HTTP ${response.status}`);
 		}
 
 		return response.json();

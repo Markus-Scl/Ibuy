@@ -20,6 +20,7 @@ export const RegisterPage: FC = () => {
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [passwordMatch, setPasswordMatch] = useState(true);
+	const [userExists, setUserExists] = useState<boolean>(false);
 	const [fieldErrors, setFieldErrors] = useState({
 		firstName: false,
 		lastName: false,
@@ -92,12 +93,14 @@ export const RegisterPage: FC = () => {
 		})
 			.then((res) => {
 				if (res !== null) {
+					setUserExists(false);
 					navigate('/login');
 				}
 			})
 			.catch((error) => {
-				console.error('Error details:', error);
-				console.error('Error message:', error.message);
+				if (error.message === 'Email already exists') {
+					setUserExists(true);
+				}
 			})
 			.finally(() => {
 				setIsLoading(false);
@@ -118,6 +121,14 @@ export const RegisterPage: FC = () => {
 
 				{/* Register Card */}
 				<div className="card bg-white shadow-2xl border-0">
+					{userExists && (
+						<div role="alert" className="alert alert-error">
+							<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+							</svg>
+							<span>User already exists.</span>
+						</div>
+					)}
 					<div className="card-body p-8">
 						<div className="space-y-6">
 							{/* Name Fields Row */}
