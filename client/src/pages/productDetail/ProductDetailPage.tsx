@@ -21,6 +21,7 @@ import {useCategoriesStore} from '../../stores/useCategoriesStore';
 import {useProductStatusesStore} from '../../stores/UseProductStatusesStore';
 import {EditProductModal} from './components/EditProductModal';
 import {getImageUrl} from './utils';
+import {toast} from '../../components/Toast/utils';
 
 export const ProductDetailPage: FC = () => {
 	const {productId} = useParams();
@@ -56,10 +57,12 @@ export const ProductDetailPage: FC = () => {
 		setIsLoading(true);
 		mutationFetcher(`product?id=${product?.productId}`, {method: 'DELETE', body: {}})
 			.then(() => {
+				toast.success('Successfully deleted product');
 				navigate('/products');
 				setProduct(null);
 			})
 			.catch((e) => {
+				toast.error('Failed to delete product');
 				console.error(e);
 			})
 			.finally(() => setIsLoading(false));

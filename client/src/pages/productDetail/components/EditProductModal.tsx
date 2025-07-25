@@ -20,6 +20,7 @@ import type {ProductResponse} from '../../product/types';
 import {getImageUrl} from '../utils';
 import {useProductStatusesStore} from '../../../stores/UseProductStatusesStore';
 import OutlinedFlagOutlinedIcon from '@mui/icons-material/OutlinedFlagOutlined';
+import {toast} from '../../../components/Toast/utils';
 
 interface EditProductModalProps {
 	product: ProductResponse;
@@ -192,10 +193,12 @@ export const EditProductModal: FC<EditProductModalProps> = ({onClose, setUpdated
 		})
 			.then((res) => {
 				if (res !== null) {
+					toast.success('Product update successful');
 					setUpdatedProduct(res);
 				}
 			})
 			.catch((error) => {
+				toast.error('Failed to update product');
 				console.error('Error details:', error);
 				console.error('Error message:', error.message);
 			})

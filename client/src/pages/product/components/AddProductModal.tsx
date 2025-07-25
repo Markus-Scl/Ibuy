@@ -16,6 +16,7 @@ import {mutationFetcher} from '../../../utils/fetcher';
 import {CustomButton} from '../../../components/CustomButton';
 import {deleteColor, primaryColor} from '../../../utils/theme';
 import {useCategoriesStore} from '../../../stores/useCategoriesStore';
+import {toast} from '../../../components/Toast/utils';
 
 interface AddProductModalProps {
 	onClose: () => void;
@@ -152,10 +153,12 @@ export const AddProductModal: FC<AddProductModalProps> = ({onClose, refreshProdu
 		})
 			.then((res) => {
 				if (res !== null) {
+					toast.success('Successfully added product');
 					refreshProducts();
 				}
 			})
 			.catch((error) => {
+				toast.error('Failed to add product');
 				console.error('Error details:', error);
 				console.error('Error message:', error.message);
 			})

@@ -7,6 +7,7 @@ import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import {CustomButton} from '../../components/CustomButton';
 import {primaryColor} from '../../utils/theme';
+import {toast} from '../../components/Toast/utils';
 
 export const RegisterPage: FC = () => {
 	const [formData, setFormData] = useState({
@@ -93,6 +94,7 @@ export const RegisterPage: FC = () => {
 		})
 			.then((res) => {
 				if (res !== null) {
+					toast.success('Registration successful');
 					setUserExists(false);
 					navigate('/login');
 				}
