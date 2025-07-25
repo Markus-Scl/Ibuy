@@ -54,7 +54,7 @@ func main() {
 	mux.Handle("GET /auth/session", routeHandler.CheckAuth)
 
 	//Products
-	mux.Handle("GET /product", routeHandler.GetUserProducts)
+	mux.Handle("GET /product", routeHandler.GetProducts)
 	mux.Handle("GET /product/{id}", routeHandler.GetProductById)
 	mux.Handle("POST /product", routeHandler.AddProduct)
 	mux.Handle("PUT /product", routeHandler.UpdateProduct)

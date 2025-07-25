@@ -406,15 +406,131 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
         return
     }
 }
+func GetProducts(w http.ResponseWriter, r *http.Request){
+    userId := r.URL.Query().Get("id")
 
-func GetUserProducts(w http.ResponseWriter, r *http.Request) {
-    userContext, ok := r.Context().Value("userContext").(UserContext)
-    if !ok {
-        w.WriteHeader(http.StatusUnauthorized)
-        json.NewEncoder(w).Encode(map[string]string{"error": "No user context found"})
+    if userId != "" {
+        GetUserProducts(w, r, userId);
+    }else{
+        GetCategoryProducts(w, r);
+    }
+}
+
+func GetCategoryProducts(w http.ResponseWriter, r *http.Request){
+    query := `
+        WITH ranked_products AS (
+            SELECT 
+                p.p_id,
+                p.name,
+                p.price,
+                p.category_id,
+                p.condition,
+                p.status_id,
+                p.location,
+                p.description,
+                p.created,
+                p.u_id,
+                ROW_NUMBER() OVER (PARTITION BY p.category_id ORDER BY p.created DESC) as rn
+            FROM product p
+        )
+        SELECT 
+            rp.p_id,
+            rp.name,
+            rp.price,
+            rp.category_id,
+            rp.condition,
+            rp.status_id,
+            rp.location,
+            rp.description,
+            rp.created,
+            rp.u_id,
+            pi.image_path
+        FROM ranked_products rp
+        LEFT JOIN product_image pi ON rp.p_id = pi.product_id
+        WHERE rp.rn <= 10
+        ORDER BY rp.category_id, rp.created DESC`
+
+    rows, err := db.DB.Query(query)
+    if err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to get products"})
         return
     }
-    var userId = userContext.UserId
+    defer rows.Close()
+
+    productMap := make(map[string]*ProductResponse)
+    
+    for rows.Next() {
+        var productID, name, condition, location, description, userID string
+        var price float32
+        var category, status int
+        var imagePath sql.NullString
+        var created time.Time
+
+        err := rows.Scan(
+            &productID,
+            &name,
+            &price,
+            &category,
+            &condition,
+            &status,
+            &location,
+            &description,
+            &created,
+            &userID,
+            &imagePath,
+        )
+        if err != nil {
+            w.WriteHeader(http.StatusInternalServerError)
+            json.NewEncoder(w).Encode(map[string]string{"error": "Failed to get all product info"})
+            return
+        }
+
+        // Check if product already exists in map
+        if _, exists := productMap[productID]; !exists {
+            productMap[productID] = &ProductResponse{
+                ProductID:   productID,
+                Name:        name,
+                Price:       price,
+                Category:    category,
+                Condition:   condition,
+                Status:      status,
+                Location:    location,
+                Description: description,
+                Created:     created,
+                UserID:      userID, // Added user ID to response
+                Images:      []string{},
+            }
+        }
+
+        // Add image path if it exists
+        if imagePath.Valid && imagePath.String != "" {
+            productMap[productID].Images = append(productMap[productID].Images, imagePath.String)
+        }
+    }
+
+    if err = rows.Err(); err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to read product images"})
+        return
+    }
+
+    // Convert map to slice
+    var products []ProductResponse
+    for _, product := range productMap {
+        products = append(products, *product)
+    }
+
+    w.WriteHeader(http.StatusOK)
+
+    if err := json.NewEncoder(w).Encode(products); err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": "Failed to encode response"})
+        return
+    }
+}
+
+func GetUserProducts(w http.ResponseWriter, r *http.Request, userId string) {
 
     query := `
         SELECT 
