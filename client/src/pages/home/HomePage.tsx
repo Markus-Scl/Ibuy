@@ -2,7 +2,6 @@ import {useMemo, type FC} from 'react';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import ImageIcon from '@mui/icons-material/Image';
 import CategoryIcon from '@mui/icons-material/Category';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import {useProducts} from '../../hooks/useProducts';
 import {statusClassMap} from '../product/utils';
 import {useNavigate} from 'react-router-dom';
@@ -39,7 +38,8 @@ export const HomePage: FC = () => {
 			productList.sort((a, b) => a.name.localeCompare(b.name));
 		});
 
-		return categoryMap;
+		// Sort the map by category name
+		return new Map([...categoryMap.entries()].sort(([a], [b]) => a.localeCompare(b)));
 	}, [products, categories]);
 
 	if (productsLoading) {
