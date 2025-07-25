@@ -34,7 +34,7 @@ export const HomePage: FC = () => {
 		});
 
 		// Sort products within each category by name
-		categoryMap.forEach((productList, category) => {
+		categoryMap.forEach((productList) => {
 			productList.sort((a, b) => a.name.localeCompare(b.name));
 		});
 
