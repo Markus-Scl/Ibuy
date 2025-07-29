@@ -15,7 +15,7 @@ export function useProducts() {
 		};
 	}
 
-	const {data, mutate: refreshProducts} = useCustomSWR<ProductResponse[]>(`product?id=${userId}`);
+	const {data, mutate: refreshProducts} = useCustomSWR<ProductResponse[]>('product');
 
 	return {
 		products: data ?? [],

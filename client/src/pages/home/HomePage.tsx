@@ -1,8 +1,7 @@
-import {useEffect, useMemo, useState, type FC} from 'react';
+import {useEffect, useState, type FC} from 'react';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import ImageIcon from '@mui/icons-material/Image';
 import CategoryIcon from '@mui/icons-material/Category';
-import {useProducts} from '../../hooks/useProducts';
 import {statusClassMap} from '../product/utils';
 import {useNavigate} from 'react-router-dom';
 import {primaryColor} from '../../utils/theme';
@@ -13,56 +12,31 @@ import type {ProductResponse} from '../product/types';
 import {fetcher} from '../../utils/fetcher';
 
 export const HomePage: FC = () => {
-	const {products, productsLoading} = useProducts();
 	const {productStatuses} = useProductStatusesStore();
 	const {categories} = useCategoriesStore();
 	const navigate = useNavigate();
 	const [productCategoryMap, setProductCategoryMap] = useState<Map<number, ProductResponse[]>>(new Map());
 
 	useEffect(() => {
-		fetcher<Map<number, ProductResponse[]>>('product').then((data) => {
+		fetcher<Map<number, ProductResponse[]>>('home').then((data) => {
 			const mapData = new Map<number, ProductResponse[]>();
 			Object.entries(data).forEach(([key, value]) => {
 				mapData.set(parseInt(key), value);
 			});
+			console.log(mapData);
 			setProductCategoryMap(mapData);
 		});
 	}, []);
 
-	/*const productsByCategory: Map<string, ProductResponse[]> = useMemo(() => {
-		if (!categories || products.length === 0) return new Map();
-
-		const categoryMap = new Map<string, ProductResponse[]>();
-
-		// Group products by category
-		products.forEach((product) => {
-			const categoryName = categories.get(product.category);
-			if (categoryName) {
-				if (!categoryMap.has(categoryName)) {
-					categoryMap.set(categoryName, []);
-				}
-				categoryMap.get(categoryName)!.push(product);
-			}
-		});
-
-		// Sort products within each category by name
-		categoryMap.forEach((productList) => {
-			productList.sort((a, b) => a.name.localeCompare(b.name));
-		});
-
-		// Sort the map by category name
-		return new Map([...categoryMap.entries()].sort(([a], [b]) => a.localeCompare(b)));
-	}, [products, categories]);*/
-
-	if (productsLoading) {
+	/*if (productsLoading) {
 		return (
 			<div className="w-full h-full flex flex-col justify-center items-center p-8">
 				<span className="loading loading-spinner loading-sm mr-2 loading-xl text-primary"></span>
 			</div>
 		);
-	}
+	}*/
 
-	if (products.length === 0) {
+	if (productCategoryMap.size === 0) {
 		return (
 			<div className="w-full h-full flex flex-col justify-center items-center p-8">
 				<div className="text-center space-y-6 max-w-md">
@@ -133,14 +107,14 @@ export const HomePage: FC = () => {
 									{/* Product Info */}
 									<div className="card-body p-4 space-y-3">
 										<div className="space-y-2">
-											<h3 className="font-bold text-lg">{product.name}</h3>
+											<h3 className="font-bold text-lg text-white">{product.name}</h3>
 											<div className="flex items-center justify-between">
-												<span className="text-2xl font-bold">${product.price}</span>
-												<div className="badge badge-secondary text-xs">{product.condition}</div>
+												<span className="text-2xl font-bold text-white">${product.price}</span>
+												<div className="badge badge-secondary text-xs text-white">{product.condition}</div>
 											</div>
 										</div>
 
-										<p className="text-sm ">{product.description.length > 100 ? `${product.description.substring(0, 100)}...` : product.description}</p>
+										<p className="text-sm text-white">{product.description.length > 100 ? `${product.description.substring(0, 100)}...` : product.description}</p>
 
 										<div className="flex items-center justify-between pt-2">
 											{productStatuses && productStatuses.get(product.status) && (

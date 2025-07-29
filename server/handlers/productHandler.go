@@ -406,15 +406,7 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
         return
     }
 }
-func GetProducts(w http.ResponseWriter, r *http.Request){
-    userId := r.URL.Query().Get("id")
 
-    if userId != "" {
-        GetUserProducts(w, r, userId);
-    }else{
-        GetCategoryProducts(w, r);
-    }
-}
 
 func GetCategoryProducts(w http.ResponseWriter, r *http.Request) {
     query := `
@@ -530,7 +522,16 @@ func GetCategoryProducts(w http.ResponseWriter, r *http.Request) {
     }
 }
 
-func GetUserProducts(w http.ResponseWriter, r *http.Request, userId string) {
+func GetUserProducts(w http.ResponseWriter, r *http.Request) {
+
+    userContext, ok := r.Context().Value("userContext").(UserContext)
+    if !ok {
+        w.WriteHeader(http.StatusUnauthorized)
+        json.NewEncoder(w).Encode(map[string]string{"error": "No user context found"})
+        return
+    }
+
+    var userId = userContext.UserId
 
     query := `
         SELECT 

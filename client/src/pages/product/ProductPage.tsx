@@ -115,13 +115,13 @@ export const ProductPage: FC = () => {
 						</figure>
 						<div className="card-body h-1/2">
 							<h2 className="card-title flex justify-between items-center">
-								<div className="flex items-center gap-2">
+								<div className="flex items-center gap-2 text-white">
 									{product.name}
 									<div className="badge badge-secondary">{product.condition}</div>
 								</div>
-								<div>{product.price}$</div>
+								<div className="text-white">{product.price}$</div>
 							</h2>
-							<p>{product.description.length > 150 ? `${product.description.substring(0, 150)}...` : product.description}</p>
+							<p className="text-white">{product.description.length > 150 ? `${product.description.substring(0, 150)}...` : product.description}</p>
 							<div className="card-actions justify-end">
 								{productStatuses && productStatuses.get(product.status) && <div className={statusClassMap.get(product.status)}>{productStatuses.get(product.status)}</div>}
 								{categories && categories.get(product.category) && <div className="badge badge-outline">{categories.get(product.category)}</div>}
