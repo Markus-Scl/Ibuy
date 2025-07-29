@@ -1,4 +1,4 @@
-import {useMemo, type FC} from 'react';
+import {useEffect, useMemo, useState, type FC} from 'react';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import ImageIcon from '@mui/icons-material/Image';
 import CategoryIcon from '@mui/icons-material/Category';
@@ -7,17 +7,29 @@ import {statusClassMap} from '../product/utils';
 import {useNavigate} from 'react-router-dom';
 import {primaryColor} from '../../utils/theme';
 import {useCategoriesStore} from '../../stores/useCategoriesStore';
-import {useProductStatusesStore} from '../../stores/UseProductStatusesStore';
+import {useProductStatusesStore} from '../../stores/useProductStatusesStore';
 import {getImageUrl} from '../productDetail/utils';
 import type {ProductResponse} from '../product/types';
+import {fetcher} from '../../utils/fetcher';
 
 export const HomePage: FC = () => {
 	const {products, productsLoading} = useProducts();
 	const {productStatuses} = useProductStatusesStore();
 	const {categories} = useCategoriesStore();
 	const navigate = useNavigate();
+	const [productCategoryMap, setProductCategoryMap] = useState<Map<number, ProductResponse[]>>(new Map());
 
-	const productsByCategory: Map<string, ProductResponse[]> = useMemo(() => {
+	useEffect(() => {
+		fetcher<Map<number, ProductResponse[]>>('product').then((data) => {
+			const mapData = new Map<number, ProductResponse[]>();
+			Object.entries(data).forEach(([key, value]) => {
+				mapData.set(parseInt(key), value);
+			});
+			setProductCategoryMap(mapData);
+		});
+	}, []);
+
+	/*const productsByCategory: Map<string, ProductResponse[]> = useMemo(() => {
 		if (!categories || products.length === 0) return new Map();
 
 		const categoryMap = new Map<string, ProductResponse[]>();
@@ -40,7 +52,7 @@ export const HomePage: FC = () => {
 
 		// Sort the map by category name
 		return new Map([...categoryMap.entries()].sort(([a], [b]) => a.localeCompare(b)));
-	}, [products, categories]);
+	}, [products, categories]);*/
 
 	if (productsLoading) {
 		return (
@@ -83,8 +95,8 @@ export const HomePage: FC = () => {
 		<div className="w-full h-full overflow-auto">
 			{/* Products by Category */}
 			<div className="px-6 py-6 pb-6">
-				{Array.from(productsByCategory.entries()).map(([categoryName, categoryProducts]) => (
-					<div key={categoryName} className="space-y-4 mb-8">
+				{Array.from(productCategoryMap.entries()).map(([categoryId, categoryProducts]) => (
+					<div key={categoryId} className="space-y-4 mb-8">
 						{/* Category Header */}
 						<div className="relative mb-6">
 							<div className="flex items-center space-x-3">
@@ -92,7 +104,7 @@ export const HomePage: FC = () => {
 									<CategoryIcon className="text-white w-6 h-6" />
 								</div>
 								<div>
-									<h2 className="text-2xl font-bold text-gray-800">{categoryName}</h2>
+									<h2 className="text-2xl font-bold text-gray-800">{categories?.get(categoryId)}</h2>
 								</div>
 							</div>
 						</div>
@@ -102,7 +114,7 @@ export const HomePage: FC = () => {
 							{categoryProducts.map((product, idx) => (
 								<div
 									onClick={() => navigate(`/product/${product.productId}`)}
-									key={`${categoryName}-${idx}`}
+									key={`${categoryId}-${idx}`}
 									className={`group card ${primaryColor} shadow-sm hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer overflow-hidden`}>
 									{/* Product Image */}
 									<figure className="h-48 relative overflow-hidden">

@@ -416,7 +416,7 @@ func GetProducts(w http.ResponseWriter, r *http.Request){
     }
 }
 
-func GetCategoryProducts(w http.ResponseWriter, r *http.Request){
+func GetCategoryProducts(w http.ResponseWriter, r *http.Request) {
     query := `
         WITH ranked_products AS (
             SELECT 
@@ -459,7 +459,8 @@ func GetCategoryProducts(w http.ResponseWriter, r *http.Request){
     defer rows.Close()
 
     productMap := make(map[string]*ProductResponse)
-    
+    categoryMap := make(map[int][]ProductResponse)
+
     for rows.Next() {
         var productID, name, condition, location, description, userID string
         var price float32
@@ -498,7 +499,7 @@ func GetCategoryProducts(w http.ResponseWriter, r *http.Request){
                 Location:    location,
                 Description: description,
                 Created:     created,
-                UserID:      userID, // Added user ID to response
+                UserID:      userID,
                 Images:      []string{},
             }
         }
@@ -515,15 +516,14 @@ func GetCategoryProducts(w http.ResponseWriter, r *http.Request){
         return
     }
 
-    // Convert map to slice
-    var products []ProductResponse
+    // Group products by category ID
     for _, product := range productMap {
-        products = append(products, *product)
+        categoryMap[product.Category] = append(categoryMap[product.Category], *product)
     }
 
     w.WriteHeader(http.StatusOK)
 
-    if err := json.NewEncoder(w).Encode(products); err != nil {
+    if err := json.NewEncoder(w).Encode(categoryMap); err != nil {
         w.WriteHeader(http.StatusInternalServerError)
         json.NewEncoder(w).Encode(map[string]string{"error": "Failed to encode response"})
         return

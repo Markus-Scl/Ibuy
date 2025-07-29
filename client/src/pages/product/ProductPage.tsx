@@ -9,7 +9,7 @@ import {useNavigate} from 'react-router-dom';
 import {CustomButton} from '../../components/CustomButton';
 import {primaryColor} from '../../utils/theme';
 import {useCategoriesStore} from '../../stores/useCategoriesStore';
-import {useProductStatusesStore} from '../../stores/UseProductStatusesStore';
+import {useProductStatusesStore} from '../../stores/useProductStatusesStore';
 import {getImageUrl} from '../productDetail/utils';
 
 export const ProductPage: FC = () => {

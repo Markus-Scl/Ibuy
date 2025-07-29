@@ -18,7 +18,7 @@ import {conditions} from '../../product/utils';
 import {useCategoriesStore} from '../../../stores/useCategoriesStore';
 import type {ProductResponse} from '../../product/types';
 import {getImageUrl} from '../utils';
-import {useProductStatusesStore} from '../../../stores/UseProductStatusesStore';
+import {useProductStatusesStore} from '../../../stores/useProductStatusesStore';
 import OutlinedFlagOutlinedIcon from '@mui/icons-material/OutlinedFlagOutlined';
 import {toast} from '../../../components/Toast/utils';
 

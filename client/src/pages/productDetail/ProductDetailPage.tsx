@@ -18,7 +18,7 @@ import {DeleteModal} from '../../components/DeleteModal';
 import {CustomButton} from '../../components/CustomButton';
 import {deleteColor, primaryColor} from '../../utils/theme';
 import {useCategoriesStore} from '../../stores/useCategoriesStore';
-import {useProductStatusesStore} from '../../stores/UseProductStatusesStore';
+import {useProductStatusesStore} from '../../stores/useProductStatusesStore';
 import {EditProductModal} from './components/EditProductModal';
 import {getImageUrl} from './utils';
 import {toast} from '../../components/Toast/utils';

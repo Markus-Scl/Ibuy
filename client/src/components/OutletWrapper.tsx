@@ -4,7 +4,7 @@ import PrivateRoute from './PrivateRoute';
 import {SideNavbar} from './SideNavBar';
 import {useCategoriesStore} from '../stores/useCategoriesStore';
 import {fetcher} from '../utils/fetcher';
-import {useProductStatusesStore} from '../stores/UseProductStatusesStore';
+import {useProductStatusesStore} from '../stores/useProductStatusesStore';
 import {initAuth} from '../auth/initAuth';
 
 interface OutletWrapperProps {
