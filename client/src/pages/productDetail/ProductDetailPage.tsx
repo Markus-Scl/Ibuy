@@ -163,11 +163,11 @@ export const ProductDetailPage: FC = () => {
 					{/* Image Section */}
 					<div className="space-y-4 h-full">
 						{/* Main Image */}
-						<div className="relative bg-white rounded-3xl shadow-2xl  h-[80%]">
+						<div className="relative bg-white rounded-3xl shadow-2xl min-h-150 max-h-[500px] h-[80%]">
 							{product.images && product.images.length > 0 ? (
 								<img src={getImageUrl(product.images[selectedImageIndex])} alt={product.name} className="w-full h-full object-cover rounded-3xl" />
 							) : (
-								<div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+								<div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl">
 									<div className="text-center space-y-4">
 										<ImageIcon className="mx-auto text-gray-400" sx={{fontSize: '80px'}} />
 										<p className="text-gray-500 font-medium">No Image Available</p>
@@ -288,19 +288,6 @@ export const ProductDetailPage: FC = () => {
 								</div>
 							</div>
 						)}*/}
-
-						{/* Action Buttons */}
-						{product.userId !== user?.userId && (
-							<div className="space-y-3">
-								<button
-									className={`w-full ${primaryColor} text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer`}>
-									Contact Seller
-								</button>
-								<button className="w-full border-2 border-gray-300 text-gray-700 py-4 px-6 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all duration-200 cursor-pointer">
-									Add to Favorites
-								</button>
-							</div>
-						)}
 					</div>
 				</div>
 			</div>
