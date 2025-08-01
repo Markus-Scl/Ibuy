@@ -84,51 +84,6 @@ export const HomePage: FC = () => {
 							</div>
 						</div>
 						{productStatuses !== null && <ProductCarousel products={categoryProducts} categoryId={categoryId} productStatuses={productStatuses} statusClassMap={statusClassMap} />}
-						{/* Products Grid */}
-						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-							{categoryProducts.map((product, idx) => (
-								<div
-									onClick={() => navigate(`/product/${product.productId}`)}
-									key={`${categoryId}-${idx}`}
-									className={`group card ${primaryColor} shadow-sm hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer overflow-hidden`}>
-									{/* Product Image */}
-									<figure className="h-48 relative overflow-hidden">
-										{product.images.length > 0 ? (
-											<img src={getImageUrl(product.images[0])} alt="Product Image" className="w-full h-full object-cover" />
-										) : (
-											<div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-												<div className="text-center space-y-4">
-													<ImageIcon className="mx-auto text-gray-400" sx={{fontSize: '80px'}} />
-													<p className="text-gray-500 font-medium">No Image Available</p>
-												</div>
-											</div>
-										)}
-									</figure>
-
-									{/* Product Info */}
-									<div className="card-body p-4 space-y-3">
-										<div className="space-y-2">
-											<h3 className="font-bold text-lg text-white">{product.name}</h3>
-											<div className="flex items-center justify-between">
-												<span className="text-2xl font-bold text-white">${product.price}</span>
-												<div className="badge badge-secondary text-xs text-white">{product.condition}</div>
-											</div>
-										</div>
-
-										<p className="text-sm text-white">{product.description.length > 100 ? `${product.description.substring(0, 100)}...` : product.description}</p>
-
-										<div className="flex items-center justify-between pt-2">
-											{productStatuses && productStatuses.get(product.status) && (
-												<div className={`${statusClassMap.get(product.status)} text-xs px-2 py-1 rounded-full`}>{productStatuses.get(product.status)}</div>
-											)}
-											<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-												<span className="text-xs text-blue-600 font-medium">View Details →</span>
-											</div>
-										</div>
-									</div>
-								</div>
-							))}
-						</div>
 
 						{/* Category Divider */}
 						<div className="w-full h-px bg-gradient-to-r from-transparent via-gray-400 to-transparent"></div>

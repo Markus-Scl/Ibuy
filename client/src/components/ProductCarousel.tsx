@@ -70,7 +70,21 @@ export const ProductCarousel: FC<ProductCarouselProps> = ({products, categoryId,
 
 	const currentProducts = getCurrentPageProducts();
 
-	console.log(currentProducts);
+	// Helper function to get flex basis for consistent card sizing
+	const getCardFlexBasis = () => {
+		const width = window.innerWidth;
+		if (width < 640) {
+			return 'flex-basis-full'; // 1 item per row
+		} else if (width < 768) {
+			return 'flex-basis-1/2'; // 2 items per row
+		} else if (width < 1024) {
+			return 'flex-basis-1/3'; // 3 items per row
+		} else if (width < 1280) {
+			return 'flex-basis-1/4'; // 4 items per row
+		} else {
+			return 'flex-basis-1/5'; // 5 items per row
+		}
+	};
 
 	if (products.length === 0) {
 		return <div className="text-center py-8 text-gray-500">No products found</div>;
@@ -79,79 +93,79 @@ export const ProductCarousel: FC<ProductCarouselProps> = ({products, categoryId,
 	return (
 		<div className="relative w-full">
 			{/* Carousel Container */}
-			<div className="carousel w-full">
-				<div className="carousel-item w-full">
-					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 w-full">
-						{currentProducts.map((product, idx) => (
-							<div
-								onClick={() => navigate(`/product/${product.productId}`)}
-								key={`${categoryId}-${idx}`}
-								className={`group card ${primaryColor} shadow-sm hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer overflow-hidden`}>
-								{/* Product Image */}
-								<figure className="h-48 relative overflow-hidden">
-									{product.images.length > 0 ? (
-										<img src={getImageUrl(product.images[0])} alt="Product Image" className="w-full h-full object-cover" />
-									) : (
-										<div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-											<div className="text-center space-y-4">
-												<ImageIcon className="mx-auto text-gray-400" sx={{fontSize: '80px'}} />
-												<p className="text-gray-500 font-medium">No Image Available</p>
+			<div className="h-full w-full flex items-center">
+				{totalPages > 1 && (
+					<>
+						{/* Previous Button */}
+						<button
+							onClick={prevSlide}
+							disabled={!canGoPrev}
+							className={`mr-2 btn btn-circle  ${canGoPrev ? 'btn-primary hover:btn-primary-focus' : 'btn-disabled opacity-50 cursor-not-allowed'}`}>
+							❮
+						</button>
+					</>
+				)}
+				<div className="carousel">
+					<div className="carousel-item w-full">
+						<div className="flex flex-wrap gap-4 w-full justify-start">
+							{currentProducts.map((product, idx) => (
+								<div
+									onClick={() => navigate(`/product/${product.productId}`)}
+									key={`${categoryId}-${idx}`}
+									className={`group card ${primaryColor} shadow-sm hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.67rem)] lg:w-[calc(25%-0.75rem)] xl:w-[calc(20%-0.8rem)] max-w-sm`}
+									style={{minWidth: '280px'}}>
+									{/* Product Image */}
+									<figure className="h-48 relative overflow-hidden">
+										{product.images.length > 0 ? (
+											<img src={getImageUrl(product.images[0])} alt="Product Image" className="w-full h-full object-cover" />
+										) : (
+											<div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+												<div className="text-center space-y-4">
+													<ImageIcon className="mx-auto text-gray-400" sx={{fontSize: '80px'}} />
+													<p className="text-gray-500 font-medium">No Image Available</p>
+												</div>
+											</div>
+										)}
+									</figure>
+
+									{/* Product Info */}
+									<div className="card-body p-4 space-y-3">
+										<div className="space-y-2">
+											<h3 className="font-bold text-lg text-white">{product.name}</h3>
+											<div className="flex items-center justify-between">
+												<span className="text-2xl font-bold text-white">${product.price}</span>
+												<div className="badge badge-secondary text-xs text-white">{product.condition}</div>
 											</div>
 										</div>
-									)}
-								</figure>
 
-								{/* Product Info */}
-								<div className="card-body p-4 space-y-3">
-									<div className="space-y-2">
-										<h3 className="font-bold text-lg text-white">{product.name}</h3>
-										<div className="flex items-center justify-between">
-											<span className="text-2xl font-bold text-white">${product.price}</span>
-											<div className="badge badge-secondary text-xs text-white">{product.condition}</div>
-										</div>
-									</div>
+										<p className="text-sm text-white">{product.description.length > 100 ? `${product.description.substring(0, 100)}...` : product.description}</p>
 
-									<p className="text-sm text-white">{product.description.length > 100 ? `${product.description.substring(0, 100)}...` : product.description}</p>
-
-									<div className="flex items-center justify-between pt-2">
-										{productStatuses && productStatuses.get(product.status) && (
-											<div className={`${statusClassMap.get(product.status)} text-xs px-2 py-1 rounded-full`}>{productStatuses.get(product.status)}</div>
-										)}
-										<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-											<span className="text-xs text-blue-600 font-medium">View Details →</span>
+										<div className="flex items-center justify-between pt-2">
+											{productStatuses && productStatuses.get(product.status) && (
+												<div className={`${statusClassMap.get(product.status)} text-xs px-2 py-1 rounded-full`}>{productStatuses.get(product.status)}</div>
+											)}
+											<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+												<span className="text-xs text-blue-600 font-medium">View Details →</span>
+											</div>
 										</div>
 									</div>
 								</div>
-							</div>
-						))}
+							))}
+						</div>
 					</div>
 				</div>
+				{totalPages > 1 && (
+					<>
+						{/* Next Button */}
+						<button
+							onClick={nextSlide}
+							disabled={!canGoNext}
+							className={`ml-2 btn btn-circle z-10 ${canGoNext ? 'btn-primary hover:btn-primary-focus' : 'btn-disabled opacity-50 cursor-not-allowed'}`}>
+							❯
+						</button>
+					</>
+				)}
 			</div>
-
-			{/* Navigation Buttons - Only show if there are multiple pages */}
-			{totalPages > 1 && (
-				<>
-					{/* Previous Button */}
-					<button
-						onClick={prevSlide}
-						disabled={!canGoPrev}
-						className={`absolute left-2 top-1/2 transform -translate-y-1/2 btn btn-circle z-10 ${
-							canGoPrev ? 'btn-primary hover:btn-primary-focus' : 'btn-disabled opacity-50 cursor-not-allowed'
-						}`}>
-						❮
-					</button>
-
-					{/* Next Button */}
-					<button
-						onClick={nextSlide}
-						disabled={!canGoNext}
-						className={`absolute right-2 top-1/2 transform -translate-y-1/2 btn btn-circle z-10 ${
-							canGoNext ? 'btn-primary hover:btn-primary-focus' : 'btn-disabled opacity-50 cursor-not-allowed'
-						}`}>
-						❯
-					</button>
-				</>
-			)}
 
 			{/* Page Indicators */}
 			{totalPages > 1 && (
