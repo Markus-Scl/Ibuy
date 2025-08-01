@@ -103,7 +103,7 @@ export const ProductPage: FC = () => {
 						className={`card ${primaryColor} max-w-sm  h-100 shadow-sm hover:shadow-lg transform hover:scale-103 transition-all duration-200 cursor-pointer`}>
 						<figure className="h-1/2">
 							{product.images.length > 0 ? (
-								<img src={getImageUrl(product.images[0])} alt="Product Image" />
+								<img src={getImageUrl(product.images[0])} alt="Product Image" className="h-full w-full object-cover" />
 							) : (
 								<div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
 									<div className="text-center space-y-4">

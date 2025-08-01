@@ -10,6 +10,7 @@ import {useProductStatusesStore} from '../../stores/useProductStatusesStore';
 import {getImageUrl} from '../productDetail/utils';
 import type {ProductResponse} from '../product/types';
 import {fetcher} from '../../utils/fetcher';
+import {ProductCarousel} from '../../components/ProductCarousel';
 
 export const HomePage: FC = () => {
 	const {productStatuses} = useProductStatusesStore();
@@ -82,7 +83,7 @@ export const HomePage: FC = () => {
 								</div>
 							</div>
 						</div>
-
+						{productStatuses !== null && <ProductCarousel products={categoryProducts} categoryId={categoryId} productStatuses={productStatuses} statusClassMap={statusClassMap} />}
 						{/* Products Grid */}
 						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
 							{categoryProducts.map((product, idx) => (

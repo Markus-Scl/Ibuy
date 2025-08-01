@@ -103,7 +103,7 @@ export const ProductDetailPage: FC = () => {
 						<p className="text-gray-600 text-lg leading-relaxed">The product you're looking for doesn't exist or has been removed.</p>
 					</div>
 					<button
-						onClick={() => navigate('/products')}
+						onClick={() => navigate(-1)}
 						className={`${primaryColor} text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-out cursor-pointer`}>
 						Back to Products
 					</button>
@@ -124,9 +124,9 @@ export const ProductDetailPage: FC = () => {
 		<div className="w-full h-full bg-gray-50">
 			{/* Header with Back Button */}
 			<div className="bg-white shadow-sm border-b border-gray-200 h-[8%]">
-				<div className="max-w-9xl mx-auto px-12 py-4">
-					<div className="flex items-center justify-between">
-						<button onClick={() => navigate('/products')} className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors duration-200 cursor-pointer">
+				<div className="max-w-9xl mx-auto px-12 py-4 h-full">
+					<div className="flex items-center justify-between h-full">
+						<button onClick={() => navigate(-1)} className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors duration-200 cursor-pointer">
 							<ArrowBackIcon className="w-5 h-5" />
 							<span className="font-medium">Back to Products</span>
 						</button>
@@ -196,7 +196,7 @@ export const ProductDetailPage: FC = () => {
 					{/* Product Details Section */}
 					<div className="space-y-6 h-full">
 						{/* Title and Price */}
-						<div className="bg-white rounded-3xl p-6 shadow-lg h-[20%]">
+						<div className="bg-white rounded-3xl p-6 shadow-lg h-[20%] overflow-auto">
 							<div className="space-y-4">
 								<div className="flex items-start justify-between">
 									<h1 className="text-3xl font-bold text-gray-800 leading-tight">{product.name}</h1>
