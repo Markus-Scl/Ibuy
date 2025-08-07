@@ -94,18 +94,15 @@ export const ProductCarousel: FC<ProductCarouselProps> = ({products, categoryId,
 		<div className="relative w-full">
 			{/* Carousel Container */}
 			<div className="h-full w-full flex items-center">
-				{totalPages > 1 && (
-					<>
-						{/* Previous Button */}
-						<button
-							onClick={prevSlide}
-							disabled={!canGoPrev}
-							className={`mr-2 btn btn-circle  ${canGoPrev ? 'btn-primary hover:btn-primary-focus' : 'btn-disabled opacity-50 cursor-not-allowed'}`}>
-							❮
-						</button>
-					</>
-				)}
-				<div className="carousel">
+				{/* Previous Button */}
+				<button
+					onClick={prevSlide}
+					disabled={!canGoPrev}
+					className={`mr-2 btn btn-circle  ${canGoPrev ? 'btn-primary hover:btn-primary-focus' : 'btn-disabled opacity-50 cursor-not-allowed'}`}>
+					❮
+				</button>
+
+				<div className="carousel p-3">
 					<div className="carousel-item w-full">
 						<div className="flex flex-wrap gap-4 w-full justify-start">
 							{currentProducts.map((product, idx) => (
