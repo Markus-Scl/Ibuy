@@ -22,6 +22,7 @@ import {useProductStatusesStore} from '../../stores/useProductStatusesStore';
 import {EditProductModal} from './components/EditProductModal';
 import {getImageUrl} from './utils';
 import {toast} from '../../components/Toast/utils';
+import {LiveChat} from '../../components/LiveChat';
 
 export const ProductDetailPage: FC = () => {
 	const {productId} = useParams();
@@ -31,6 +32,7 @@ export const ProductDetailPage: FC = () => {
 	const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
 	const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
 	const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
+	const [liveChatOpen, setLiveChatOpen] = useState<boolean>(false);
 	const {productStatuses} = useProductStatusesStore();
 	const {user} = useAuthStore();
 	const {categories} = useCategoriesStore();
@@ -80,6 +82,14 @@ export const ProductDetailPage: FC = () => {
 		);
 	}
 
+	if (liveChatOpen) {
+		return (
+			<div className="h-full w-full flex items-center justify-center">
+				<LiveChat onClose={() => setLiveChatOpen(false)} />
+			</div>
+		);
+	}
+
 	if (isLoading) {
 		return (
 			<div className="w-full h-full flex flex-col justify-center items-center p-8">
@@ -123,7 +133,7 @@ export const ProductDetailPage: FC = () => {
 	return (
 		<div className="w-full h-full bg-gray-50">
 			{/* Header with Back Button */}
-			<div className="bg-white shadow-sm border-b border-gray-200 h-[8%]">
+			<div className="bg-white shadow-sm border-b border-gray-200 h-15">
 				<div className="max-w-9xl mx-auto px-12 py-4 h-full">
 					<div className="flex items-center justify-between h-full">
 						<button onClick={() => navigate(-1)} className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors duration-200 cursor-pointer">
@@ -139,7 +149,9 @@ export const ProductDetailPage: FC = () => {
 							) : (
 								<>
 									<div className="tooltip tooltip-bottom" data-tip="Contact Seller">
-										<button className="btn btn-circle btn-primary btn-lg shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300">
+										<button
+											className="btn btn-circle btn-primary btn-lg shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300"
+											onClick={() => setLiveChatOpen(true)}>
 											<MessageOutlinedIcon />
 										</button>
 									</div>

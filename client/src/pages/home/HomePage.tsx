@@ -24,7 +24,6 @@ export const HomePage: FC = () => {
 			Object.entries(data).forEach(([key, value]) => {
 				mapData.set(parseInt(key), value);
 			});
-			console.log(mapData);
 			setProductCategoryMap(mapData);
 		});
 	}, []);
