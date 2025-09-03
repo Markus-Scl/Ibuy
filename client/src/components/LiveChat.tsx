@@ -1,4 +1,4 @@
-import type {FC} from 'react';
+import {useState, type FC} from 'react';
 import {primaryColor} from '../utils/theme';
 import CloseIcon from '@mui/icons-material/Close';
 import {CustomInput} from './Form/CustomInput';
@@ -10,6 +10,10 @@ interface LiveChatProps {
 
 export const LiveChat: FC<LiveChatProps> = ({onClose}) => {
 	const isLoading = false;
+	const [messages, setMessages] = useState<string[]>(['What kind of nonsense is this', 'What kind of nonsense is this']);
+
+	const [currentMessage, setCurrentMessage] = useState<string>('');
+
 	const handleOverlayClick = (e: React.MouseEvent) => {
 		if (e.target === e.currentTarget) {
 			onClose();
@@ -78,7 +82,7 @@ export const LiveChat: FC<LiveChatProps> = ({onClose}) => {
 						</div>
 					</div>
 					<div className={`${primaryColor} p-4 h-[15%] flex`}>
-						<CustomInput name="chat" value="" type="text" placeHolder="Message" onChange={() => console.log('change')} />
+						<CustomInput name="chat" value={currentMessage} type="text" placeHolder="Message" onChange={(e) => setCurrentMessage(e.target.value)} />
 						<button className="btn btn-circle btn-primary btn-lg shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 ml-2" onClick={() => console.log('send')}>
 							<SendOutlinedIcon />
 						</button>
