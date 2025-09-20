@@ -68,3 +68,14 @@ CREATE TABLE product_image (
     uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES product(p_id) ON DELETE CASCADE
 );
+
+CREATE TABLE message (
+    id SERIAL PRIMARY KEY,
+    m_id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4(),
+    content TEXT NOT NULL,
+    created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    sender UUID NOT NULL,
+    receiver UUID NOT NULL,
+    FOREIGN KEY (sender) REFERENCES web_user(u_id),
+    FOREIGN KEY (receiver) REFERENCES web_user(u_id)
+);
