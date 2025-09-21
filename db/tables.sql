@@ -76,6 +76,8 @@ CREATE TABLE message (
     created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     sender UUID NOT NULL,
     receiver UUID NOT NULL,
+    m_type VARCHAR(50) NOT NULL,
+    seen BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (sender) REFERENCES web_user(u_id),
     FOREIGN KEY (receiver) REFERENCES web_user(u_id)
 );
