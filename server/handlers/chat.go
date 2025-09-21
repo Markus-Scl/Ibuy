@@ -33,7 +33,7 @@ func SendMessage(w http.ResponseWriter, r *http.Request){
         json.NewEncoder(w).Encode(map[string]string{"error": "No user context found"})
         return
     }
-    var userId = userContext.UserId
+    var senderId = userContext.UserId
 
 	var req SendMessageRequest
 
@@ -47,7 +47,7 @@ func SendMessage(w http.ResponseWriter, r *http.Request){
 
 	err := db.DB.QueryRow(
 		"INSERT INTO message (content, sender, receiver, created, seen) VALUES ($1, $2, $3, $4) RETURNING m_id, created",
-		req.Content, userId, req.Receiver, time.Now(), false).Scan(&messageId, &created)
+		req.Content, senderId, req.Receiver, time.Now(), false).Scan(&messageId, &created)
 
 	if err != nil{
 		log.Printf("Error saving message: %v", err)
@@ -58,7 +58,7 @@ func SendMessage(w http.ResponseWriter, r *http.Request){
 	wsMessage := websocket.Message{
 		Type:     "message",
 		Content:  req.Content,
-		Sender:   userId,
+		Sender:   senderId,
 		Receiver: req.Receiver,
 		MID:      messageId,
 	}
@@ -69,11 +69,103 @@ func SendMessage(w http.ResponseWriter, r *http.Request){
 		MID:      messageId,
 		Content:  req.Content,
 		Created:  created,
-		Sender:   userId,
+		Sender:   senderId,
 		Receiver: req.Receiver,
 		Seen:     false,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+
+
+func GetMessages(w http.ResponseWriter, r *http.Request) {
+	userContext, ok := r.Context().Value("userContext").(UserContext)
+    if !ok {
+        w.WriteHeader(http.StatusUnauthorized)
+        json.NewEncoder(w).Encode(map[string]string{"error": "No user context found"})
+        return
+    }
+    var senderId = userContext.UserId
+
+	if senderId == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	otherUserID := r.URL.Query().Get("user_id")
+	if otherUserID == "" {
+		http.Error(w, "Missing user_id parameter", http.StatusBadRequest)
+		return
+	}
+
+	// Query messages between the two users
+	query := `
+		SELECT id, m_id, content, created, sender, receiver, seen 
+		FROM message 
+		WHERE (sender = $1 AND receiver = $2) OR (sender = $2 AND receiver = $1)
+		ORDER BY created ASC
+	`
+
+	rows, err := db.DB.Query(query, senderId, otherUserID)
+	if err != nil {
+		log.Printf("Error querying messages: %v", err)
+		http.Error(w, "Failed to retrieve messages", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var messages []ChatMessage
+	for rows.Next() {
+		var msg ChatMessage
+		err := rows.Scan(&msg.ID, &msg.MID, &msg.Content, &msg.Created, &msg.Sender, &msg.Receiver, &msg.Seen)
+		if err != nil {
+			log.Printf("Error scanning message: %v", err)
+			continue
+		}
+		messages = append(messages, msg)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(messages)
+}
+
+func MarkMessagesAsSeen(w http.ResponseWriter, r *http.Request) {
+	userContext, ok := r.Context().Value("userContext").(UserContext)
+    if !ok {
+        w.WriteHeader(http.StatusUnauthorized)
+        json.NewEncoder(w).Encode(map[string]string{"error": "No user context found"})
+        return
+    }
+    var userId = userContext.UserId
+
+	if userId == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	senderID := r.URL.Query().Get("sender_id")
+	if senderID == "" {
+		http.Error(w, "Missing sender_id parameter", http.StatusBadRequest)
+		return
+	}
+
+	// Mark all messages from sender to current user as seen
+	query := `UPDATE message SET seen = true WHERE sender = $1 AND receiver = $2 AND seen = false`
+	_, err := db.DB.Exec(query, senderID, userId)
+	if err != nil {
+		log.Printf("Error marking messages as seen: %v", err)
+		http.Error(w, "Failed to mark messages as seen", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func GetOnlineUsers(w http.ResponseWriter, r *http.Request) {
+	users := ChatHub.GetOnlineUsers()
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string][]string{"online_users": users})
 }

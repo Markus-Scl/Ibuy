@@ -6,6 +6,7 @@ import (
 	routeHandler "ibuy-server/handlers"
 	"ibuy-server/middleware"
 	"ibuy-server/router"
+	"ibuy-server/websocket"
 	"log"
 	"net/http"
 	"os"
@@ -35,6 +36,11 @@ func main() {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, dbPort, dbname)
 
 	db.InitDB(dsn)
+
+	hub := websocket.NewHub()
+	routeHandler.ChatHub = hub
+	
+	go hub.Run()
 
 	mux := router.NewMiddlewareMux(middleware.CORS(), middleware.Logging(), middleware.Auth())
 
@@ -67,11 +73,19 @@ func main() {
 	//Product statuses
 	mux.Handle("GET /productstatus", routeHandler.GetProductStatuses)
 
+		// Chat endpoints
+	mux.Handle("GET /ws", hub.HandleWebSocket)              
+	mux.Handle("POST /chat/send", routeHandler.SendMessage) 
+	mux.Handle("GET /chat/messages", routeHandler.GetMessages)
+	mux.Handle("PUT /chat/seen", routeHandler.MarkMessagesAsSeen)
+	mux.Handle("GET /chat/online", routeHandler.GetOnlineUsers)
+
 	serverPort := ":" + os.Getenv("SERVER_PORT")
 	if os.Getenv("SERVER_PORT") == "" {
 		serverPort = ":8080" // Default port
 	}
 	
 	log.Println("Server listening on", serverPort)
+	log.Println("WebSocket endpoint: ws://localhost" + serverPort + "/ws")
 	log.Fatal(http.ListenAndServe(serverPort, mux))
 }
