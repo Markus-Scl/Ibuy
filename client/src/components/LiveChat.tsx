@@ -81,7 +81,7 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, onClose}) => {
 
 	const loadChatHistory = () => {
 		try {
-			fetcher(`chat/messages?user_id=${user?.userId}`).then((res) => {
+			fetcher(`chat/messages?user_id=${targetUserId}`).then((res) => {
 				console.log(res);
 				const history = res as Message[];
 

@@ -42,11 +42,13 @@ func SendMessage(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
+	log.Printf("%+v", req)
+
 	var messageId string
 	var created time.Time
 
 	err := db.DB.QueryRow(
-		"INSERT INTO message (content, sender, receiver, created, seen) VALUES ($1, $2, $3, $4) RETURNING m_id, created",
+		"INSERT INTO message (content, sender, receiver, created, seen) VALUES ($1, $2, $3, $4, $5) RETURNING m_id, created",
 		req.Content, senderId, req.Receiver, time.Now(), false).Scan(&messageId, &created)
 
 	if err != nil{
