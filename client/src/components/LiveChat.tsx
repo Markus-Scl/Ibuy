@@ -5,6 +5,7 @@ import {CustomInput} from './Form/CustomInput';
 import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 import {useAuthStore} from '../stores/useAuthStore';
 import type {Message, WsMessage} from '../types/types';
+import {fetcher, mutationFetcher} from '../utils/fetcher';
 
 interface LiveChatProps {
 	targetUserId: string;
@@ -38,6 +39,7 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, onClose}) => {
 			ws.current.onopen = () => {
 				console.log('WebSocket Connected');
 				setIsConnected(true);
+				loadChatHistory();
 			};
 
 			ws.current.onmessage = (event) => {
@@ -77,6 +79,47 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, onClose}) => {
 		};
 	}, []);
 
+	const loadChatHistory = () => {
+		try {
+			fetcher(`chat/messages?user_id=${user?.userId}`).then((res) => {
+				console.log(res);
+				const history = res as Message[];
+
+				if (history) {
+					setMessages(history || []);
+				}
+			});
+		} catch (error) {
+			console.error('Error loading chat history:', error);
+		}
+	};
+
+	const sendMessage = () => {
+		if (!currentMessage.trim() || !isConnected) return;
+
+		const messageData = {
+			content: currentMessage.trim(),
+			receiver: targetUserId,
+		};
+
+		// Send via HTTP API (which will then broadcast via WebSocket)
+		mutationFetcher<Message>('chat/send', {
+			method: 'POST',
+			body: messageData,
+		})
+			.then((res: Message) => {
+				if (res !== null) {
+					setMessages((prev) => [...prev, res]);
+					setCurrentMessage('');
+				} else {
+					console.error('Failed to send message');
+				}
+			})
+			.catch((e) => {
+				console.error(e);
+			});
+	};
+
 	const handleOverlayClick = (e: React.MouseEvent) => {
 		if (e.target === e.currentTarget) {
 			onClose();
@@ -97,56 +140,16 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, onClose}) => {
 					</div>
 					<div className={`${primaryColor}  h-[75%]`}>
 						<div className="h-full w-full p-4 overflow-auto">
-							<div className="chat chat-start">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
-							<div className="chat chat-start">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
-							<div className="chat chat-start">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
-							<div className="chat chat-end">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
-							<div className="chat chat-end">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
-							<div className="chat chat-start">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
-							<div className="chat chat-start">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
-							<div className="chat chat-start">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
-							<div className="chat chat-end">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
-							<div className="chat chat-end">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
-							<div className="chat chat-start">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
-							<div className="chat chat-start">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
-							<div className="chat chat-start">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
-							<div className="chat chat-end">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
-							<div className="chat chat-end">
-								<div className="chat-bubble chat-bubble-primary">What kind of nonsense is this</div>
-							</div>
+							{messages.map((message) => (
+								<div className={`chat ${message.sender === user?.userId ? 'chat-end' : 'chat-start'}`}>
+									<div className="chat-bubble chat-bubble-primary">{message.content}</div>
+								</div>
+							))}
 						</div>
 					</div>
 					<div className={`${primaryColor} p-4 h-[15%] flex`}>
-						<CustomInput name="chat" value={currentMessage} type="text" placeHolder="Message" onChange={(e) => setCurrentMessage(e.target.value)} />
-						<button className="btn btn-circle btn-primary btn-lg shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 ml-2" onClick={() => console.log('send')}>
+						<CustomInput name="chat" value={currentMessage} type="text" placeHolder="Message" onChange={(e) => setCurrentMessage(e.target.value)} onEnter={() => sendMessage()} />
+						<button className="btn btn-circle btn-primary btn-lg shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 ml-2" onClick={() => sendMessage()}>
 							<SendOutlinedIcon />
 						</button>
 					</div>
