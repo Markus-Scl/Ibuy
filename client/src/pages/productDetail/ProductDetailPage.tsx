@@ -82,10 +82,10 @@ export const ProductDetailPage: FC = () => {
 		);
 	}
 
-	if (liveChatOpen) {
+	if (liveChatOpen && product?.userId) {
 		return (
 			<div className="h-full w-full flex items-center justify-center">
-				<LiveChat onClose={() => setLiveChatOpen(false)} />
+				<LiveChat targetUserId={product?.userId} onClose={() => setLiveChatOpen(false)} />
 			</div>
 		);
 	}

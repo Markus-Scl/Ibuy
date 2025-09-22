@@ -1,18 +1,81 @@
-import {useState, type FC} from 'react';
+import {useEffect, useRef, useState, type FC} from 'react';
 import {primaryColor} from '../utils/theme';
 import CloseIcon from '@mui/icons-material/Close';
 import {CustomInput} from './Form/CustomInput';
 import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
+import {useAuthStore} from '../stores/useAuthStore';
+import type {Message, WsMessage} from '../types/types';
 
 interface LiveChatProps {
+	targetUserId: string;
 	onClose: () => void;
 }
 
-export const LiveChat: FC<LiveChatProps> = ({onClose}) => {
-	const isLoading = false;
-	const [messages, setMessages] = useState<string[]>(['What kind of nonsense is this', 'What kind of nonsense is this']);
+export const LiveChat: FC<LiveChatProps> = ({targetUserId, onClose}) => {
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [messages, setMessages] = useState<Message[]>([]);
+	const [isConnected, setIsConnected] = useState(false);
+	const [onlineUsers, setOnlineUsers] = useState([]);
+	const [isTargetOnline, setIsTargetOnline] = useState(false);
 
 	const [currentMessage, setCurrentMessage] = useState<string>('');
+
+	const {user} = useAuthStore();
+
+	const ws = useRef<WebSocket | null>(null);
+	const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+	const scrollToBottom = () => {
+		messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
+	};
+
+	useEffect(scrollToBottom, [messages]);
+
+	useEffect(() => {
+		const connectWebSocket = () => {
+			ws.current = new WebSocket(`${import.meta.env.VITE_WEBSOCKET_API}${user?.userId}`);
+
+			ws.current.onopen = () => {
+				console.log('WebSocket Connected');
+				setIsConnected(true);
+			};
+
+			ws.current.onmessage = (event) => {
+				const message = JSON.parse(event.data) as WsMessage;
+
+				if (message.type === 'message') {
+					setMessages((prev) => [
+						...prev,
+						{
+							id: message.messageId,
+							content: message.content,
+							sender: message.sender,
+							receiver: message.receiver,
+							created: new Date(),
+							seen: false,
+						},
+					]);
+				}
+			};
+
+			ws.current.onclose = () => {
+				console.log('WebSocket Disconnected');
+				setIsConnected(false);
+			};
+
+			ws.current.onerror = (error) => {
+				setIsConnected(false);
+			};
+		};
+
+		connectWebSocket();
+
+		return () => {
+			if (ws.current) {
+				ws.current.close();
+			}
+		};
+	}, []);
 
 	const handleOverlayClick = (e: React.MouseEvent) => {
 		if (e.target === e.currentTarget) {

@@ -24,3 +24,20 @@ export interface LoginData {
 	email: string;
 	password: string;
 }
+
+export interface Message {
+	id: string;
+	content: string;
+	sender: string;
+	receiver: string;
+	created: Date;
+	seen: boolean;
+}
+
+export interface WsMessage {
+	type: string;
+	content: string;
+	sender: string;
+	receiver: string;
+	messageId: string;
+}
