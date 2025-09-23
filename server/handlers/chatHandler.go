@@ -100,14 +100,14 @@ func GetMessages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	productId := r.URL.Query().Get("product_id")
-	log.Printf(productId)
+
 	if productId == "" {
 		http.Error(w, "Missing product_id parameter", http.StatusBadRequest)
 		return
 	}
 
 	otherUserID := r.URL.Query().Get("user_id")
-	log.Printf(otherUserID)
+
 	if otherUserID == "" {
 		http.Error(w, "Missing user_id parameter", http.StatusBadRequest)
 		return

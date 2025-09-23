@@ -141,7 +141,7 @@ export const ProductDetailPage: FC = () => {
 							<span className="font-medium">Back to Products</span>
 						</button>
 						<div className="flex items-center space-x-3">
-							{false ? (
+							{product.userId === user?.userId ? (
 								<>
 									<CustomButton title="Edit" color={primaryColor} textColor="text-white" fullLength={false} icon={<EditIcon />} handleClick={() => setEditModalOpen(true)} />
 									<CustomButton title="Delete" color={deleteColor} textColor="text-white" fullLength={false} icon={<DeleteIcon />} handleClick={() => setDeleteModalOpen(true)} />

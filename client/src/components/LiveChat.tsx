@@ -58,6 +58,8 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, productId, onClose}) 
 							seen: false,
 						},
 					]);
+				} else if (message.type === 'notification') {
+					console.log('Notify: ', message);
 				}
 			};
 
@@ -102,6 +104,8 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, productId, onClose}) 
 			receiver: targetUserId,
 			productId: productId,
 		};
+
+		console.log(messageData);
 
 		// Send via HTTP API (which will then broadcast via WebSocket)
 		mutationFetcher<Message>('chat/send', {
