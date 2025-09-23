@@ -8,11 +8,12 @@ import type {Message, WsMessage} from '../types/types';
 import {fetcher, mutationFetcher} from '../utils/fetcher';
 
 interface LiveChatProps {
+	productId: string;
 	targetUserId: string;
 	onClose: () => void;
 }
 
-export const LiveChat: FC<LiveChatProps> = ({targetUserId, onClose}) => {
+export const LiveChat: FC<LiveChatProps> = ({targetUserId, productId, onClose}) => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [isConnected, setIsConnected] = useState(false);
@@ -81,8 +82,7 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, onClose}) => {
 
 	const loadChatHistory = () => {
 		try {
-			fetcher(`chat/messages?user_id=${targetUserId}`).then((res) => {
-				console.log(res);
+			fetcher(`chat/messages?product_id=${productId}&user_id=${targetUserId}`).then((res) => {
 				const history = res as Message[];
 
 				if (history) {
@@ -100,6 +100,7 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, onClose}) => {
 		const messageData = {
 			content: currentMessage.trim(),
 			receiver: targetUserId,
+			productId: productId,
 		};
 
 		// Send via HTTP API (which will then broadcast via WebSocket)
@@ -140,8 +141,8 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, onClose}) => {
 					</div>
 					<div className={`${primaryColor}  h-[75%]`}>
 						<div className="h-full w-full p-4 overflow-auto">
-							{messages.map((message) => (
-								<div className={`chat ${message.sender === user?.userId ? 'chat-end' : 'chat-start'}`}>
+							{messages.map((message, idx) => (
+								<div key={idx} className={`chat ${message.sender === user?.userId ? 'chat-end' : 'chat-start'}`}>
 									<div className="chat-bubble chat-bubble-primary">{message.content}</div>
 								</div>
 							))}

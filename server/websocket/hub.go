@@ -9,15 +9,25 @@ import (
 )
 
 type Message struct {
-	Type     string `json:"type"`     
-	Content  string `json:"content"`  
-	Sender   string `json:"sender"`   
-	Receiver string `json:"receiver"`
-	MID      string `json:"m_id"`    
+	Type     	string `json:"type"`     
+	Content  	string `json:"content"`  
+	Sender   	string `json:"sender"`   
+	Receiver 	string `json:"receiver"`
+	ProductId 	string `json:"productId"`
+	MID      	string `json:"m_id"`    
+}
+
+type NotificationMessage struct {
+	Type      string `json:"type"`
+	ProductId string `json:"productId"`
+	Sender    string `json:"sender"`
+	Content   string `json:"content"`
+	MID       string `json:"m_id"`
 }
 
 type Client struct {
-	UserID string          
+	UserID string 
+	ProductID string         
 	Conn   *websocket.Conn 
 	Hub    *Hub            
 }
@@ -28,6 +38,7 @@ type Hub struct {
 	register   chan *Client       // Register new clients
 	unregister chan *Client       // Unregister clients
 	broadcast  chan Message       // Broadcast message to specific user
+	notify     chan Message		  // Send notification to user
 	mutex      sync.RWMutex       // Protect concurrent access
 }
 
@@ -37,6 +48,7 @@ func NewHub() *Hub {
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		broadcast:  make(chan Message),
+		notify:     make(chan Message),
 	}
 }
 
@@ -58,22 +70,55 @@ func (h *Hub) Run(){
 			h.mutex.Unlock()
 			log.Printf("User %s disconnected. Total connections: %d", client.UserID, len(h.clients))
 
-		case message := <- h.broadcast:
-			h.mutex.RLock()
-			receiver, exists := h.clients[message.Receiver]
-			h.mutex.RUnlock()
+		case message := <-h.broadcast:
+			h.handleMessage(message)
 
-			if exists {
-				if err := receiver.Conn.WriteJSON(message); err != nil{
-					log.Printf("Error sending message to %s: %v", message.Receiver, err)
-					h.unregister <- receiver
-				}
-			}else{
-				log.Printf("User %s is not connected, message not delivered", message.Receiver)
-			}
+		case message := <-h.notify:
+			h.sendNotification(message)
+		
 		}
 	
 	}
+}
+
+func (h *Hub) handleMessage(message Message) {
+	h.mutex.RLock()
+	receiver, exists := h.clients[message.Receiver]
+	h.mutex.RUnlock()
+
+	if !exists {
+		log.Printf("User %s is not connected, message not delivered", message.Receiver)
+		return
+	}
+
+	// Check if receiver is viewing the same product chat
+	if receiver.ProductID == message.ProductId {
+		// User is viewing the same product chat - send as regular message
+		if err := receiver.Conn.WriteJSON(message); err != nil {
+			log.Printf("Error sending message to %s: %v", message.Receiver, err)
+			h.unregister <- receiver
+		}
+		log.Printf("Message delivered to %s in product %s", message.Receiver, message.ProductId)
+	} else {
+		// User is not viewing this product chat - send as notification
+		notification := NotificationMessage{
+			Type:      "notification",
+			ProductId: message.ProductId,
+			Sender:    message.Sender,
+			Content:   message.Content,
+			MID:       message.MID,
+		}
+
+		if err := receiver.Conn.WriteJSON(notification); err != nil {
+			log.Printf("Error sending notification to %s: %v", message.Receiver, err)
+			h.unregister <- receiver
+		}
+		log.Printf("Notification sent to %s for product %s", message.Receiver, message.ProductId)
+	}
+}
+
+func (h *Hub) sendNotification(message Message) {
+	h.handleMessage(message)
 }
 
 func (h *Hub) SendMessage(message Message) {

@@ -10,18 +10,20 @@ import (
 )
 
 type ChatMessage struct {
-	ID       int       `json:"id"`
-	MID      string    `json:"m_id"`
-	Content  string    `json:"content"`
-	Created  time.Time `json:"created"`
-	Sender   string    `json:"sender"`
-	Receiver string    `json:"receiver"`
-	Seen     bool      `json:"seen"`
+	ID       	int       `json:"id"`
+	MID      	string    `json:"m_id"`
+	Content  	string    `json:"content"`
+	Created  	time.Time `json:"created"`
+	Sender   	string    `json:"sender"`
+	Receiver 	string    `json:"receiver"`
+	ProductId 	string 	  `json:"productId"`
+	Seen     	bool      `json:"seen"`
 }
 
 type SendMessageRequest struct {
 	Content  string `json:"content"`
 	Receiver string `json:"receiver"`
+	ProductId string `json:"productId"`
 }
 
 var ChatHub *websocket.Hub
@@ -42,14 +44,13 @@ func SendMessage(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	log.Printf("%+v", req)
 
 	var messageId string
 	var created time.Time
 
 	err := db.DB.QueryRow(
-		"INSERT INTO message (content, sender, receiver, created, seen) VALUES ($1, $2, $3, $4, $5) RETURNING m_id, created",
-		req.Content, senderId, req.Receiver, time.Now(), false).Scan(&messageId, &created)
+		"INSERT INTO message (content, sender, receiver, product_id, created, seen) VALUES ($1, $2, $3, $4, $5, $6) RETURNING m_id, created",
+		req.Content, senderId, req.Receiver, req.ProductId, time.Now(), false).Scan(&messageId, &created)
 
 	if err != nil{
 		log.Printf("Error saving message: %v", err)
@@ -62,17 +63,19 @@ func SendMessage(w http.ResponseWriter, r *http.Request){
 		Content:  req.Content,
 		Sender:   senderId,
 		Receiver: req.Receiver,
+		ProductId: req.ProductId,
 		MID:      messageId,
 	}
 
 	ChatHub.SendMessage(wsMessage)
 
-		response := ChatMessage{
+	response := ChatMessage{
 		MID:      messageId,
 		Content:  req.Content,
 		Created:  created,
 		Sender:   senderId,
 		Receiver: req.Receiver,
+		ProductId: req.ProductId,
 		Seen:     false,
 	}
 
@@ -96,21 +99,31 @@ func GetMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	productId := r.URL.Query().Get("product_id")
+	log.Printf(productId)
+	if productId == "" {
+		http.Error(w, "Missing product_id parameter", http.StatusBadRequest)
+		return
+	}
+
 	otherUserID := r.URL.Query().Get("user_id")
+	log.Printf(otherUserID)
 	if otherUserID == "" {
 		http.Error(w, "Missing user_id parameter", http.StatusBadRequest)
 		return
 	}
 
+
+
 	// Query messages between the two users
 	query := `
 		SELECT id, m_id, content, created, sender, receiver, seen 
 		FROM message 
-		WHERE (sender = $1 AND receiver = $2) OR (sender = $2 AND receiver = $1)
+		WHERE ((sender = $1 AND receiver = $2) OR (sender = $2 AND receiver = $1)) AND product_id = $3
 		ORDER BY created ASC
 	`
 
-	rows, err := db.DB.Query(query, senderId, otherUserID)
+	rows, err := db.DB.Query(query, senderId, otherUserID, productId)
 	if err != nil {
 		log.Printf("Error querying messages: %v", err)
 		http.Error(w, "Failed to retrieve messages", http.StatusInternalServerError)
