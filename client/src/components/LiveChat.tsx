@@ -6,6 +6,7 @@ import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 import {useAuthStore} from '../stores/useAuthStore';
 import type {Message, WsMessage} from '../types/types';
 import {fetcher, mutationFetcher} from '../utils/fetcher';
+import {useWebSocketStore} from '../stores/useWebSocketStore';
 
 interface LiveChatProps {
 	productId: string;
@@ -16,16 +17,17 @@ interface LiveChatProps {
 export const LiveChat: FC<LiveChatProps> = ({targetUserId, productId, onClose}) => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [messages, setMessages] = useState<Message[]>([]);
-	const [isConnected, setIsConnected] = useState(false);
 	const [onlineUsers, setOnlineUsers] = useState([]);
-	const [isTargetOnline, setIsTargetOnline] = useState(false);
+	const [isTargetOnline, setIsTargetOnline] = useState<boolean>(false);
+	const [isConnected, setIsConnected] = useState<boolean>(false);
 
 	const [currentMessage, setCurrentMessage] = useState<string>('');
 
 	const {user} = useAuthStore();
 
-	const ws = useRef<WebSocket | null>(null);
 	const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+	const ws = useRef<WebSocket | null>(null);
 
 	const scrollToBottom = () => {
 		messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
@@ -35,7 +37,7 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, productId, onClose}) 
 
 	useEffect(() => {
 		const connectWebSocket = () => {
-			ws.current = new WebSocket(`${import.meta.env.VITE_WEBSOCKET_API}${user?.userId}`);
+			ws.current = new WebSocket(`${import.meta.env.VITE_WEBSOCKET_API}${user?.userId}&product_id=${productId}`);
 
 			ws.current.onopen = () => {
 				console.log('WebSocket Connected');
@@ -58,8 +60,6 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, productId, onClose}) 
 							seen: false,
 						},
 					]);
-				} else if (message.type === 'notification') {
-					console.log('Notify: ', message);
 				}
 			};
 

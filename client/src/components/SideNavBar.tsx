@@ -5,16 +5,30 @@ import {CustomDropdown} from './Form/CustomDropdown';
 import {useLocation, useNavigate} from 'react-router-dom';
 import {useAuthStore} from '../stores/useAuthStore';
 import {primaryColor} from '../utils/theme';
+import {useWebSocketStore} from '../stores/useWebSocketStore';
 
 export const SideNavbar: FC = () => {
 	const [activeItem, setActiveItem] = useState('home');
 	const navigate = useNavigate();
 	const location = useLocation();
 	const {user} = useAuthStore();
+	const {getWebSocket, isConnected} = useWebSocketStore();
 
 	useEffect(() => {
 		setActiveItem(location.pathname.replace('/', ''));
-	});
+		const ws = getWebSocket();
+		console.log('bla');
+		if (!ws) return;
+		console.log('hi there');
+		ws.addEventListener('message', (event) => {
+			const message = JSON.parse(event.data);
+
+			if (message.type === 'notification') {
+				console.log('hi notify', message);
+				// Handle notification here
+			}
+		});
+	}, []);
 
 	return (
 		<div className={`h-full w-64 bg-white shadow-xl transition-all duration-300 `}>

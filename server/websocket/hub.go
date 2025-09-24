@@ -156,6 +156,7 @@ var upgrader = websocket.Upgrader{
 
 func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request){
 	userId := r.URL.Query().Get("user_id")
+	productId := r.URL.Query().Get("product_id")
 
 	if userId == ""{
 		http.Error(w, "Missing user_id parameter", http.StatusBadRequest)
@@ -168,8 +169,10 @@ func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
+
 	client := &Client{
 		UserID: userId,
+		ProductID: productId,
 		Conn: conn,
 		Hub: h,
 	}

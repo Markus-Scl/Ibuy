@@ -1,22 +1,20 @@
 import {useEffect, useState, type FC} from 'react';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
-import ImageIcon from '@mui/icons-material/Image';
 import CategoryIcon from '@mui/icons-material/Category';
 import {statusClassMap} from '../product/utils';
-import {useNavigate} from 'react-router-dom';
 import {primaryColor} from '../../utils/theme';
 import {useCategoriesStore} from '../../stores/useCategoriesStore';
 import {useProductStatusesStore} from '../../stores/useProductStatusesStore';
-import {getImageUrl} from '../productDetail/utils';
 import type {ProductResponse} from '../product/types';
 import {fetcher} from '../../utils/fetcher';
 import {ProductCarousel} from '../../components/ProductCarousel';
+import {useAuthStore} from '../../stores/useAuthStore';
 
 export const HomePage: FC = () => {
 	const {productStatuses} = useProductStatusesStore();
 	const {categories} = useCategoriesStore();
-	const navigate = useNavigate();
 	const [productCategoryMap, setProductCategoryMap] = useState<Map<number, ProductResponse[]>>(new Map());
+	const {user} = useAuthStore();
 
 	useEffect(() => {
 		fetcher<Map<number, ProductResponse[]>>('home').then((data) => {
@@ -26,15 +24,7 @@ export const HomePage: FC = () => {
 			});
 			setProductCategoryMap(mapData);
 		});
-	}, []);
-
-	/*if (productsLoading) {
-		return (
-			<div className="w-full h-full flex flex-col justify-center items-center p-8">
-				<span className="loading loading-spinner loading-sm mr-2 loading-xl text-primary"></span>
-			</div>
-		);
-	}*/
+	}, [user?.userId]);
 
 	if (productCategoryMap.size === 0) {
 		return (

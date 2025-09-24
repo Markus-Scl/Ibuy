@@ -12,7 +12,7 @@ export async function authenticate(loginData: LoginData) {
 		useAuthStore.getState().setSession(user);
 		useAuthStore.getState().setLoading(false);
 
-		return {success: true, error: undefined};
+		return {success: true, user: user, error: undefined};
 	} catch (error) {
 		return {success: false, error: error};
 	}
