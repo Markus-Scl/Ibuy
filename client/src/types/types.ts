@@ -40,4 +40,13 @@ export interface WsMessage {
 	sender: string;
 	receiver: string;
 	messageId: string;
+	productId: string;
+}
+
+export interface WSNotificationMessage {
+	type: 'notification';
+	productId: string;
+	sender: string;
+	content: string;
+	messageId: string;
 }

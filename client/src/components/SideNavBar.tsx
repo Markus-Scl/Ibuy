@@ -12,21 +12,20 @@ export const SideNavbar: FC = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const {user} = useAuthStore();
-	const {getWebSocket} = useWebSocketStore();
+	const addMessageHandler = useWebSocketStore((state) => state.addMessageHandler);
 
 	useEffect(() => {
 		setActiveItem(location.pathname.replace('/', ''));
-		const ws = getWebSocket();
-		if (!ws) return;
-		ws.addEventListener('message', (event) => {
-			const message = JSON.parse(event.data);
 
+		const cleanup = addMessageHandler((message) => {
 			if (message.type === 'notification') {
-				console.log('hi notify', message);
-				// Handle notification here
+				console.log(message);
 			}
 		});
-	}, []);
+
+		// Cleanup when component unmounts
+		return cleanup;
+	}, [addMessageHandler]);
 
 	return (
 		<div className={`h-full w-64 bg-white shadow-xl transition-all duration-300 `}>

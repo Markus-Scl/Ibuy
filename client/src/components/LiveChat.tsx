@@ -6,6 +6,7 @@ import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 import {useAuthStore} from '../stores/useAuthStore';
 import type {Message, WsMessage} from '../types/types';
 import {fetcher, mutationFetcher} from '../utils/fetcher';
+import {useWebSocketStore} from '../stores/useWebSocketStore';
 
 interface LiveChatProps {
 	productId: string;
@@ -18,15 +19,15 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, productId, onClose}) 
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [onlineUsers, setOnlineUsers] = useState([]);
 	const [isTargetOnline, setIsTargetOnline] = useState<boolean>(false);
-	const [isConnected, setIsConnected] = useState<boolean>(false);
 
 	const [currentMessage, setCurrentMessage] = useState<string>('');
 
 	const {user} = useAuthStore();
+	const {updateView, addMessageHandler} = useWebSocketStore();
 
 	const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-	const ws = useRef<WebSocket | null>(null);
+	//const ws = useRef<WebSocket | null>(null);
 
 	const scrollToBottom = () => {
 		messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
@@ -35,51 +36,30 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, productId, onClose}) 
 	useEffect(scrollToBottom, [messages]);
 
 	useEffect(() => {
-		const connectWebSocket = () => {
-			ws.current = new WebSocket(`${import.meta.env.VITE_WEBSOCKET_API}${user?.userId}&product_id=${productId}`);
-
-			ws.current.onopen = () => {
-				console.log('WebSocket Connected');
-				setIsConnected(true);
-				loadChatHistory();
-			};
-
-			ws.current.onmessage = (event) => {
-				const message = JSON.parse(event.data) as WsMessage;
-
-				if (message.type === 'message') {
-					setMessages((prev) => [
-						...prev,
-						{
-							id: message.messageId,
-							content: message.content,
-							sender: message.sender,
-							receiver: message.receiver,
-							created: new Date(),
-							seen: false,
-						},
-					]);
-				}
-			};
-
-			ws.current.onclose = () => {
-				console.log('WebSocket Disconnected');
-				setIsConnected(false);
-			};
-
-			ws.current.onerror = (error) => {
-				setIsConnected(false);
-			};
-		};
-
-		connectWebSocket();
-
-		return () => {
-			if (ws.current) {
-				ws.current.close();
+		updateView(productId);
+		loadChatHistory();
+		const cleanup = addMessageHandler((message) => {
+			if (message.type === 'message' && message.productId === productId) {
+				// Add message to chat UI
+				setMessages((prev) => [
+					...prev,
+					{
+						id: message.messageId,
+						content: message.content,
+						sender: message.sender,
+						receiver: message.receiver,
+						created: new Date(),
+						seen: false,
+					},
+				]);
 			}
+		});
+		// When leaving chat, tell server we're not viewing any product
+		return () => {
+			updateView('');
+			cleanup();
 		};
-	}, []);
+	}, [productId, updateView, addMessageHandler]);
 
 	const loadChatHistory = () => {
 		try {
@@ -96,15 +76,13 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, productId, onClose}) 
 	};
 
 	const sendMessage = () => {
-		if (!currentMessage.trim() || !isConnected) return;
+		if (!currentMessage.trim()) return;
 
 		const messageData = {
 			content: currentMessage.trim(),
 			receiver: targetUserId,
 			productId: productId,
 		};
-
-		console.log(messageData);
 
 		// Send via HTTP API (which will then broadcast via WebSocket)
 		mutationFetcher<Message>('chat/send', {

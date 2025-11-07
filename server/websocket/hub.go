@@ -25,11 +25,33 @@ type NotificationMessage struct {
 	MID       string `json:"m_id"`
 }
 
+// Message to update which product the user is currently viewing
+type UpdateViewMessage struct {
+	Type      string `json:"type"` // "update_view"
+	ProductId string `json:"productId"` // empty string means no chat open
+}
+
 type Client struct {
 	UserID string 
 	ProductID string         
 	Conn   *websocket.Conn 
-	Hub    *Hub            
+	Hub    *Hub      
+	mutex     sync.RWMutex      
+}
+
+// Update which product this client is viewing
+func (c *Client) SetViewingProduct(productId string) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.ProductID = productId
+	log.Printf("User %s now viewing product: %s", c.UserID, productId)
+}
+
+// Get which product this client is viewing
+func (c *Client) GetViewingProduct() string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	return c.ProductID
 }
 
 // Hub manages all active connections
@@ -73,8 +95,8 @@ func (h *Hub) Run(){
 		case message := <-h.broadcast:
 			h.handleMessage(message)
 
-		case message := <-h.notify:
-			h.sendNotification(message)
+		/*case message := <-h.notify:
+			h.sendNotification(message)*/
 		
 		}
 	
@@ -83,16 +105,19 @@ func (h *Hub) Run(){
 
 func (h *Hub) handleMessage(message Message) {
 	h.mutex.RLock()
-	receiver, exists := h.clients[message.Receiver]
+	receiver, isOnline := h.clients[message.Receiver]
 	h.mutex.RUnlock()
 
-	if !exists {
+	if !isOnline {
 		log.Printf("User %s is not connected, message not delivered", message.Receiver)
 		return
 	}
 
+	// Get which product the receiver is currently viewing
+	viewingProduct := receiver.GetViewingProduct()
+
 	// Check if receiver is viewing the same product chat
-	if receiver.ProductID == message.ProductId {
+	if viewingProduct == message.ProductId && viewingProduct != ""{
 		// User is viewing the same product chat - send as regular message
 		if err := receiver.Conn.WriteJSON(message); err != nil {
 			log.Printf("Error sending message to %s: %v", message.Receiver, err)
@@ -100,7 +125,7 @@ func (h *Hub) handleMessage(message Message) {
 		}
 		log.Printf("Message delivered to %s in product %s", message.Receiver, message.ProductId)
 	} else {
-		// User is not viewing this product chat - send as notification
+		// User is online but not viewing this product chat - send as notification
 		notification := NotificationMessage{
 			Type:      "notification",
 			ProductId: message.ProductId,
@@ -112,14 +137,15 @@ func (h *Hub) handleMessage(message Message) {
 		if err := receiver.Conn.WriteJSON(notification); err != nil {
 			log.Printf("Error sending notification to %s: %v", message.Receiver, err)
 			h.unregister <- receiver
+			return
 		}
 		log.Printf("Notification sent to %s for product %s", message.Receiver, message.ProductId)
 	}
 }
 
-func (h *Hub) sendNotification(message Message) {
+/*func (h *Hub) sendNotification(message Message) {
 	h.handleMessage(message)
-}
+}*/
 
 func (h *Hub) SendMessage(message Message) {
 	h.broadcast <- message
@@ -188,9 +214,9 @@ func (c *Client) readMessages() {
 		c.Conn.Close()
 	}()
 
-	for{
-		var msg Message
-		err := c.Conn.ReadJSON(&msg)
+	for {
+		var rawMsg map[string]interface{}
+		err := c.Conn.ReadJSON(&rawMsg)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("WebSocket error for user %s: %v", c.UserID, err)
@@ -198,10 +224,35 @@ func (c *Client) readMessages() {
 			break
 		}
 
-		msg.Sender = c.UserID
+		// Check message type
+		msgType, ok := rawMsg["type"].(string)
+		if !ok {
+			log.Printf("Invalid message format from user %s", c.UserID)
+			continue
+		}
 
-		log.Printf("Received message from %s to %s: %s", msg.Sender, msg.Receiver, msg.Content)
+		// Handle different message types
+		switch msgType {
+			case "update_view":
+				// Client is telling us which product they're now viewing
+				productId, _ := rawMsg["productId"].(string)
+				c.SetViewingProduct(productId)
 
-		c.Hub.SendMessage(msg)
+			case "message":
+				// Regular chat message - convert to Message struct
+				var msg Message
+				msg.Type = msgType
+				msg.Content, _ = rawMsg["content"].(string)
+				msg.Receiver, _ = rawMsg["receiver"].(string)
+				msg.ProductId, _ = rawMsg["productId"].(string)
+				msg.MID, _ = rawMsg["m_id"].(string)
+				msg.Sender = c.UserID
+
+				log.Printf("Received message from %s to %s: %s", msg.Sender, msg.Receiver, msg.Content)
+				c.Hub.SendMessage(msg)
+
+			default:
+				log.Printf("Unknown message type '%s' from user %s", msgType, c.UserID)
+		}
 	}
 }
