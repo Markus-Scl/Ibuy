@@ -12,14 +12,12 @@ export const SideNavbar: FC = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const {user} = useAuthStore();
-	const {getWebSocket, isConnected} = useWebSocketStore();
+	const {getWebSocket} = useWebSocketStore();
 
 	useEffect(() => {
 		setActiveItem(location.pathname.replace('/', ''));
 		const ws = getWebSocket();
-		console.log('bla');
 		if (!ws) return;
-		console.log('hi there');
 		ws.addEventListener('message', (event) => {
 			const message = JSON.parse(event.data);
 

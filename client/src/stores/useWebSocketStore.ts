@@ -16,7 +16,6 @@ export const useWebSocketStore = create<WebSocketStore>((set, get) => ({
 		const {ws: currentWs, isConnected} = get();
 
 		if (currentWs && isConnected) {
-			console.log('yeah!!!');
 			return;
 		}
 

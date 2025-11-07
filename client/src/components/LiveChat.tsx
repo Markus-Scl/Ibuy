@@ -6,7 +6,6 @@ import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 import {useAuthStore} from '../stores/useAuthStore';
 import type {Message, WsMessage} from '../types/types';
 import {fetcher, mutationFetcher} from '../utils/fetcher';
-import {useWebSocketStore} from '../stores/useWebSocketStore';
 
 interface LiveChatProps {
 	productId: string;

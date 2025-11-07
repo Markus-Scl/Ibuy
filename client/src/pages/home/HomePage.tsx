@@ -9,14 +9,19 @@ import type {ProductResponse} from '../product/types';
 import {fetcher} from '../../utils/fetcher';
 import {ProductCarousel} from '../../components/ProductCarousel';
 import {useAuthStore} from '../../stores/useAuthStore';
+import {useWebSocketStore} from '../../stores/useWebSocketStore';
 
 export const HomePage: FC = () => {
 	const {productStatuses} = useProductStatusesStore();
 	const {categories} = useCategoriesStore();
 	const [productCategoryMap, setProductCategoryMap] = useState<Map<number, ProductResponse[]>>(new Map());
 	const {user} = useAuthStore();
+	const {connect, disconnect, isConnected} = useWebSocketStore();
 
 	useEffect(() => {
+		if (user?.userId && !isConnected) {
+			connect(user.userId);
+		}
 		fetcher<Map<number, ProductResponse[]>>('home').then((data) => {
 			const mapData = new Map<number, ProductResponse[]>();
 			Object.entries(data).forEach(([key, value]) => {
