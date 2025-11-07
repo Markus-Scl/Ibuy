@@ -10,15 +10,13 @@ import {useWebSocketStore} from '../stores/useWebSocketStore';
 
 interface LiveChatProps {
 	productId: string;
-	targetUserId: string;
+	targetUserId: string | null;
 	onClose: () => void;
 }
 
 export const LiveChat: FC<LiveChatProps> = ({targetUserId, productId, onClose}) => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [messages, setMessages] = useState<Message[]>([]);
-	const [onlineUsers, setOnlineUsers] = useState([]);
-	const [isTargetOnline, setIsTargetOnline] = useState<boolean>(false);
 
 	const [currentMessage, setCurrentMessage] = useState<string>('');
 
@@ -62,6 +60,7 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, productId, onClose}) 
 	}, [productId, updateView, addMessageHandler]);
 
 	const loadChatHistory = () => {
+		setIsLoading(true);
 		try {
 			fetcher(`chat/messages?product_id=${productId}&user_id=${targetUserId}`).then((res) => {
 				const history = res as Message[];
@@ -72,15 +71,26 @@ export const LiveChat: FC<LiveChatProps> = ({targetUserId, productId, onClose}) 
 			});
 		} catch (error) {
 			console.error('Error loading chat history:', error);
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
 	const sendMessage = () => {
 		if (!currentMessage.trim()) return;
 
+		let targetId = targetUserId;
+
+		if (targetUserId === null) {
+			const message = messages.find((message) => message.sender !== user?.userId);
+			if (message) {
+				targetId = message.sender;
+			}
+		}
+
 		const messageData = {
 			content: currentMessage.trim(),
-			receiver: targetUserId,
+			receiver: targetId,
 			productId: productId,
 		};
 

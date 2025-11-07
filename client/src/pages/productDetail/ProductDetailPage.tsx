@@ -85,7 +85,7 @@ export const ProductDetailPage: FC = () => {
 	if (liveChatOpen && product?.userId) {
 		return (
 			<div className="h-full w-full flex items-center justify-center">
-				<LiveChat targetUserId={product?.userId} productId={product.productId} onClose={() => setLiveChatOpen(false)} />
+				<LiveChat targetUserId={product.userId !== user?.userId ? product?.userId : null} productId={product.productId} onClose={() => setLiveChatOpen(false)} />
 			</div>
 		);
 	}

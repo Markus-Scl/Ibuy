@@ -74,7 +74,7 @@ func main() {
 	mux.Handle("GET /productstatus", routeHandler.GetProductStatuses)
 
 	// Chat endpoints
-	mux.Handle("GET /ws", http.HandlerFunc(hub.HandleWebSocket))             
+	mux.Handle("GET /ws", hub.HandleWebSocket)              
 	mux.Handle("POST /chat/send", routeHandler.SendMessage) 
 	mux.Handle("GET /chat/messages", routeHandler.GetMessages)
 	mux.Handle("PUT /chat/seen", routeHandler.MarkMessagesAsSeen)
