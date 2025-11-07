@@ -13,6 +13,7 @@ export const SideNavbar: FC = () => {
 	const location = useLocation();
 	const {user} = useAuthStore();
 	const addMessageHandler = useWebSocketStore((state) => state.addMessageHandler);
+	const [notificationCount, setNotificationCount] = useState(0);
 
 	useEffect(() => {
 		setActiveItem(location.pathname.replace('/', ''));
@@ -20,6 +21,7 @@ export const SideNavbar: FC = () => {
 		const cleanup = addMessageHandler((message) => {
 			if (message.type === 'notification') {
 				console.log(message);
+				setNotificationCount((prev) => prev + 1);
 			}
 		});
 
@@ -31,20 +33,37 @@ export const SideNavbar: FC = () => {
 		<div className={`h-full w-64 bg-white shadow-xl transition-all duration-300 `}>
 			{/* Navigation Menu */}
 			<nav className="flex-1 p-4 space-y-2">
-				{menuItems.map((item) => (
-					<button
-						key={item.id}
-						onClick={() => {
-							setActiveItem(item.id);
-							navigate(item.id);
-						}}
-						className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group ${
-							activeItem === item.id ? `${primaryColor} text-white shadow-lg` : 'text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-600'
-						}`}>
-						<div className={`flex-shrink-0 ${activeItem === item.id ? 'text-white' : 'text-gray-500 group-hover:text-blue-600'}`}>{item.icon}</div>
-						<span className="font-medium truncate">{item.label}</span>
-					</button>
-				))}
+				{menuItems.map((item) => {
+					const isMessages = item.id === 'messages';
+					const showBadge = isMessages && notificationCount > 0;
+
+					return (
+						<button
+							key={item.id}
+							onClick={() => {
+								setActiveItem(item.id);
+								navigate(`/${item.id}`);
+								// Optional: Reset count when opening Messages
+								if (isMessages) setNotificationCount(0);
+							}}
+							className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group relative ${
+								activeItem === item.id ? `${primaryColor} text-white shadow-lg` : 'text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-600'
+							}`}>
+							<div className="relative flex-shrink-0">
+								<div className={`text-gray-500 group-hover:text-blue-600 ${activeItem === item.id ? 'text-white' : ''}`}>{item.icon}</div>
+								{/* Notification Badge */}
+								{showBadge && (
+									<span
+										className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full px-1"
+										style={{fontSize: '0.65rem'}}>
+										{notificationCount > 99 ? '99+' : notificationCount}
+									</span>
+								)}
+							</div>
+							<span className="font-medium truncate">{item.label}</span>
+						</button>
+					);
+				})}
 			</nav>
 
 			{/* Bottom Section */}
