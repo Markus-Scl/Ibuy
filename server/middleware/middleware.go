@@ -29,7 +29,7 @@ func Auth() Middleware {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			// Skip authentication for /login and /register
-			if r.URL.Path == "/login" || r.URL.Path == "/register" {
+			if r.URL.Path == "/login" || r.URL.Path == "/register" || r.URL.Path == "/ws" {
 				next(w, r)
 				return
 			}

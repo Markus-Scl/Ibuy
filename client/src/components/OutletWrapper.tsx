@@ -6,18 +6,27 @@ import {useCategoriesStore} from '../stores/useCategoriesStore';
 import {fetcher} from '../utils/fetcher';
 import {useProductStatusesStore} from '../stores/useProductStatusesStore';
 import {initAuth} from '../auth/initAuth';
+import {useWebSocketStore} from '../stores/useWebSocketStore';
+import {useAuthStore} from '../stores/useAuthStore';
+import type {User} from '../types/types';
 
 interface OutletWrapperProps {
 	children: ReactNode;
 }
 export const OutletWrapper: FC<OutletWrapperProps> = ({children}) => {
 	const [isLoading, setIsLoading] = useState<boolean>(true);
+	const {connect, disconnect, isConnected} = useWebSocketStore();
 
 	useEffect(() => {
 		const fetchData = async () => {
 			await initAuth();
 			try {
 				setIsLoading(true);
+
+				const user = useAuthStore.getState().user;
+				if (user) {
+					connect(user.userId);
+				}
 
 				const [categoriesRes, productStatusesRes] = await Promise.allSettled([fetcher<Record<number, string>>('category'), fetcher<Record<number, string>>('productstatus')]);
 
@@ -49,6 +58,11 @@ export const OutletWrapper: FC<OutletWrapperProps> = ({children}) => {
 			}
 		};
 		fetchData();
+
+		return () => {
+			// Only disconnect if component is truly being destroyed
+			// You might want to keep the connection alive
+		};
 	}, []);
 
 	fetcher<Record<number, string>>('category')

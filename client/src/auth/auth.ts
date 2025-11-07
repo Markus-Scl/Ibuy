@@ -14,6 +14,7 @@ export async function authenticate(loginData: LoginData) {
 
 		return {success: true, user: user, error: undefined};
 	} catch (error) {
+		useAuthStore.getState().clearSession();
 		return {success: false, error: error};
 	}
 }

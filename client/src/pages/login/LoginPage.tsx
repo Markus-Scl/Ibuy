@@ -7,7 +7,6 @@ import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import {CustomButton} from '../../components/CustomButton';
 import {primaryColor} from '../../utils/theme';
-import {useWebSocketStore} from '../../stores/useWebSocketStore';
 
 export const LoginPage: React.FC = () => {
 	const [formData, setFormData] = useState<LoginData>({
@@ -21,7 +20,6 @@ export const LoginPage: React.FC = () => {
 		email: false,
 		password: false,
 	});
-	const {connect, disconnect} = useWebSocketStore();
 
 	const navigate = useNavigate();
 
@@ -64,12 +62,8 @@ export const LoginPage: React.FC = () => {
 		const isAuthenticated = await authenticate(formData);
 
 		if (isAuthenticated.success) {
-			if (isAuthenticated.user) {
-				connect(isAuthenticated.user.userId);
-			}
 			navigate('/home');
 		} else {
-			disconnect();
 			setIsLoading(false);
 			setIsAuth(false);
 		}

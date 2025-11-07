@@ -79,13 +79,21 @@ func (h *Hub) Run(){
 		select{
 		case client := <- h.register:
 			h.mutex.Lock()
+
+			// If user already has a connection, close it
+			if oldClient, exists := h.clients[client.UserID]; exists {
+				log.Printf("Closing previous connection for user %s", client.UserID)
+				oldClient.Conn.Close()
+			}
+
 			h.clients[client.UserID] = client
 			h.mutex.Unlock()
+
 			log.Printf("User %s connected. Total connections: %d", client.UserID, len(h.clients))
 
 		case client := <- h.unregister:
 			h.mutex.Lock()
-			if _, exists := h.clients[client.UserID]; exists{
+			if existing, ok := h.clients[client.UserID]; ok && existing == client {
 				delete(h.clients, client.UserID)
 				client.Conn.Close()
 			}
@@ -94,9 +102,6 @@ func (h *Hub) Run(){
 
 		case message := <-h.broadcast:
 			h.handleMessage(message)
-
-		/*case message := <-h.notify:
-			h.sendNotification(message)*/
 		
 		}
 	

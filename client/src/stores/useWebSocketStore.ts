@@ -7,6 +7,7 @@ type MessageHandler = (message: WebSocketMessage) => void;
 interface WebSocketStore {
 	ws: WebSocket | null;
 	isConnected: boolean;
+	isConnecting: boolean;
 	messageHandlers: Set<MessageHandler>;
 
 	connect: (userId: string) => void;
@@ -19,16 +20,18 @@ interface WebSocketStore {
 export const useWebSocketStore = create<WebSocketStore>((set, get) => ({
 	ws: null,
 	isConnected: false,
+	isConnecting: false,
 	messageHandlers: new Set(),
 
 	connect: (userId: string) => {
-		const {ws: currentWs, isConnected} = get();
+		const {ws: currentWs, isConnected, isConnecting} = get();
 
 		// Already connected with same user
-		if (currentWs && isConnected) {
+		if ((currentWs && isConnected) || isConnecting) {
 			console.log('WebSocket already connected');
 			return;
 		}
+		set({isConnecting: true});
 
 		// Close existing connection if any
 		if (currentWs) {
