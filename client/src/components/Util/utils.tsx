@@ -20,8 +20,8 @@ export const menuItems = [
 		),
 	},
 	{
-		id: 'messages',
-		label: 'Messages',
+		id: 'chats',
+		label: 'Chats',
 		icon: <NotificationsNoneOutlinedIcon />,
 	},
 	{

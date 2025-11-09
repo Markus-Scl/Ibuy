@@ -7,6 +7,7 @@ import {ProductPage} from './pages/product/ProductPage';
 import {HomePage} from './pages/home/HomePage';
 import {ProductDetailPage} from './pages/productDetail/ProductDetailPage';
 import ToastContextProvider from './components/Toast/ToastContextProvider';
+import {ChatPage} from './pages/chat/ChatPage';
 
 function App() {
 	return (
@@ -23,6 +24,7 @@ function App() {
 						<Route path="/home" element={<HomePage />} />
 						<Route path="/products" element={<ProductPage />} />
 						<Route path="/product/:productId" element={<ProductDetailPage />} />
+						<Route path="/chats" element={<ChatPage />} />
 					</Route>
 					<Route path="/login" element={<LoginPage />} />
 					<Route path="/register" element={<RegisterPage />} />

@@ -26,6 +26,13 @@ type SendMessageRequest struct {
 	ProductId string `json:"productId"`
 }
 
+type Chat struct {
+	Sender   		string    	`json:"sender"`
+	Receiver 		string    	`json:"receiver"`
+	ProductId 		string 	  	`json:"productId"`
+	UnseenCount 	int 		`json:"unseenCount"`
+}
+
 var ChatHub *websocket.Hub
 
 func SendMessage(w http.ResponseWriter, r *http.Request){
@@ -83,6 +90,57 @@ func SendMessage(w http.ResponseWriter, r *http.Request){
 	json.NewEncoder(w).Encode(response)
 }
 
+func GetUserChats(w http.ResponseWriter, r *http.Request){
+	userContext, ok := r.Context().Value("userContext").(UserContext)
+    if !ok {
+        w.WriteHeader(http.StatusUnauthorized)
+        json.NewEncoder(w).Encode(map[string]string{"error": "No user context found"})
+        return
+    }
+
+	query := `
+		SELECT DISTINCT ON (
+			LEAST(sender, receiver),
+			GREATEST(sender, receiver),
+			product_id
+		)
+			sender,
+			receiver,
+			product_id,
+			COUNT(*) FILTER (WHERE NOT seen AND receiver = $1) AS unseen_count
+		FROM message
+		WHERE sender = $1 OR receiver = $1
+		GROUP BY sender, receiver, product_id
+		ORDER BY 
+			LEAST(sender, receiver),
+			GREATEST(sender, receiver),
+			product_id;
+	`
+
+	rows, err := db.DB.Query(query, userContext.UserId)
+	if err != nil {
+		log.Printf("Error querying chats: %v", err)
+		http.Error(w, "Failed to retrieve chats", http.StatusInternalServerError)
+		return
+	}
+
+	defer rows.Close()
+
+	var chats []Chat
+	for rows.Next() {
+		var chat Chat
+		err := rows.Scan(&chat.Sender, &chat.Receiver, &chat.ProductId, &chat.UnseenCount)
+		if err != nil {
+			log.Printf("Error scanning chats: %v", err)
+			continue
+		}
+		chats = append(chats, chat)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(chats)
+}
+
 
 
 func GetMessages(w http.ResponseWriter, r *http.Request) {
@@ -112,8 +170,6 @@ func GetMessages(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing user_id parameter", http.StatusBadRequest)
 		return
 	}
-
-
 
 	// Query messages between the two users
 	query := `
