@@ -6,6 +6,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import {primaryColor} from '../../utils/theme';
 import {useNavigate} from 'react-router-dom';
+import {getImageUrl} from '../productDetail/utils';
 
 export const ChatPage: FC = () => {
 	const [chats, setChats] = useState<Chat[]>([]);
@@ -82,19 +83,23 @@ export const ChatPage: FC = () => {
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-4 flex-1">
 										{/* Avatar */}
-										<div className={`avatar placeholder`}>
-											<div className={`${primaryColor} text-white rounded-full w-12 h-12 flex items-center justify-center`}>
-												<PersonOutlineIcon sx={{fontSize: '24px'}} />
-											</div>
+										<div className={`${primaryColor} text-white rounded-full w-12 h-12 flex items-center justify-center`}>
+											<PersonOutlineIcon sx={{fontSize: '24px'}} />
 										</div>
 
 										{/* Chat Info */}
-										<div className="flex-1">
-											<div className="flex items-center gap-2">
-												<h3 className="font-semibold text-gray-800 text-lg">{chat.sender as string}</h3>
-												<ChatBubbleOutlineIcon className="text-gray-400" sx={{fontSize: '16px'}} />
+										<div className="flex w-[80%] items-center">
+											<div className="w-[30%]">
+												<div className="flex items-center gap-2">
+													<h3 className="font-semibold text-gray-800 text-lg">{(chat.senderFirstName as string) + ' ' + chat.senderLastName}</h3>
+													<div className="fled"></div>
+													<ChatBubbleOutlineIcon className="text-gray-400" sx={{fontSize: '16px'}} />
+												</div>
+												<p className="text-gray-500 text-sm">Product: {chat.productTitle as string}</p>
 											</div>
-											<p className="text-gray-500 text-sm">Product ID: {chat.productId as string}</p>
+											<div className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all duration-200 cursor-pointer`}>
+												<img src={getImageUrl(chat.productImage as string)} className="w-full h-full object-cover" />
+											</div>
 										</div>
 
 										{/* Unseen Count Badge */}

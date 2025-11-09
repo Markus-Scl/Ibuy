@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"ibuy-server/db"
 	"ibuy-server/websocket"
@@ -27,10 +28,12 @@ type SendMessageRequest struct {
 }
 
 type Chat struct {
-	Sender   		string    	`json:"sender"`
-	Receiver 		string    	`json:"receiver"`
-	ProductId 		string 	  	`json:"productId"`
-	UnseenCount 	int 		`json:"unseenCount"`
+	SenderFirstName  string `json:"senderFirstName"`
+	SenderLastName   string `json:"senderLastName"`
+	ProductId        string `json:"productId"`
+	ProductTitle     string `json:"productTitle"`
+	ProductImage     string `json:"productImage"`
+	UnseenCount      int    `json:"unseenCount"`
 }
 
 var ChatHub *websocket.Hub
@@ -99,22 +102,33 @@ func GetUserChats(w http.ResponseWriter, r *http.Request){
     }
 
 	query := `
-		SELECT DISTINCT ON (
-			LEAST(sender, receiver),
-			GREATEST(sender, receiver),
-			product_id
-		)
-			sender,
-			receiver,
-			product_id,
-			COUNT(*) FILTER (WHERE NOT seen AND receiver = $1) AS unseen_count
-		FROM message
-		WHERE sender = $1 OR receiver = $1
-		GROUP BY sender, receiver, product_id
-		ORDER BY 
-			LEAST(sender, receiver),
-			GREATEST(sender, receiver),
-			product_id;
+	SELECT DISTINCT ON (
+		LEAST(sender, receiver),
+		GREATEST(sender, receiver),
+		product_id
+	)
+		wu.first_name,
+		wu.last_name,
+		m.product_id,
+		p.name AS product_title,
+		pi.image_path AS product_image,
+		COUNT(*) FILTER (WHERE NOT m.seen AND m.receiver = $1) AS unseen_count
+	FROM message m
+	INNER JOIN web_user wu ON m.sender = wu.u_id
+	INNER JOIN product p ON m.product_id = p.p_id
+	LEFT JOIN LATERAL (
+		SELECT image_path
+		FROM product_image
+		WHERE product_id = m.product_id
+		ORDER BY uploaded_at ASC
+		LIMIT 1
+	) pi ON true
+	WHERE m.receiver = $1
+	GROUP BY wu.first_name, wu.last_name, m.sender, m.receiver, m.product_id, p.name, pi.image_path
+	ORDER BY 
+		LEAST(m.sender, m.receiver),
+		GREATEST(m.sender, m.receiver),
+		m.product_id;
 	`
 
 	rows, err := db.DB.Query(query, userContext.UserId)
@@ -129,11 +143,26 @@ func GetUserChats(w http.ResponseWriter, r *http.Request){
 	var chats []Chat
 	for rows.Next() {
 		var chat Chat
-		err := rows.Scan(&chat.Sender, &chat.Receiver, &chat.ProductId, &chat.UnseenCount)
+		var productImage sql.NullString
+		err := rows.Scan(
+			&chat.SenderFirstName,
+			&chat.SenderLastName,
+			&chat.ProductId,
+			&chat.ProductTitle,
+			&productImage,
+			&chat.UnseenCount,
+		)
 		if err != nil {
 			log.Printf("Error scanning chats: %v", err)
 			continue
 		}
+		
+		if productImage.Valid {
+			chat.ProductImage = productImage.String
+		} else {
+			chat.ProductImage = ""
+		}
+		
 		chats = append(chats, chat)
 	}
 
