@@ -1,8 +1,8 @@
 export interface Chat {
-	senderFirstName: String;
-	senderLastName: String;
-	productId: String;
-	productTitle: String;
-	productImage: String;
+	senderFirstName: string;
+	senderLastName: string;
+	productId: string;
+	productTitle: string;
+	productImage: string;
 	unseenCount: number;
 }

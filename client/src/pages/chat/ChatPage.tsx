@@ -7,17 +7,18 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import {primaryColor} from '../../utils/theme';
 import {useNavigate} from 'react-router-dom';
 import {getImageUrl} from '../productDetail/utils';
+import {LiveChat} from '../../components/LiveChat';
 
 export const ChatPage: FC = () => {
 	const [chats, setChats] = useState<Chat[]>([]);
 	const [isLoading, setIsLoading] = useState<boolean>(true);
+	const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
 	const navigate = useNavigate();
 
 	useEffect(() => {
 		fetcher<Chat[]>('chats')
 			.then((res: Chat[]) => {
 				if (res) {
-					console.log(res);
 					setChats(res);
 				}
 			})
@@ -34,6 +35,14 @@ export const ChatPage: FC = () => {
 		return (
 			<div className="w-full h-full flex flex-col justify-center items-center p-8">
 				<span className="loading loading-spinner loading-sm mr-2 loading-xl text-primary"></span>
+			</div>
+		);
+	}
+
+	if (selectedChat) {
+		return (
+			<div className="h-full w-full flex items-center justify-center">
+				<LiveChat targetUserId={null} productId={selectedChat.productId} onClose={() => setSelectedChat(null)} />
 			</div>
 		);
 	}
@@ -77,7 +86,7 @@ export const ChatPage: FC = () => {
 					{chats.map((chat, idx) => (
 						<div
 							key={idx}
-							onClick={() => navigate(`/chat/${chat.productId}`)}
+							onClick={() => setSelectedChat(chat)}
 							className="card bg-white shadow-sm hover:shadow-lg transform hover:scale-[1.01] transition-all duration-200 cursor-pointer border border-gray-100">
 							<div className="card-body p-4">
 								<div className="flex items-center justify-between">
@@ -91,7 +100,7 @@ export const ChatPage: FC = () => {
 										<div className="flex w-[80%] items-center">
 											<div className="w-[30%]">
 												<div className="flex items-center gap-2">
-													<h3 className="font-semibold text-gray-800 text-lg">{(chat.senderFirstName as string) + ' ' + chat.senderLastName}</h3>
+													<h3 className="font-semibold text-gray-800 text-lg">{chat.senderFirstName + ' ' + chat.senderLastName}</h3>
 													<div className="fled"></div>
 													<ChatBubbleOutlineIcon className="text-gray-400" sx={{fontSize: '16px'}} />
 												</div>
