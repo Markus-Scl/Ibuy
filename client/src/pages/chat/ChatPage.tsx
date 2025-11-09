@@ -5,7 +5,6 @@ import {toast} from '../../components/Toast/utils';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import {primaryColor} from '../../utils/theme';
-import {useNavigate} from 'react-router-dom';
 import {getImageUrl} from '../productDetail/utils';
 import {LiveChat} from '../../components/LiveChat';
 
@@ -13,7 +12,6 @@ export const ChatPage: FC = () => {
 	const [chats, setChats] = useState<Chat[]>([]);
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
-	const navigate = useNavigate();
 
 	useEffect(() => {
 		fetcher<Chat[]>('chats')
@@ -42,7 +40,7 @@ export const ChatPage: FC = () => {
 	if (selectedChat) {
 		return (
 			<div className="h-full w-full flex items-center justify-center">
-				<LiveChat targetUserId={null} productId={selectedChat.productId} onClose={() => setSelectedChat(null)} />
+				<LiveChat targetUserId={selectedChat.sender} productId={selectedChat.productId} onClose={() => setSelectedChat(null)} />
 			</div>
 		);
 	}

@@ -28,6 +28,7 @@ type SendMessageRequest struct {
 }
 
 type Chat struct {
+	Sender 			string `json:"sender"`
 	SenderFirstName  string `json:"senderFirstName"`
 	SenderLastName   string `json:"senderLastName"`
 	ProductId        string `json:"productId"`
@@ -109,6 +110,7 @@ func GetUserChats(w http.ResponseWriter, r *http.Request){
 	)
 		wu.first_name,
 		wu.last_name,
+		wu.u_id,
 		m.product_id,
 		p.name AS product_title,
 		pi.image_path AS product_image,
@@ -124,7 +126,7 @@ func GetUserChats(w http.ResponseWriter, r *http.Request){
 		LIMIT 1
 	) pi ON true
 	WHERE m.receiver = $1
-	GROUP BY wu.first_name, wu.last_name, m.sender, m.receiver, m.product_id, p.name, pi.image_path
+	GROUP BY wu.first_name, wu.last_name, wu.u_id, m.sender, m.receiver, m.product_id, p.name, pi.image_path
 	ORDER BY 
 		LEAST(m.sender, m.receiver),
 		GREATEST(m.sender, m.receiver),
@@ -147,6 +149,7 @@ func GetUserChats(w http.ResponseWriter, r *http.Request){
 		err := rows.Scan(
 			&chat.SenderFirstName,
 			&chat.SenderLastName,
+			&chat.Sender,
 			&chat.ProductId,
 			&chat.ProductTitle,
 			&productImage,

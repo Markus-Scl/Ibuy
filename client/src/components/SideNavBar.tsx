@@ -20,7 +20,6 @@ export const SideNavbar: FC = () => {
 
 		const cleanup = addMessageHandler((message) => {
 			if (message.type === 'notification') {
-				console.log(message);
 				setNotificationCount((prev) => prev + 1);
 			}
 		});
@@ -34,7 +33,7 @@ export const SideNavbar: FC = () => {
 			{/* Navigation Menu */}
 			<nav className="flex-1 p-4 space-y-2">
 				{menuItems.map((item) => {
-					const isMessages = item.id === 'messages';
+					const isMessages = item.id === 'chats';
 					const showBadge = isMessages && notificationCount > 0;
 
 					return (
