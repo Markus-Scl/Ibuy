@@ -39,6 +39,59 @@ type Client struct {
 	mutex     sync.RWMutex      
 }
 
+// Hub manages all active connections
+type Hub struct {
+	clients    map[string]*Client // Map of userID to client
+	register   chan *Client       // Register new clients
+	unregister chan *Client       // Unregister clients
+	broadcast  chan Message       // Broadcast message to specific user
+	mutex      sync.RWMutex       // Protect concurrent access
+}
+
+func NewHub() *Hub {
+	return &Hub{
+		clients:    make(map[string]*Client),
+		register:   make(chan *Client),
+		unregister: make(chan *Client),
+		broadcast:  make(chan Message),
+	}
+}
+
+
+func (h *Hub) Run(){
+	for{
+		select{
+			case client := <- h.register:
+				h.mutex.Lock()
+
+				// If user already has a connection, close it
+				if oldClient, exists := h.clients[client.UserID]; exists {
+					log.Printf("Closing previous connection for user %s", client.UserID)
+					oldClient.Conn.Close()
+				}
+
+				h.clients[client.UserID] = client
+				h.mutex.Unlock()
+
+				log.Printf("User %s connected. Total connections: %d", client.UserID, len(h.clients))
+
+			case client := <- h.unregister:
+				h.mutex.Lock()
+				if existing, ok := h.clients[client.UserID]; ok && existing == client {
+					delete(h.clients, client.UserID)
+					client.Conn.Close()
+				}
+				h.mutex.Unlock()
+				log.Printf("User %s disconnected. Total connections: %d", client.UserID, len(h.clients))
+
+			case message := <-h.broadcast:
+				h.handleMessage(message)
+		
+		}
+	
+	}
+}
+
 // Update which product this client is viewing
 func (c *Client) SetViewingProduct(productId string) {
 	c.mutex.Lock()
@@ -52,60 +105,6 @@ func (c *Client) GetViewingProduct() string {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	return c.ProductID
-}
-
-// Hub manages all active connections
-type Hub struct {
-	clients    map[string]*Client // Map of userID to client
-	register   chan *Client       // Register new clients
-	unregister chan *Client       // Unregister clients
-	broadcast  chan Message       // Broadcast message to specific user
-	notify     chan Message		  // Send notification to user
-	mutex      sync.RWMutex       // Protect concurrent access
-}
-
-func NewHub() *Hub {
-	return &Hub{
-		clients:    make(map[string]*Client),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
-		broadcast:  make(chan Message),
-		notify:     make(chan Message),
-	}
-}
-
-func (h *Hub) Run(){
-	for{
-		select{
-		case client := <- h.register:
-			h.mutex.Lock()
-
-			// If user already has a connection, close it
-			if oldClient, exists := h.clients[client.UserID]; exists {
-				log.Printf("Closing previous connection for user %s", client.UserID)
-				oldClient.Conn.Close()
-			}
-
-			h.clients[client.UserID] = client
-			h.mutex.Unlock()
-
-			log.Printf("User %s connected. Total connections: %d", client.UserID, len(h.clients))
-
-		case client := <- h.unregister:
-			h.mutex.Lock()
-			if existing, ok := h.clients[client.UserID]; ok && existing == client {
-				delete(h.clients, client.UserID)
-				client.Conn.Close()
-			}
-			h.mutex.Unlock()
-			log.Printf("User %s disconnected. Total connections: %d", client.UserID, len(h.clients))
-
-		case message := <-h.broadcast:
-			h.handleMessage(message)
-		
-		}
-	
-	}
 }
 
 func (h *Hub) handleMessage(message Message) {
@@ -148,34 +147,11 @@ func (h *Hub) handleMessage(message Message) {
 	}
 }
 
-/*func (h *Hub) sendNotification(message Message) {
-	h.handleMessage(message)
-}*/
 
 func (h *Hub) SendMessage(message Message) {
 	h.broadcast <- message
 }
 
-func (h *Hub) IsUserOnline(userId string) bool {
-	h.mutex.RLock()
-	defer h.mutex.RUnlock()
-
-	_, exists := h.clients[userId]
-
-	return exists
-}
-
-func (h *Hub) GetOnlineUsers() []string {
-	h.mutex.RLock()
-	defer h.mutex.RUnlock()
-
-	users := make([]string, 0, len(h.clients))
-
-	for userId := range h.clients {
-		users = append(users, userId)
-	}
-	return users
-}
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
