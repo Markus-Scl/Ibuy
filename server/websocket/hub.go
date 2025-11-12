@@ -186,18 +186,18 @@ func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request){
 
 	h.register <- client
 
-	go client.readMessages()
+	go client.updateViewListener()
 }
 
-func (c *Client) readMessages() {
+func (c *Client) updateViewListener() {
 	defer func(){
 		c.Hub.unregister <- c
 		c.Conn.Close()
 	}()
 
 	for {
-		var rawMsg map[string]interface{}
-		err := c.Conn.ReadJSON(&rawMsg)
+		var updateViewMsg UpdateViewMessage
+		err := c.Conn.ReadJSON(&updateViewMsg)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("WebSocket error for user %s: %v", c.UserID, err)
@@ -205,22 +205,6 @@ func (c *Client) readMessages() {
 			break
 		}
 
-		// Check message type
-		msgType, ok := rawMsg["type"].(string)
-		if !ok {
-			log.Printf("Invalid message format from user %s", c.UserID)
-			continue
-		}
-
-		// Handle different message types
-		switch msgType {
-			case "update_view":
-				// Client is telling us which product they're now viewing
-				productId, _ := rawMsg["productId"].(string)
-				c.SetViewingProduct(productId)
-
-			default:
-				log.Printf("Unknown message type '%s' from user %s", msgType, c.UserID)
-		}
+		c.SetViewingProduct(updateViewMsg.ProductId)
 	}
 }
