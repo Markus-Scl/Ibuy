@@ -44,7 +44,6 @@ type Hub struct {
 	clients    map[string]*Client // Map of userID to client
 	register   chan *Client       // Register new clients
 	unregister chan *Client       // Unregister clients
-	broadcast  chan Message       // Broadcast message to specific user
 	mutex      sync.RWMutex       // Protect concurrent access
 }
 
@@ -53,7 +52,6 @@ func NewHub() *Hub {
 		clients:    make(map[string]*Client),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		broadcast:  make(chan Message),
 	}
 }
 
@@ -83,9 +81,6 @@ func (h *Hub) Run(){
 				}
 				h.mutex.Unlock()
 				log.Printf("User %s disconnected. Total connections: %d", client.UserID, len(h.clients))
-
-			case message := <-h.broadcast:
-				h.handleMessage(message)
 		
 		}
 	
@@ -107,7 +102,7 @@ func (c *Client) GetViewingProduct() string {
 	return c.ProductID
 }
 
-func (h *Hub) handleMessage(message Message) {
+func (h *Hub) SendMessage(message Message) {
 	h.mutex.RLock()
 	receiver, isOnline := h.clients[message.Receiver]
 	h.mutex.RUnlock()
@@ -145,11 +140,6 @@ func (h *Hub) handleMessage(message Message) {
 		}
 		log.Printf("Notification sent to %s for product %s", message.Receiver, message.ProductId)
 	}
-}
-
-
-func (h *Hub) SendMessage(message Message) {
-	h.broadcast <- message
 }
 
 
