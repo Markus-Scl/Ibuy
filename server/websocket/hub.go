@@ -219,19 +219,6 @@ func (c *Client) readMessages() {
 				productId, _ := rawMsg["productId"].(string)
 				c.SetViewingProduct(productId)
 
-			case "message":
-				// Regular chat message - convert to Message struct
-				var msg Message
-				msg.Type = msgType
-				msg.Content, _ = rawMsg["content"].(string)
-				msg.Receiver, _ = rawMsg["receiver"].(string)
-				msg.ProductId, _ = rawMsg["productId"].(string)
-				msg.MID, _ = rawMsg["m_id"].(string)
-				msg.Sender = c.UserID
-
-				log.Printf("Received message from %s to %s: %s", msg.Sender, msg.Receiver, msg.Content)
-				c.Hub.SendMessage(msg)
-
 			default:
 				log.Printf("Unknown message type '%s' from user %s", msgType, c.UserID)
 		}
