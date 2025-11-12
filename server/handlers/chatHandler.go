@@ -79,6 +79,7 @@ func SendMessage(w http.ResponseWriter, r *http.Request){
 	}
 
 	ChatHub.SendMessage(wsMessage)
+	
 
 	response := ChatMessage{
 		MID:      messageId,
