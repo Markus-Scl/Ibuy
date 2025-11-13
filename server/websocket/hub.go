@@ -21,7 +21,6 @@ type NotificationMessage struct {
 	Type      string `json:"type"`
 	ProductId string `json:"productId"`
 	Sender    string `json:"sender"`
-	Content   string `json:"content"`
 	MID       string `json:"m_id"`
 }
 
@@ -129,7 +128,6 @@ func (h *Hub) SendMessage(message Message) {
 			Type:      "notification",
 			ProductId: message.ProductId,
 			Sender:    message.Sender,
-			Content:   message.Content,
 			MID:       message.MID,
 		}
 
