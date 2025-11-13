@@ -75,7 +75,6 @@ func SendMessage(w http.ResponseWriter, r *http.Request){
 		Sender:   senderId,
 		Receiver: req.Receiver,
 		ProductId: req.ProductId,
-		MID:      messageId,
 	}
 
 	ChatHub.SendMessage(wsMessage)

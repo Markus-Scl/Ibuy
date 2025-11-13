@@ -39,7 +39,6 @@ export interface WsMessage {
 	content: string;
 	sender: string;
 	receiver: string;
-	messageId: string;
 	productId: string;
 }
 
@@ -47,5 +46,4 @@ export interface WSNotificationMessage {
 	type: 'notification';
 	productId: string;
 	sender: string;
-	messageId: string;
 }

@@ -13,15 +13,13 @@ type Message struct {
 	Content  	string `json:"content"`  
 	Sender   	string `json:"sender"`   
 	Receiver 	string `json:"receiver"`
-	ProductId 	string `json:"productId"`
-	MID      	string `json:"m_id"`    
+	ProductId 	string `json:"productId"`    
 }
 
 type NotificationMessage struct {
 	Type      string `json:"type"`
 	ProductId string `json:"productId"`
 	Sender    string `json:"sender"`
-	MID       string `json:"m_id"`
 }
 
 // Message to update which product the user is currently viewing
@@ -128,7 +126,6 @@ func (h *Hub) SendMessage(message Message) {
 			Type:      "notification",
 			ProductId: message.ProductId,
 			Sender:    message.Sender,
-			MID:       message.MID,
 		}
 
 		if err := receiver.Conn.WriteJSON(notification); err != nil {
