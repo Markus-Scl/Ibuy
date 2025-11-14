@@ -77,7 +77,7 @@ func SendMessage(w http.ResponseWriter, r *http.Request){
 		ProductId: req.ProductId,
 	}
 
-	ChatHub.SendMessage(wsMessage)
+	ChatHub.RegisterMessage(wsMessage)
 	
 
 	response := ChatMessage{

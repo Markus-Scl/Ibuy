@@ -38,10 +38,10 @@ type Client struct {
 
 // Hub manages all active connections
 type Hub struct {
-	clients    map[string]*Client // Map of userID to client
-	register   chan *Client       // Register new clients
-	unregister chan *Client       // Unregister clients
-	mutex      sync.RWMutex       // Protect concurrent access
+	clients    	map[string]*Client // Map of userID to client
+	register   	chan *Client       // Register new clients
+	unregister 	chan *Client       // Unregister clients
+	message 	chan Message
 }
 
 func NewHub() *Hub {
@@ -49,6 +49,7 @@ func NewHub() *Hub {
 		clients:    make(map[string]*Client),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
+		message: 	make(chan Message),
 	}
 }
 
@@ -120,7 +121,6 @@ func (h *Hub) Run(){
 	for{
 		select{
 			case client := <- h.register:
-				h.mutex.Lock()
 
 				// If user already has a connection, close it
 				if oldClient, exists := h.clients[client.UserID]; exists {
@@ -129,33 +129,33 @@ func (h *Hub) Run(){
 				}
 
 				h.clients[client.UserID] = client
-				h.mutex.Unlock()
 
 				log.Printf("User %s connected. Total connections: %d", client.UserID, len(h.clients))
 
 			case client := <- h.unregister:
-				h.mutex.Lock()
 				if existing, ok := h.clients[client.UserID]; ok && existing == client {
 					delete(h.clients, client.UserID)
 					client.Conn.Close()
 				}
-				h.mutex.Unlock()
 				log.Printf("User %s disconnected. Total connections: %d", client.UserID, len(h.clients))
-		
+
+			case message := <- h.message:
+				receiver, ok := h.clients[message.Receiver]
+				if ok {
+                    h.SendMessage(message, receiver)
+                } else {
+					log.Printf("User %s is not connected, message not delivered but saved in db", message.Receiver)
+				}
 		}
 	
 	}
 }
 
-func (h *Hub) SendMessage(message Message) {
-	h.mutex.RLock()
-	receiver, isOnline := h.clients[message.Receiver]
-	h.mutex.RUnlock()
+func (h *Hub) RegisterMessage(message Message){
+	h.message <- message
+}
 
-	if !isOnline {
-		log.Printf("User %s is not connected, message not delivered", message.Receiver)
-		return
-	}
+func (h *Hub) SendMessage(message Message, receiver *Client) {
 
 	// Get which product the receiver is currently viewing
 	viewingProduct := receiver.GetViewingProduct()
@@ -166,6 +166,7 @@ func (h *Hub) SendMessage(message Message) {
 		if err := receiver.Conn.WriteJSON(message); err != nil {
 			log.Printf("Error sending message to %s: %v", message.Receiver, err)
 			h.unregister <- receiver
+			return 
 		}
 		log.Printf("Message delivered to %s in product %s", message.Receiver, message.ProductId)
 	} else {
