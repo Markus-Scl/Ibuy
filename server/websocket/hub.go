@@ -157,11 +157,14 @@ func (h *Hub) RegisterMessage(message Message){
 
 func (h *Hub) SendMessage(message Message, receiver *Client) {
 
-	// Get which product the receiver is currently viewing
-	viewingProduct := receiver.GetViewingProduct()
+
+	receiver.mutex.Lock()
+    viewingProduct := receiver.ProductID
+    sendAsMessage := viewingProduct == message.ProductId && viewingProduct != ""
+    receiver.mutex.Unlock()
 
 	// Check if receiver is viewing the same product chat
-	if viewingProduct == message.ProductId && viewingProduct != ""{
+	if sendAsMessage{
 		// User is viewing the same product chat - send as regular message
 		if err := receiver.Conn.WriteJSON(message); err != nil {
 			log.Printf("Error sending message to %s: %v", message.Receiver, err)
