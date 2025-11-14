@@ -52,92 +52,6 @@ func NewHub() *Hub {
 	}
 }
 
-
-func (h *Hub) Run(){
-	for{
-		select{
-			case client := <- h.register:
-				h.mutex.Lock()
-
-				// If user already has a connection, close it
-				if oldClient, exists := h.clients[client.UserID]; exists {
-					log.Printf("Closing previous connection for user %s", client.UserID)
-					oldClient.Conn.Close()
-				}
-
-				h.clients[client.UserID] = client
-				h.mutex.Unlock()
-
-				log.Printf("User %s connected. Total connections: %d", client.UserID, len(h.clients))
-
-			case client := <- h.unregister:
-				h.mutex.Lock()
-				if existing, ok := h.clients[client.UserID]; ok && existing == client {
-					delete(h.clients, client.UserID)
-					client.Conn.Close()
-				}
-				h.mutex.Unlock()
-				log.Printf("User %s disconnected. Total connections: %d", client.UserID, len(h.clients))
-		
-		}
-	
-	}
-}
-
-// Update which product this client is viewing
-func (c *Client) SetViewingProduct(productId string) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	c.ProductID = productId
-	log.Printf("User %s now viewing product: %s", c.UserID, productId)
-}
-
-// Get which product this client is viewing
-func (c *Client) GetViewingProduct() string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-	return c.ProductID
-}
-
-func (h *Hub) SendMessage(message Message) {
-	h.mutex.RLock()
-	receiver, isOnline := h.clients[message.Receiver]
-	h.mutex.RUnlock()
-
-	if !isOnline {
-		log.Printf("User %s is not connected, message not delivered", message.Receiver)
-		return
-	}
-
-	// Get which product the receiver is currently viewing
-	viewingProduct := receiver.GetViewingProduct()
-
-	// Check if receiver is viewing the same product chat
-	if viewingProduct == message.ProductId && viewingProduct != ""{
-		// User is viewing the same product chat - send as regular message
-		if err := receiver.Conn.WriteJSON(message); err != nil {
-			log.Printf("Error sending message to %s: %v", message.Receiver, err)
-			h.unregister <- receiver
-		}
-		log.Printf("Message delivered to %s in product %s", message.Receiver, message.ProductId)
-	} else {
-		// User is online but not viewing this product chat - send as notification
-		notification := NotificationMessage{
-			Type:      "notification",
-			ProductId: message.ProductId,
-			Sender:    message.Sender,
-		}
-
-		if err := receiver.Conn.WriteJSON(notification); err != nil {
-			log.Printf("Error sending notification to %s: %v", message.Receiver, err)
-			h.unregister <- receiver
-			return
-		}
-		log.Printf("Notification sent to %s for product %s", message.Receiver, message.ProductId)
-	}
-}
-
-
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -193,3 +107,90 @@ func (c *Client) updateViewListener() {
 		c.SetViewingProduct(updateViewMsg.ProductId)
 	}
 }
+
+// Update which product this client is viewing
+func (c *Client) SetViewingProduct(productId string) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.ProductID = productId
+	log.Printf("User %s now viewing product: %s", c.UserID, productId)
+}
+
+func (h *Hub) Run(){
+	for{
+		select{
+			case client := <- h.register:
+				h.mutex.Lock()
+
+				// If user already has a connection, close it
+				if oldClient, exists := h.clients[client.UserID]; exists {
+					log.Printf("Closing previous connection for user %s", client.UserID)
+					oldClient.Conn.Close()
+				}
+
+				h.clients[client.UserID] = client
+				h.mutex.Unlock()
+
+				log.Printf("User %s connected. Total connections: %d", client.UserID, len(h.clients))
+
+			case client := <- h.unregister:
+				h.mutex.Lock()
+				if existing, ok := h.clients[client.UserID]; ok && existing == client {
+					delete(h.clients, client.UserID)
+					client.Conn.Close()
+				}
+				h.mutex.Unlock()
+				log.Printf("User %s disconnected. Total connections: %d", client.UserID, len(h.clients))
+		
+		}
+	
+	}
+}
+
+func (h *Hub) SendMessage(message Message) {
+	h.mutex.RLock()
+	receiver, isOnline := h.clients[message.Receiver]
+	h.mutex.RUnlock()
+
+	if !isOnline {
+		log.Printf("User %s is not connected, message not delivered", message.Receiver)
+		return
+	}
+
+	// Get which product the receiver is currently viewing
+	viewingProduct := receiver.GetViewingProduct()
+
+	// Check if receiver is viewing the same product chat
+	if viewingProduct == message.ProductId && viewingProduct != ""{
+		// User is viewing the same product chat - send as regular message
+		if err := receiver.Conn.WriteJSON(message); err != nil {
+			log.Printf("Error sending message to %s: %v", message.Receiver, err)
+			h.unregister <- receiver
+		}
+		log.Printf("Message delivered to %s in product %s", message.Receiver, message.ProductId)
+	} else {
+		// User is online but not viewing this product chat - send as notification
+		notification := NotificationMessage{
+			Type:      "notification",
+			ProductId: message.ProductId,
+			Sender:    message.Sender,
+		}
+
+		if err := receiver.Conn.WriteJSON(notification); err != nil {
+			log.Printf("Error sending notification to %s: %v", message.Receiver, err)
+			h.unregister <- receiver
+			return
+		}
+		log.Printf("Notification sent to %s for product %s", message.Receiver, message.ProductId)
+	}
+}
+
+// Get which product this client is viewing
+func (c *Client) GetViewingProduct() string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	return c.ProductID
+}
+
+
+
