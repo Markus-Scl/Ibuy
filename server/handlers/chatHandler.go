@@ -94,6 +94,32 @@ func SendMessage(w http.ResponseWriter, r *http.Request){
 	json.NewEncoder(w).Encode(response)
 }
 
+func GetUnseenMessageCount(w http.ResponseWriter, r *http.Request){
+	userContext, ok := r.Context().Value("userContext").(UserContext)
+    if !ok {
+        w.WriteHeader(http.StatusUnauthorized)
+        json.NewEncoder(w).Encode(map[string]string{"error": "No user context found"})
+        return
+    }
+
+	query := `
+		SELECT COUNT(*) from message where receiver = $1 AND seen = FALSE;
+	`
+	var count int
+	err:= db.DB.QueryRow(query, userContext.UserId).Scan(&count)
+
+	if err != nil {
+		log.Printf("Error querying count: %v", err)
+		http.Error(w, "Failed to retrieve count", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]int{
+		"unseenCount": count,
+	})
+}
+
 func GetUserChats(w http.ResponseWriter, r *http.Request){
 	userContext, ok := r.Context().Value("userContext").(UserContext)
     if !ok {

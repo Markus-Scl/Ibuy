@@ -2,7 +2,7 @@ import type {FC} from 'react';
 import {useEffect, useState} from 'react';
 import {bottomItems, menuItems} from './Util/utils';
 import {CustomDropdown} from './Form/CustomDropdown';
-import {useLocation, useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import {useAuthStore} from '../stores/useAuthStore';
 import {primaryColor} from '../utils/theme';
 import {useWebSocketStore} from '../stores/useWebSocketStore';
@@ -10,7 +10,6 @@ import {useWebSocketStore} from '../stores/useWebSocketStore';
 export const SideNavbar: FC = () => {
 	const [activeItem, setActiveItem] = useState('home');
 	const navigate = useNavigate();
-	const location = useLocation();
 	const {user} = useAuthStore();
 	const addMessageHandler = useWebSocketStore((state) => state.addMessageHandler);
 	const [notificationCount, setNotificationCount] = useState(0);
