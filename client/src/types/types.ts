@@ -47,3 +47,7 @@ export interface WSNotificationMessage {
 	productId: string;
 	sender: string;
 }
+
+export interface UnseenCount {
+	unseenCount: number;
+}

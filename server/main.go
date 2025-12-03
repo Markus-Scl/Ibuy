@@ -79,7 +79,7 @@ func main() {
 	mux.Handle("GET /chat/messages", routeHandler.GetMessages)
 	mux.Handle("GET /chats", routeHandler.GetUserChats)
 	mux.Handle("PUT /chat/seen", routeHandler.MarkMessagesAsSeen)
-	mux.Handle("Get /chat/unseen", routeHandler.GetUnseenMessageCount)
+	mux.Handle("GET /chat/unseen", routeHandler.GetUnseenMessageCount)
 
 	serverPort := ":" + os.Getenv("SERVER_PORT")
 	if os.Getenv("SERVER_PORT") == "" {

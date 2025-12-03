@@ -6,6 +6,8 @@ import {useNavigate} from 'react-router-dom';
 import {useAuthStore} from '../stores/useAuthStore';
 import {primaryColor} from '../utils/theme';
 import {useWebSocketStore} from '../stores/useWebSocketStore';
+import {fetcher} from '../utils/fetcher';
+import type {UnseenCount} from '../types/types';
 
 export const SideNavbar: FC = () => {
 	const [activeItem, setActiveItem] = useState('home');
@@ -23,9 +25,13 @@ export const SideNavbar: FC = () => {
 			}
 		});
 
+		fetcher<UnseenCount>('chat/unseen').then((data: UnseenCount) => {
+			setNotificationCount(data.unseenCount);
+		});
+
 		// Cleanup when component unmounts
 		return cleanup;
-	}, [addMessageHandler]);
+	}, []);
 
 	return (
 		<div className={`h-full w-64 bg-white shadow-xl transition-all duration-300 `}>
